@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using static ClientInspectionSystem.ClientExtentions;
 
 namespace ClientInspectionSystem.SocketClient.Request {
-    public class AuthorizationElement {
+    public class ClientAuthorizationElement {
         public int ordinary { get; set; }
         public string description { get; set; }
 

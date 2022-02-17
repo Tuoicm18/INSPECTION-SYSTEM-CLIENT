@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace ClientInspectionSystem {
     public static class ClientExtentions {
+        //Setting Jsons For KeyValuPair<string, object>
+        public static JsonSerializerSettings settingsJsonDuplicateDic = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
+
         /// <summary>
         /// Returns the right part of the string instance.
         /// </summary>

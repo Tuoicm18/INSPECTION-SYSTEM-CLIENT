@@ -14,6 +14,7 @@ using ClientInspectionSystem.SocketClient.Request;
 using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
+using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem {
     /// <summary>
@@ -36,7 +37,6 @@ namespace ClientInspectionSystem {
         private RenderSingleChoices renderLayoutSingleChoices = new RenderSingleChoices();
         //Name Value Pairs (NVP)
         private RenderNameValuePairs renderLayoutNVP = new RenderNameValuePairs();
-
         #endregion
 
         #region MAIN
@@ -84,16 +84,32 @@ namespace ClientInspectionSystem {
         //Button Copy Json
         private void btnCopyJson_Click(object sender, RoutedEventArgs e) {
             try {
+                PrepareAuthData prepareAuthData = new PrepareAuthData();
+                //Content List
+                List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
+                if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
+                    prepareAuthData.authContentList = authorizationsContentList;
+                }
+                //Multiple
+                List<AuthorizationElement> authorizationsMultiple = renderLayoutMultiple.getDataMultipleChoices();
+
+                if (null != authorizationsMultiple && authorizationsMultiple.Count > 0) {
+                    prepareAuthData.multipleSelectList = authorizationsMultiple;
+                }
+                //Single
+                List<AuthorizationElement> authorizationsSingle = renderLayoutSingleChoices.getDataSingleChoices();
+                if (null != authorizationsSingle && authorizationsSingle.Count > 0) {
+                    prepareAuthData.singleSelectList = authorizationsSingle;
+                }
+                //Namve Value Pairs
+                List<AuthorizationElement> authorizationsNVP = renderLayoutNVP.getDataNVP();
+                if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
+                    prepareAuthData.nameValuePairList = authorizationsNVP;
+                }
                 AuthorizationData authorizationData = new AuthorizationData();
-                authorizationData.authContentList = renderLayoutPlainText.getDataContentListFromLayout();
-                authorizationData.multipleSelectList = renderLayoutMultiple.getDataMultipleChoices();
-                authorizationData.singleSelectList = renderLayoutSingleChoices.getDataSingleChoices();
-                authorizationData.nameValuePairList = renderLayoutNVP.getDataNVP();
-                AuthorizationDataReq authorizationDataReq = new AuthorizationDataReq();
-                authorizationDataReq.authorizationData = authorizationData;
+                authorizationData.authorizationData = prepareAuthData;
                 //Json String
-                JsonSerializerSettings settings = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
-                string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationDataReq, Formatting.Indented, settings);
+                string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
                 Clipboard.SetText(strAuthorizationDataReq);
             }
             catch (Exception eSubmit) {
@@ -358,6 +374,25 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region VALIDATION
+        #endregion
+
+        #region GET DATA FROM LAYOUT
+        //Plain Text
+        public List<AuthorizationElement> getDataContentList() {
+            return renderLayoutPlainText.getDataContentListFromLayout();
+        }
+        //Multiple Choices
+        public List<AuthorizationElement> getDataMultipleChoices() {
+            return renderLayoutMultiple.getDataMultipleChoices();
+        }
+        //Single Choices
+        public List<AuthorizationElement> getDataSingleChoices() {
+            return renderLayoutSingleChoices.getDataSingleChoices();
+        }
+        //Name Value Pairs
+        public List<AuthorizationElement> getDataNVP() {
+            return renderLayoutNVP.getDataNVP();
+        }
         #endregion
     }
 }

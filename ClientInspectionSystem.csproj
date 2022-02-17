@@ -212,8 +212,8 @@
     <Compile Include="RenderToLayout\RenderPlainText.cs" />
     <Compile Include="RenderToLayout\RenderSingleChoices.cs" />
     <Compile Include="SocketClient\Connection.cs" />
-    <Compile Include="SocketClient\Request\AuthorizationData.cs" />
-    <Compile Include="SocketClient\Request\AuthorizationElement.cs" />
+    <Compile Include="SocketClient\Request\ClientAuthorizationData.cs" />
+    <Compile Include="SocketClient\Request\ClientAuthorizationElement.cs" />
     <Compile Include="SocketClient\Response\ClientListener.cs" />
     <Compile Include="SocketClient\Response\GetBiometricAuthentication.cs" />
     <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />

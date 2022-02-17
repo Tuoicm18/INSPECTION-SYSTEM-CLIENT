@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem.RenderToLayout {
     public class RenderNameValuePairs {

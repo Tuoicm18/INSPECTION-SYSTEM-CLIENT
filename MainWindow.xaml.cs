@@ -575,7 +575,7 @@ namespace ClientInspectionSystem {
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
                         controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                           InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
+                                                                          InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerFaceAuth.SetIndeterminate();
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE);
@@ -629,7 +629,7 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultFaceAuth);
+                                //initFormResultBiometricAuth(resultFaceAuth);
                             });
                         });
                         btnRFID.IsEnabled = true;
@@ -649,41 +649,15 @@ namespace ClientInspectionSystem {
             //bool resultAuthFace = false;
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
-                //List<string> multiSelected = formAuthorizationData.getValueMultilSelect();
-                //List<string> singleSelected = formAuthorizationData.getValueSinglelSelect();
-                //List<string> multiSelected = formAuthorizationData.MultiSelectList;
-                //List<string> singleSelected = formAuthorizationData.SingleSelectList;
-                //string txtText = formAuthorizationData.getTxtText();
-                //Dictionary<string, string> keyValues = formAuthorizationData.getKeyAndValue();
-
-                //AuthContent authContent = new AuthContent();
-                //authContent.title = formAuthorizationData.HeaderGroupAddText;
-                //authContent.text = formAuthorizationData.getTxtText();
-
-                //MultipleSelect multipleSelect = new MultipleSelect();
-                //multipleSelect.title = formAuthorizationData.HeaderGroupMultiple;
-                //multipleSelect.multipleContent = formAuthorizationData.MultiSelectList;
-
-                //SingleSelect singleSelect = new SingleSelect();
-                //singleSelect.title = formAuthorizationData.HeaderGroupSingle;
-                //singleSelect.singleContent = formAuthorizationData.SingleSelectList;
-
-                //NVP nameValuePair = new NVP();
-                //nameValuePair.title = formAuthorizationData.HeaderGroupNVP;
-                //nameValuePair.listKeyValue = formAuthorizationData.getKeyAndValue();
-
                 TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_1M);
+                PrepareAuthData prepareAuthData = new PrepareAuthData();
+                prepareAuthData.authContentList = formAuthorizationData.getDataContentList();
+                prepareAuthData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
+                prepareAuthData.singleSelectList = formAuthorizationData.getDataSingleChoices();
+                prepareAuthData.nameValuePairList = formAuthorizationData.getDataNVP();
+
                 AuthorizationData authorizationData = new AuthorizationData();
-
-                //authorizationData.multiSelect = multiSelected;
-                //authorizationData.singleSelect = singleSelected;
-                //authorizationData.text = txtText;
-                //authorizationData.listKeyValues = keyValues;
-
-                //authorizationData.authenticationContent = authContent;
-                //authorizationData.multipleSelect = multipleSelect;
-                //authorizationData.singleSelect = singleSelect;
-                //authorizationData.nameValuePair = nameValuePair;
+                authorizationData.authorizationData = prepareAuthData;
 
                 BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp);
                 if (null != resultBiometric) {
@@ -723,7 +697,7 @@ namespace ClientInspectionSystem {
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
                         controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                           InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
+                                                                                InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerLeftFingerAuth.SetIndeterminate();
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT);
@@ -789,7 +763,7 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultLeftFingerAuth);
+                                //initFormResultBiometricAuth(resultLeftFingerAuth);
                                 Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH " + JsonConvert.SerializeObject(resultLeftFingerAuth));
                             });
                         });
@@ -884,7 +858,7 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultFingerRightAuth);
+                                //initFormResultBiometricAuth(resultFingerRightAuth);
                             });
                         });
 
@@ -903,7 +877,7 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region INIT FORM RESULT BIOMETRIC AUTH
-        private void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
+        /*private void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
             //Show Form Result Biometric Type
             MultipleSelected multipleSelected = baseBiometricAuthResp.data.multipleSelected;
             string titleMultiple = multipleSelected.title;
@@ -923,7 +897,7 @@ namespace ClientInspectionSystem {
                 }
                 if (formResultAuthorizationData.ShowDialog() == true) { }
             }
-        }
+        }*/
         #endregion
 
         #region TEST FORM AUTHORIZATION DATA

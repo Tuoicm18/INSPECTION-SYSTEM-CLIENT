@@ -6,22 +6,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientInspectionSystem.SocketClient.Request {
-    public class AuthorizationData {
+    public class ClientAuthorizationData {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<AuthorizationElement> authContentList { get; set; }
+        public List<ClientAuthorizationElement> authContentList { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<AuthorizationElement> multipleSelectList { get; set; }
+        public List<ClientAuthorizationElement> multipleSelectList { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<AuthorizationElement> singleSelectList { get; set; }
+        public List<ClientAuthorizationElement> singleSelectList { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<AuthorizationElement> nameValuePairList { get; set; }
+        public List<ClientAuthorizationElement> nameValuePairList { get; set; }
     }
 
     public class AuthorizationDataReq {
 
-        public AuthorizationData authorizationData { get; set; }
+        public ClientAuthorizationData authorizationData { get; set; }
     }
 }
