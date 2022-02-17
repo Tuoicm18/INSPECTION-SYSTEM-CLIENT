@@ -1,0 +1,1614 @@
+﻿<mah:MetroWindow x:Class="ClientInspectionSystem.MainWindow"        
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"    
+        xmlns:local="clr-namespace:ClientInspectionSystem"
+        xmlns:loadin="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
+        xmlns:ucOptions ="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
+        xmlns:ucConnectSocket="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"   
+        ResizeMode="CanMinimize"
+        AllowsTransparency="True"
+        Height="900" 
+        Width="1600"
+        x:Name="mainWindow"
+        Closed="mainWindow_Closed"
+        TitleAlignment="Center"
+        Title="CLIENT INSPECTION SYSTEM">
+
+    <!--Syte For WindowCommands Mahapps Metro-->
+    <Window.Resources>
+        <Style x:Key="Styles.WindowCommands.Custom"
+               BasedOn="{StaticResource MahApps.Styles.WindowCommands}"
+               TargetType="{x:Type mah:WindowCommands}">
+            <Style.Resources>
+                <ResourceDictionary>
+                    <Style BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}" TargetType="{x:Type Button}">
+                        <Setter Property="Opacity" Value="1" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.7" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style BasedOn="{StaticResource MahApps.Styles.ToggleButton.WindowCommands}" TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Opacity" Value="1" />
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter Property="Opacity" Value="1" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style BasedOn="{StaticResource MahApps.Styles.SplitButton.WindowCommands}" TargetType="{x:Type mah:SplitButton}">
+                        <Setter Property="Opacity" Value="1" />
+                    </Style>
+                    <Style BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}" TargetType="{x:Type mah:DropDownButton}">
+                        <Setter Property="Opacity" Value="1" />
+                    </Style>
+                </ResourceDictionary>
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
+    <!--End Syte For WindowCommands Mahapps Metro-->
+
+    <!--LEFT WINDOW-->
+    <!--Button-->
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands Style="{StaticResource Styles.WindowCommands.Custom}">
+            <!--Connect-->
+            <Button x:Name="btnConnect"
+                    Content="CONNECT"
+                    Click="btnConnect_Click">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="WS" Click="MenuItemWS_Click"/>
+                        <MenuItem Header="WSS" Click="MenuItemWSS_Click"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+            <!--Option             <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button> -->
+            <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button>
+            <!--Disconnect-->
+            <Button x:Name="btnDisconnect" Click="btnDisconnect_Click" Content="DISCONNECT"/>
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
+
+    <!--RIGHT WINDOW-->
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Label x:Name="lbSocketConnectionStatus" Content="STATUS SOCKET"/>
+
+            <!-- LoadingIndicatorArcsStyle -->
+            <loadin:LoadingIndicator 
+                Name="loadingConnectSocket" 
+                Visibility="Collapsed"
+                SpeedRatio="1"
+                Width="10"
+                Height="10"
+                IsActive="True" 
+                Style="{DynamicResource LoadingIndicatorThreeDotsStyle}">
+            </loadin:LoadingIndicator>
+
+            <Image x:Name="imgSocketConnectionStatus" 
+                   Stretch="Fill" 
+                   Width="20"
+                   Height="20"
+                   Source="Resource/Button-warning-icon.png"></Image>
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+
+    <Grid x:Name="gridMainWindow">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="252*"/>
+            <RowDefinition Height="619*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="443*"/>
+            <ColumnDefinition Width="250*"/>
+            <ColumnDefinition Width="83*"/>
+            <ColumnDefinition Width="24*"/>
+            <ColumnDefinition Width="192*"/>
+            <ColumnDefinition Width="603*"/>
+        </Grid.ColumnDefinitions>
+        <!--Footer-->
+        <mah:Tile x:Name="tileFotter"
+                  HorizontalAlignment="Left" 
+                  VerticalContentAlignment="Center"
+                  Margin="78,43,0,-776" 
+                  Width="57" 
+                  RenderTransformOrigin="0.5,0.5" 
+                  Height="Auto" 
+                  BorderBrush="#0767b3"
+                  BorderThickness="1" 
+                  HorizontalContentAlignment="Left" 
+                  Grid.ColumnSpan="3" 
+                  Grid.RowSpan="2" 
+                  Grid.Column="2">
+            <mah:Tile.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-90.218"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </mah:Tile.RenderTransform>
+        </mah:Tile>
+        <!--Nav Left-->
+        <Border HorizontalAlignment="Left" 
+                Height="799"                
+                Width="435" 
+                x:Name="borderLeft"
+                VerticalAlignment="Top" 
+                Background="#252525"
+                BorderBrush="#0767b3"
+                BorderThickness="2"
+                RenderTransformOrigin="0.5,0.5" Grid.RowSpan="2">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-0.12"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Border.RenderTransform>
+            <!--Label Hotline-->
+            <Label 
+                HorizontalContentAlignment="Right" 
+                FontSize="12" 
+                Foreground="White"
+                x:Name="labeHotline"
+                Content="HOTLINE (024) 3773 8668 | (024) 3222 2665"
+                HorizontalAlignment="Left" 
+                Height="28" 
+                VerticalAlignment="Top"
+                Width="249" 
+                Margin="1342,818,-1160,-51"/>
+        </Border>
+        <!--Button Identification Document-->
+        <Button x:Name="btnIDocument" 
+                IsEnabled="False"
+                Click="btnIDocument_Click"
+                PreviewKeyDown="btnIDocument_PreviewKeyDown"
+                HorizontalAlignment="Left" 
+                Margin="0,48,0,0" 
+                VerticalAlignment="Top" 
+                Width="216" 
+                RenderTransformOrigin="0.6,-1.593"
+                Height="216" 
+                Background="White" 
+                BorderBrush="#FFE8E8F5"
+                BorderThickness="1"
+                mah:ControlsHelper.ContentCharacterCasing="Upper" 
+                OpacityMask="Black" 
+                Foreground="White" 
+                mah:ControlsHelper.FocusBorderBrush="#FF1D55F0"
+                Grid.RowSpan="2">
+            <Button.Content>
+                <Image Source="Resource/12_Identify_Doc.jpg" Height="206" Width="206" Stretch="Fill"/>
+            </Button.Content>
+        </Button>
+
+        <!--Button RFID-->
+        <Button x:Name="btnRFID" 
+                Click="btnRFID_Click"
+                IsEnabled="False"
+                HorizontalAlignment="Left" 
+                Margin="216,48,0,0" 
+                VerticalAlignment="Top" 
+                Width="216" 
+                RenderTransformOrigin="0.6,-1.593"
+                Height="216" 
+                Background="White"
+                BorderThickness="1"          
+                mah:ControlsHelper.FocusBorderBrush="#FF1D55F0" 
+                mah:ControlsHelper.ContentCharacterCasing="Upper" Grid.RowSpan="2">
+            <Button.Content>
+                <Image Source="Resource/15_FACE-AUTHENTICATION.jpg" Height="206" Width="206" Stretch="Fill"/>
+            </Button.Content>
+        </Button>
+
+        <!--Button Left Finger-->
+        <Button x:Name="btnLeftFinger" 
+                Click="btnLeftFinger_Click"
+                HorizontalAlignment="Left" 
+                IsEnabled="False"
+                Margin="0,12,0,0" 
+                VerticalAlignment="Top" 
+                Width="216" 
+                RenderTransformOrigin="0.6,-1.593"
+                Height="216" 
+                Background="White"
+                BorderThickness="1"
+                mah:ControlsHelper.FocusBorderBrush="#FF1D55F0" 
+                Grid.Row="1">
+            <Button.Content>
+                <Image Source="Resource/13_Left_Index.jpg" Height="206" Width="206" Stretch="Fill"/>
+            </Button.Content>
+        </Button>
+
+        <!--Btn Right Finger-->
+        <Button x:Name="btnRightFinger" 
+                Click="btnRightFinger_Click"
+                HorizontalAlignment="Left" 
+                IsEnabled="False"
+                Margin="216,12,0,0" 
+                VerticalAlignment="Top" 
+                Width="216" 
+                RenderTransformOrigin="0.6,-1.593"
+                Height="216" 
+                Background="White"
+                BorderThickness="1"
+                mah:ControlsHelper.FocusBorderBrush="#FF1D55F0"
+                Grid.Row="1">
+            <Image Source="Resource/14_Right_Index.jpg" Height="206" Width="206" Stretch="Fill"/>
+        </Button>
+
+        <!--Btn Signature-->
+        <!--Title When Choose button icons8_ok.ico-->
+        <mah:Tile x:Name="tileHeader" 
+                  HorizontalAlignment="Left" 
+                  Margin="82,-777,0,48" 
+                  Width="48" 
+                  RenderTransformOrigin="0.5,0.5" 
+                  Background="#252525"
+                  BorderBrush="#0767b3"
+                  BorderThickness="1"
+                  Height="Auto" Grid.ColumnSpan="3" Grid.RowSpan="2" Grid.Column="2">
+            <mah:Tile.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-90.027"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </mah:Tile.RenderTransform>
+        </mah:Tile>
+        <!--Label Choose Button #499ad1-->
+        <!--Panel Content-->
+        <StackPanel x:Name="stackPanelMainContent"
+                    HorizontalAlignment="Left" 
+                    Height="572" 
+                    Margin="73,48,0,0" 
+                    VerticalAlignment="Top" 
+                    Width="1006" 
+                    Background="Black" 
+                    Grid.ColumnSpan="5" 
+                    Grid.RowSpan="2" Grid.Column="1">
+            <!--Data Grid VerticalGridLinesBrush="Red" HorizontalContentAlignment="Center"  HorizontalGridLinesBrush="Green" GridLinesVisibility="Horizontal" -->
+            <DataGrid 
+                x:Name="dataGridInputDevice"    
+                Loaded="dataGridInputDevice_Loaded"
+                MouseLeave="dataGridInputDevice_MouseLeave"
+                SelectionMode="Extended" 
+                SelectionUnit="Cell"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalAlignment="Stretch"
+                HorizontalScrollBarVisibility="Hidden"
+                ClipboardCopyMode="ExcludeHeader"              
+                AutoGenerateColumns="False"  
+                Margin="406,0,0,0"   
+                IsReadOnly="True"
+                Padding="1"
+                RowBackground="#111111"
+                AlternatingRowBackground="#282828"
+                Background="Black"
+                Height="524">
+                <DataGrid.Resources>
+                    <!--Styles Header #0767b3 #282828-->
+                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="Background" Value="Black" />
+                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                    </Style>
+                    <!--Row Style-->
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Focusable" Value="false"/>
+                    </Style>
+                    <!--Cell style-->
+                    <!--ToolTip DESCRIPTION-->
+                    <Style TargetType="DataGridCell">
+                        <Setter
+                             Property="ToolTip">
+                            <Setter.Value>
+                                <TextBlock
+                                        Width="400"
+                                        Height="Auto"
+                                        TextAlignment="Left"
+                                        VerticalAlignment="Stretch" 
+                                        HorizontalAlignment="Stretch"
+                                        TextWrapping="WrapWithOverflow"
+                                        FontSize='12'
+                                        Text='{Binding DESCRIPTION}' />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="ToolTipService.ShowDuration" Value="120000" />
+                        <!--Disable Select Cell-->
+                        <Setter Property="Focusable" Value="false"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    </Style>
+                    <!--End Cell style-->
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <!--No-->
+                    <DataGridTextColumn 
+                        x:Name="NO"
+                        IsReadOnly="True"
+                        Foreground="White" 
+                        Header=" NO" 
+                        Width="25" 
+                        Binding="{Binding NO}"/>
+                    <!--Item-->
+                    <DataGridTextColumn x:Name="gridColItem" 
+                        Foreground="White" 
+                        Header=" ITEM" 
+                        Width="159" 
+                        Binding="{Binding ITEM}">
+                    </DataGridTextColumn>
+                    <!--Copy Item-->
+                    <DataGridTemplateColumn                         
+                        x:Name="dataGridColCoppy">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <!--Btn Copy Item-->
+                                <Button 
+                                    Name="btnCopy"                  
+                                    Click="btnCoppy_Click"
+                                    Background="Transparent"
+                                    Visibility="Hidden"
+                                    ToolTip="COPY DESCRIPTION"
+                                    Width="30"
+                                    Height="30" 
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="0">
+                                    <Image
+                                        Source="Resource/copyMRZ.ico"
+                                        x:Name="imgCoppy" 
+                                        Height="18" 
+                                        Width="16"/>
+                                </Button>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger 
+                                        Binding="{Binding Path=IsMouseOver, 
+                                        RelativeSource={RelativeSource AncestorType=DataGridRow}}" 
+                                        Value="True">
+                                        <Setter 
+                                            Property="Visibility" 
+                                            TargetName="btnCopy" 
+                                            Value="Visible"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <!--Description-->
+                    <DataGridTextColumn 
+                        x:Name="colDescription"
+                        Foreground="White" 
+                        Header=" DESCRIPTION" 
+                        Width="392" 
+                        Binding="{Binding DESCRIPTION}">
+                        <!--Truncate Text in Cell-->
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="TextWrapping" Value="NoWrap" />
+                                <Setter Property="TextTrimming" Value="WordEllipsis"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                        <!--End Truncate Text in Cell-->
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <!--End Data Grid -->
+        </StackPanel>
+        <!--End Panel Content-->
+        <!--Panel Avatar-->
+        <StackPanel x:Name="stackPanelAvatar"
+                    HorizontalAlignment="Left" 
+                    Height="570" 
+                    Margin="73,50,0,0" 
+                    VerticalAlignment="Top" 
+                    Width="405" Grid.ColumnSpan="4" Grid.RowSpan="2" Grid.Column="1">
+            <!--Source="Resource/vn_the_can_cuoc_cong_dan_3x4cm.jpg" -->
+            <Image 
+               x:Name="imgAvatar" 
+               Height="580" 
+               VerticalAlignment="Top" 
+               Source="Resource/15_RFID.jpg"
+               Stretch="Fill" Margin="0,0,-5,0"/>
+        </StackPanel>
+        <!--End Panel Avatar-->
+        <!--Label Code Input Identification-->
+        <Label
+            x:Name="lbMRZ" 
+            HorizontalContentAlignment="Center"
+            Height="56" 
+            Margin="102,321,272.622,0" 
+            VerticalAlignment="Top" 
+            Foreground="White"
+            FontStretch="Normal" 
+            FontFamily="Fonts/#OcrB"
+            Grid.Column="5" 
+            Grid.Row="1">
+        </Label>
+        <!--Details Expander BorderBrush="#0767b3"-->
+        <Expander 
+            x:Name="dropDetails" 
+            Background="#252525"
+            Margin="2,396,10,72"
+            Foreground="{x:Null}"    
+            BorderBrush="{x:Null}"
+            BorderThickness="0"
+            IsExpanded="True" Grid.Row="1">
+            <Expander.Header>
+                <TextBlock 
+                    Text="DEVICE DETAILS"                  
+                    Foreground="White" 
+                    Margin="0,0,3,0"/>
+            </Expander.Header>
+            <!--Data Grid Details #282828-->
+            <DataGrid 
+                x:Name="dataGridDetails"
+                VerticalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Disabled"
+                HorizontalAlignment="Left" 
+                Height="200" 
+                Margin="-5,0,-4,0"
+                VerticalAlignment="Top" 
+                Background="#252525"
+                SelectionMode="Extended" 
+                SelectionUnit="Cell" 
+                ClipboardCopyMode="IncludeHeader"              
+                AutoGenerateColumns="False"  
+                IsReadOnly="True"
+                Width="432" 
+                Padding="8">
+                <!--Styles Header #0767b3 #282828-->
+                <DataGrid.Resources>
+                    <!--Styles Header #0767b3 #282828-->
+                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="Background" Value="#252525" />
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <!--
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="BorderBrush" Value="White"/>
+                        -->
+                    </Style>
+
+                    <!--Styles Row-->
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                        <Setter Property="Padding" Value="10" />
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+                </DataGrid.Resources>
+                <!--Padding For Row-->
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="1"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Border Padding="{TemplateBinding Padding}"
+                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                            BorderThickness="0" 
+                                            Background="#252525" 
+                                            SnapsToDevicePixels="True">
+                                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.CellStyle>
+                <!--Col-->
+                <DataGrid.Columns>
+                    <!--Title-->
+                    <DataGridTextColumn 
+                        IsReadOnly="True"
+                        Foreground="White" 
+                        Width="150.15" 
+                        Binding="{Binding TITLE}"/>
+                    <!--Copy Item-->
+                    <DataGridTemplateColumn                         
+                        x:Name="dataGridColCoppySNDevice">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <!--Btn Copy Item-->
+                                <Button 
+                                    x:Name="btnCopySNDevice"                                       
+                                    Background="Transparent"
+                                    Visibility="Collapsed"
+                                    ToolTip="COPY SERIAL NUMBER"
+                                    Width="26"
+                                    Height="26" 
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Margin="0,0,0,0">
+                                    <Image
+                                        Source="Resource/copyMRZ.ico"
+                                        x:Name="imgCoppy" 
+                                        Height="12" 
+                                        Width="14"/>
+                                </Button>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding SHOWBUTTON}" Value="True">
+                                        <Setter TargetName="btnCopySNDevice" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--Content-->
+                    <DataGridTextColumn 
+                        IsReadOnly="True"
+                        Foreground="White" 
+                        Width="Auto" 
+                        Binding="{Binding CONTENT}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+        <!--Border Button DG-->
+        <Border BorderBrush="#0767b3" 
+                BorderThickness="1" 
+                HorizontalAlignment="Left"
+                Height="73" Margin="73,464,0,0"
+                VerticalAlignment="Top" 
+                Width="1006" 
+                Grid.ColumnSpan="5" 
+                Grid.Row="1"
+                Grid.Column="1">
+            <!--Logo-->
+            <Image Source="Resource/18_INSPECTION-SYSTEM_VGCA_256x128.png" 
+                   RenderTransformOrigin="0.5,0.5" 
+                   Margin="-532,68,1261,-112">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-359.987"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
+        </Border>
+        <!--Btn Pass All Style="{DynamicResource MahApps.Styles.Button.Circle}"-->
+        <Button 
+            x:Name="btnPassAll"
+            Background="White"
+            BorderBrush="White"
+            BorderThickness="1"
+            HorizontalAlignment="Left" 
+            Height="77" 
+            Margin="73,382,0,0" 
+            VerticalAlignment="Top"
+            Width="77" Grid.Row="1" Grid.Column="1">
+            <Button.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Resources>
+            <Image Source="Resource/01_icon_1.ico" Width="74" Height="60"/>
+        </Button>
+        <!--Border Status Device Suport-->
+        <mah:ClipBorder 
+            HorizontalAlignment="Left" 
+            Height="77"
+            Margin="155,382,0,0" 
+            VerticalAlignment="Top"
+            Width="924" 
+            BorderBrush="#0767b3"
+            BorderThickness="1" Grid.ColumnSpan="5" Grid.Row="1" Grid.Column="1">
+        </mah:ClipBorder>
+
+        <!--Stack Panel DG-->
+        <StackPanel
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Margin="73,464,72.622,82" 
+            Grid.ColumnSpan="5" 
+            Grid.Row="1" 
+            Width="1006" Grid.Column="1">
+            <!--Btn DG1-->
+            <Button 
+            x:Name="btnDG1"        
+            Focusable="False"
+            Content="DG1" 
+            HorizontalAlignment="Center" 
+            IsCancel="False"
+            Height="45" 
+            Margin="9,0" 
+            VerticalAlignment="Center"
+            Width="50" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG2-->
+            <Button 
+            x:Name="btnDG2"
+            Focusable="False"
+            Content="DG2" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG3-->
+            <Button 
+            x:Name="btnDG3"
+            Focusable="False"
+            Content="DG3" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG4-->
+            <Button 
+            x:Name="btnDG4"
+            Focusable="False"
+            Content="DG4" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0"  
+            VerticalAlignment="Center"
+            Width="50" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG5-->
+            <Button 
+            x:Name="btnDG5"
+            Focusable="False"
+            Content="DG5" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" Grid.Row="1" Grid.ColumnSpan="2">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG6-->
+            <Button 
+            x:Name="btnDG6" 
+            Focusable="False"
+            Content="DG6" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG7-->
+            <Button 
+            x:Name="btnDG7" 
+            Focusable="False"
+            Content="DG7" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG8-->
+            <Button 
+            x:Name="btnDG8"
+            Focusable="False"
+            Content="DG8" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0"  
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG9-->
+            <Button 
+            x:Name="btnDG9" 
+            Focusable="False"
+            Content="DG9" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG10-->
+            <Button 
+            x:Name="btnDG10"
+            Focusable="False"
+            Content="DG10" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG11-->
+            <Button 
+            x:Name="btnDG11" 
+            Focusable="False"
+            Content="DG11" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG12-->
+            <Button 
+            x:Name="btnDG12" 
+            Focusable="False"
+            Content="DG12" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG13-->
+            <Button 
+            x:Name="btnDG13"
+            Focusable="False"
+            Content="DG13" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG14-->
+            <Button 
+            x:Name="btnDG14"
+            Focusable="False"
+            Content="DG14" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG15-->
+            <Button 
+            x:Name="btnDG15"
+            Focusable="False"
+            Content="DG15" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0" 
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <!--Btn DG16-->
+            <Button 
+            x:Name="btnDG16"
+            Focusable="False"
+            Content="DG16" 
+            HorizontalAlignment="Center" 
+            Height="45" 
+            Margin="6,0"  
+            VerticalAlignment="Center"
+            Width="50" 
+            Grid.Column="1" 
+            Grid.Row="1">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Name="border" 
+                                            BorderThickness="1" 
+                                            BorderBrush="LightGray"                                             
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </StackPanel>
+        <!--Label Support Email-->
+        <Label
+            FontSize="12"
+            x:Name="lbSupportEmail"
+            Foreground="White"
+            Content="SUPPORT MAIL CA@BCY.GOV.VN" 
+            HorizontalAlignment="Left" 
+            Height="31" 
+            Margin="413,588,0,0"
+            VerticalAlignment="Top"
+            Width="189" 
+            Grid.Column="5" Grid.Row="1"/>
+        <!--Label Support Email-->
+        <Label
+            FontSize="10"
+            x:Name="lbVersion"
+            Foreground="White"
+            Content=" V1.0.20220209" 
+            VerticalContentAlignment="Center"
+            HorizontalAlignment="Left" 
+            Height="24" 
+            Margin="234,588,0,0"
+            VerticalAlignment="Top"
+            Width="199" Grid.Row="1"/>
+        <!--Border Status-->
+        <mah:ClipBorder 
+            x:Name="boStatus"
+            Background="#111111"
+            BorderBrush="#0767b3"
+            BorderThickness="1"
+            HorizontalAlignment="Left" 
+            Height="21" 
+            Margin="-3,544,-6.378,0" 
+            VerticalAlignment="Top" 
+            Width="1604" 
+            Grid.ColumnSpan="6" RenderTransformOrigin="0.5,0.5" Grid.Row="1">
+            <mah:ClipBorder.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-0.18"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </mah:ClipBorder.RenderTransform>
+            <!--Boder Between Completed Anh Document processed
+                            <Image
+                Source="Resource/Knob-Refresh-icon.png"
+                Stretch="Uniform"
+                Margin="1057,2,532,2" 
+                RenderTransformOrigin="0.694,0.87" />
+            -->
+
+        </mah:ClipBorder>
+        <!--Label total found reader
+        
+            <Label 
+            x:Name="lbTotalFoundReaders"
+            Foreground="White" 
+            FontSize="10"
+            Content="TOTAL FOUND READERS 1" 
+            HorizontalAlignment="Left" 
+            Height="24" 
+            Margin="2,545,0,0" 
+            VerticalAlignment="Top" 
+            Width="190" Grid.Row="1"/>
+        -->
+
+        <!--Label Completed
+             <Label 
+            x:Name="lbCompleted" 
+            FontSize="10"
+            VerticalContentAlignment="Center"
+            HorizontalContentAlignment="Left"
+            Foreground="White"
+            Content="COMPLETED IN... " 
+            Grid.Column="5"
+            HorizontalAlignment="Left" 
+            Height="32" 
+            Margin="78,537,0,0" 
+            VerticalAlignment="Top" 
+            Width="119" Grid.Row="1"/>
+        -->
+
+        <!--Label processed document
+            <Label 
+            x:Name="lbProcessedDocument" 
+            FontSize="10"
+            VerticalContentAlignment="Center"
+            HorizontalContentAlignment="Left"
+            Foreground="White"
+            Content="DOCUMENT PENDING PROCESSING" 
+            Grid.Column="5"
+            HorizontalAlignment="Left" 
+            Height="32" 
+            Margin="238,537,0,0" 
+            VerticalAlignment="Top" 
+            Width="208" Grid.Row="1"/>
+        -->
+
+        <!--Label INVALID document
+            <Label 
+            x:Name="lbInvalidDocument" 
+            FontSize="10"
+            VerticalContentAlignment="Center"
+            HorizontalContentAlignment="Left"
+            Foreground="White"
+            Content="DOCUMENT STATUS..." 
+            Grid.Column="5"
+            HorizontalAlignment="Left" 
+            Height="32" 
+            Margin="454,537,-2,0" 
+            VerticalAlignment="Top" 
+            Width="150" Grid.Row="1"/>
+        -->
+
+        <mah:ClipBorder
+            BorderBrush="#0767b3"
+            BorderThickness="2" 
+            HorizontalAlignment="Left" 
+            Height="20"
+            Background="Beige"
+            Grid.Column="5"
+            Margin="428,542,0,0" 
+            VerticalAlignment="Top"
+            Width="2" Grid.Row="1"/>
+        <mah:ClipBorder
+            BorderBrush="#0767b3"
+            BorderThickness="2" 
+            HorizontalAlignment="Left" 
+            Height="20"
+            Background="Beige"
+            Grid.Column="5"
+            Margin="205,542,0,0" 
+            VerticalAlignment="Top"
+            Width="2" Grid.Row="1"/>
+        <!--Image Validation
+                    <Image
+            Stretch="Uniform"
+            Source="Resource/success-icon.png" 
+            Margin="218,548,371,58" 
+            Grid.Column="5" RenderTransformOrigin="0.5,1.417" Grid.Row="1"/>
+        -->
+        <!--Image Warning
+                    <Image
+            Source="Resource/Button-warning-icon.png" 
+            Margin="438,548,150,58"
+            Stretch="Uniform"
+            SnapsToDevicePixels="False"
+            Grid.Column="5" 
+            Grid.Row="1" RenderTransformOrigin="0.179,0.769"/>
+        -->
+        <StackPanel 
+            Orientation="Horizontal" 
+            x:Name="stack" 
+            Grid.ColumnSpan="6"
+            Width="Auto"
+            Margin="0,0,-0.378,212">
+            <StackPanel.Resources>
+                <local:NegatingConverter x:Key="NegatingConverter" />
+                <Storyboard x:Key="slide">
+                    <DoubleAnimation From="0" 
+                                     To="{Binding Width, ElementName=canvas}" Duration="00:00:15"
+                                     Storyboard.TargetProperty="X"
+                                     Storyboard.TargetName="transferCurreny"
+                                     RepeatBehavior="Forever"/>
+                </Storyboard>
+            </StackPanel.Resources>
+            <StackPanel.RenderTransform>
+                <TranslateTransform x:Name="transferCurreny" X="0"/>
+            </StackPanel.RenderTransform>
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource slide}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="StackPanel.SizeChanged">
+                    <BeginStoryboard Storyboard="{StaticResource slide}" />
+                </EventTrigger>
+            </StackPanel.Triggers>
+            <Canvas 
+                x:Name="canvas"
+                Width="{Binding ActualWidth, ElementName=stack}"
+                Margin="0,0,0,40">
+                <!--Text Block Header-->
+                <TextBlock Width="Auto" Height="43">
+                    <!--Hyper Link Header 1-->
+                    <Hyperlink 
+                        NavigateUri="https://dtis.mobile-id.vn/"
+                        Hyperlink.RequestNavigate="Hyperlink_RequestNavigate"
+                        TextDecorations="None">
+                        <Label                       
+                        HorizontalContentAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        Content="WELCOME TO INSPECTION SYSTEM-CLIENT" 
+                        FontSize="20" 
+                        x:Name="lbLinkHeader" 
+                        Canvas.Left="0" 
+                        Width="Auto" 
+                Height="39">
+                    </Label>
+                    </Hyperlink>
+                </TextBlock>
+                <!--Hyper Link Header 1-->
+                <Label 
+                    Content="{Binding Content, ElementName=lbLinkHeader}" 
+                    FontSize="20"
+                    HorizontalAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Canvas.Left="{Binding Width, ElementName=canvas, Converter={StaticResource NegatingConverter}}"/>
+            </Canvas>
+        </StackPanel>
+        <!--Btn Copy MRZ-->
+        <Button 
+            x:Name="btnCopyMRZ" 
+            Click="btnCopyMRZ_Click"
+            HorizontalAlignment="Left" 
+            HorizontalContentAlignment="Center"
+            Background="Transparent"
+            Height="30" 
+            Margin="68,332,0,0" 
+            VerticalAlignment="Top" 
+            Width="30"
+            Grid.Column="5" 
+            Foreground="White"
+            Visibility="Collapsed"
+            Grid.Row="1">
+            <Image
+                Source="Resource/copyMRZ.ico"
+                x:Name="imgCoppy" 
+                Height="18" 
+                Width="16"/>
+        </Button>
+        <!--Stack Panem Control-->
+        <StackPanel
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Margin="155,382,72.622,160" 
+            Grid.ColumnSpan="5" 
+            Grid.Row="1" 
+            Width="924" Grid.Column="1">
+            <!--Btn MRZ-->
+            <Button 
+            x:Name="btnMRZ"
+            Background="White"
+            BorderBrush="White"
+            BorderThickness="1" 
+            Height="60" 
+            VerticalAlignment="Center" 
+            Margin="15,0"
+            Style="{DynamicResource MahApps.Styles.Button.Circle}"
+            HorizontalAlignment="Center"
+            Width="60" 
+            Grid.Row="1">
+                <Image Source="Resource/02_MRZ.ico" Height="50" Width="52"/>
+            </Button>
+
+            <!--Btn SAC-->
+            <Button 
+                x:Name="btnSAC"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Margin="5,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                HorizontalAlignment="Center"
+                Width="60" Grid.Row="1">
+                <Image Source="Resource/03_SAC.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn DAC-->
+            <Button 
+                x:Name="btnBAC"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="17,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Row="1" Grid.ColumnSpan="2">
+                <Image Source="Resource/04_BAC-copy.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn AA-->
+            <Button 
+                x:Name="btnAA"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="9,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/05_AA.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn CA-->
+            <Button 
+                x:Name="btnCA"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="15,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/06_CA.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn TA-->
+            <Button 
+                x:Name="btnTA"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="8,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/07_TA.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn ER-->
+            <Button 
+                x:Name="btnEF"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="15,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/08_EF.COM-copy.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn SOD-->
+            <Button 
+                x:Name="btnSOD"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="12,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/09_SOD.ico" Height="50" Width="52"/>
+            </Button>
+            <!--Btn CSC-->
+            <Button 
+                x:Name="btnCSC"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="12,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/10_CSC_New.png" Height="50" Width="52"/>
+            </Button>
+            <!--Btn SF-->
+            <Button 
+                x:Name="btnSF"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="10,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/11_SF_New.png" Height="50" Width="52"/>
+            </Button>
+            <!--Btn FA-->
+            <Button 
+                x:Name="btnFA"
+                Background="White"
+                BorderBrush="White"
+                BorderThickness="1"
+                HorizontalAlignment="Center" 
+                Height="60" 
+                VerticalAlignment="Center" 
+                Width="60" 
+                Margin="12,0"
+                Style="{DynamicResource MahApps.Styles.Button.Circle}" Grid.Column="1" Grid.Row="1">
+                <Image Source="Resource/47_FA.png" Height="50" Width="52"/>
+            </Button>
+        </StackPanel>
+
+        <!--OPTION CONTROL-->
+        <ucOptions:OptionsControl
+            x:Name="optionsControl"
+            Visibility="Collapsed" 
+            Grid.ColumnSpan="5" 
+            Margin="61,49,49,242" 
+            Grid.RowSpan="2" Grid.Column="1"/>
+
+        <!--CONNECT SOCKET CONTROL-->
+        <ucConnectSocket:ConnectSocketControl
+            x:Name="conncetSocketControl"
+            Visibility="Collapsed" 
+            Grid.ColumnSpan="5" 
+            Margin="200.6,214,438.6,393.4" Grid.RowSpan="2" Grid.Column="1"/>
+    </Grid>
+</mah:MetroWindow>

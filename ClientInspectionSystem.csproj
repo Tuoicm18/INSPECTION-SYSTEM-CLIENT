@@ -1,0 +1,571 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6D59FAFA-BA12-4D75-8C47-6FD20580ACA3}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ClientInspectionSystem</RootNamespace>
+    <AssemblyName>ClientInspectionSystem</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>mobileid_logo_exe.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="App.Metrics.Concurrency">
+      <HintPath>lib\App.Metrics.Concurrency.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSV4Auth, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\AWSV4Auth.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.10.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\Portable.BouncyCastle.1.8.10\lib\net40\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlzEx, Version=5.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\ControlzEx.5.0.1\lib\net462\ControlzEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Dragablz, Version=0.0.3.223, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\Dragablz.0.0.3.223\lib\net45\Dragablz.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=5.8.2.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.5.8.2\lib\net45\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="LoadingIndicators.WPF, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\LoadingIndicators.WPF.0.0.1\lib\LoadingIndicators.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\MahApps.Metro.2.4.7\lib\net47\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.1.4.1\lib\net46\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PluginICAOClientSDK">
+      <HintPath>lib\PluginICAOClientSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Converters.Wpf, Version=1.7.6.0, Culture=neutral, PublicKeyToken=b532964b8548be77, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Converters.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Core, Version=1.7.6.0, Culture=neutral, PublicKeyToken=7407205e337c98ef, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Css, Version=1.7.6.0, Culture=neutral, PublicKeyToken=7a46e3f532fdb787, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Css.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Dom, Version=1.7.6.0, Culture=neutral, PublicKeyToken=517340b6277b1a7a, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Dom.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Model, Version=1.7.6.0, Culture=neutral, PublicKeyToken=2236cfc76b505845, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Rendering.Gdi, Version=1.7.6.0, Culture=neutral, PublicKeyToken=03902092284347e3, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Rendering.Gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Rendering.Wpf, Version=1.7.6.0, Culture=neutral, PublicKeyToken=d0902381100df30e, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Rendering.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpVectors.Runtime.Wpf, Version=1.7.6.0, Culture=neutral, PublicKeyToken=d16e717f0a981fb9, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Runtime.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.ComponentModel.Annotations.4.7.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\Nuget\System.Drawing.Common.5.0.2\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="websocket-sharp">
+      <HintPath>lib\websocket-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="ClientContants.cs" />
+    <Compile Include="ClientExtentions.cs" />
+    <Compile Include="FormAuthenticationDataNew.xaml.cs">
+      <DependentUpon>FormAuthenticationDataNew.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FormBiometricAuth.xaml.cs">
+      <DependentUpon>FormBiometricAuth.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FormResultAuthorizationData.xaml.cs">
+      <DependentUpon>FormResultAuthorizationData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InspectionSystemPraser.cs" />
+    <Compile Include="Models\AuthDataKeyValue.cs" />
+    <Compile Include="Models\AuthDataListValue.cs" />
+    <Compile Include="Models\BindingPlainText.cs" />
+    <Compile Include="Models\DeviceDetails.cs" />
+    <Compile Include="RenderToLayout\ModelBindingDataNVP.cs" />
+    <Compile Include="RenderToLayout\Models\MultipleSelectModel.cs" />
+    <Compile Include="RenderToLayout\RenderMultipleChoices.cs" />
+    <Compile Include="RenderToLayout\RenderNameValuePairs.cs" />
+    <Compile Include="RenderToLayout\RenderPlainText.cs" />
+    <Compile Include="RenderToLayout\RenderSingleChoices.cs" />
+    <Compile Include="SocketClient\Connection.cs" />
+    <Compile Include="SocketClient\Request\AuthorizationData.cs" />
+    <Compile Include="SocketClient\Request\AuthorizationElement.cs" />
+    <Compile Include="SocketClient\Response\ClientListener.cs" />
+    <Compile Include="SocketClient\Response\GetBiometricAuthentication.cs" />
+    <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />
+    <Compile Include="SocketClient\Response\GetDocumentDetails.cs" />
+    <Compile Include="UserControlsClientIS\AddKeyValueControl.xaml.cs">
+      <DependentUpon>AddKeyValueControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControlsClientIS\ConnectSocketControl.xaml.cs">
+      <DependentUpon>ConnectSocketControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControlsClientIS\OptionsControl.xaml.cs">
+      <DependentUpon>OptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Page Include="FormAuthenticationDataNew.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FormBiometricAuth.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FormResultAuthorizationData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="InspectionSystemContanst.cs" />
+    <Compile Include="LoadData\LoadDataForDataGrid.cs" />
+    <Compile Include="Logmanager.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="UserControlsClientIS\AddKeyValueControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControlsClientIS\ConnectSocketControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControlsClientIS\OptionsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\DataInputFromDevice.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Resource Include="Resource\47_FA_passed.png" />
+    <Resource Include="Resource\47_FA_failed.png" />
+    <Resource Include="Resource\18_INSPECTION-SYSTEM_VGCA_256x128.png" />
+    <Resource Include="Resource\15_logo_VGCA_32x32.ico" />
+    <Resource Include="Resource\18_INSPECTION-SYSTEM_VGCA_256x128.ico" />
+    <Resource Include="Resource\18_INSPECTION-SYSTEM_VGCA_1000x500.ico" />
+    <Resource Include="Resource\15_logo_VGCA_White_256x128.ico" />
+    <Resource Include="Resource\47_FA.png" />
+    <Resource Include="Resource\15_FACE-AUTHENTICATION.jpg" />
+    <Resource Include="Resource\warning.png" />
+    <Resource Include="Resource\08_EF.COM-copy.ico" />
+    <Resource Include="Resource\04_BAC-copy.ico" />
+    <Resource Include="Resource\01_right_hand_Passed.png" />
+    <Resource Include="Resource\01_right_hand_Failed.png" />
+    <Resource Include="Resource\01_left_hand_Passed.png" />
+    <Resource Include="Resource\01_left_hand_Failed.png" />
+    <Resource Include="Resource\02_left_hand_1.png" />
+    <Resource Include="Resource\01_right_hand_1.png" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Resource Include="15_logo_VGCA_32x32.ico" />
+    <Content Include="bin\Release\AWSV4Auth.dll" />
+    <Content Include="bin\Release\BouncyCastle.Crypto.dll" />
+    <Resource Include="bin\Release\BouncyCastle.Crypto.xml" />
+    <Content Include="bin\Release\ClientInspectionSystem.exe" />
+    <Content Include="bin\Release\ClientInspectionSystem.pdb" />
+    <Content Include="bin\Release\ControlzEx.dll" />
+    <Content Include="bin\Release\ControlzEx.pdb" />
+    <Resource Include="bin\Release\ControlzEx.xml" />
+    <Content Include="bin\Release\de\MahApps.Metro.resources.dll" />
+    <Content Include="bin\Release\EPPlus.dll" />
+    <Resource Include="bin\Release\EPPlus.xml" />
+    <Content Include="bin\Release\LoadingIndicators.WPF.dll" />
+    <Content Include="bin\Release\LoadingIndicators.WPF.pdb" />
+    <Content Include="bin\Release\MahApps.Metro.dll" />
+    <Content Include="bin\Release\MahApps.Metro.pdb" />
+    <Resource Include="bin\Release\MahApps.Metro.xml" />
+    <Content Include="bin\Release\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <Resource Include="bin\Release\Microsoft.IO.RecyclableMemoryStream.xml" />
+    <Content Include="bin\Release\Microsoft.Xaml.Behaviors.dll" />
+    <Content Include="bin\Release\Microsoft.Xaml.Behaviors.pdb" />
+    <Resource Include="bin\Release\Microsoft.Xaml.Behaviors.xml" />
+    <Content Include="bin\Release\Newtonsoft.Json.dll" />
+    <Resource Include="bin\Release\Newtonsoft.Json.xml" />
+    <Content Include="bin\Release\SharpVectors.Converters.Wpf.dll" />
+    <Resource Include="bin\Release\SharpVectors.Converters.Wpf.xml" />
+    <Content Include="bin\Release\SharpVectors.Core.dll" />
+    <Resource Include="bin\Release\SharpVectors.Core.xml" />
+    <Content Include="bin\Release\SharpVectors.Css.dll" />
+    <Resource Include="bin\Release\SharpVectors.Css.xml" />
+    <Content Include="bin\Release\SharpVectors.Dom.dll" />
+    <Resource Include="bin\Release\SharpVectors.Dom.xml" />
+    <Content Include="bin\Release\SharpVectors.Model.dll" />
+    <Resource Include="bin\Release\SharpVectors.Model.xml" />
+    <Content Include="bin\Release\SharpVectors.Rendering.Gdi.dll" />
+    <Resource Include="bin\Release\SharpVectors.Rendering.Gdi.xml" />
+    <Content Include="bin\Release\SharpVectors.Rendering.Wpf.dll" />
+    <Resource Include="bin\Release\SharpVectors.Rendering.Wpf.xml" />
+    <Content Include="bin\Release\SharpVectors.Runtime.Wpf.dll" />
+    <Resource Include="bin\Release\SharpVectors.Runtime.Wpf.xml" />
+    <Content Include="bin\Release\System.ComponentModel.Annotations.dll" />
+    <Content Include="bin\Release\System.Drawing.Common.dll" />
+    <Content Include="bin\Release\x64\Suprema.UFExtractor.dll" />
+    <Content Include="bin\Release\x64\Suprema.UFMatcher.dll" />
+    <Content Include="bin\Release\x64\Suprema.UFScanner.dll" />
+    <Content Include="bin\Release\x64\UFExtractor.dll" />
+    <Content Include="bin\Release\x64\UFMatcher.dll" />
+    <Content Include="bin\Release\x64\UFScanner.dll" />
+    <Content Include="Fonts\mrz_font.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="bin\Debug\Data\reader.ini" />
+    <Content Include="Fonts\monospace.medium.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="bin\Release\ClientInspectionSystem.exe.config" />
+    <None Include="bin\Release\Data\clientIS.log" />
+    <Resource Include="bin\Release\Fonts\monospace.medium.ttf" />
+    <Resource Include="bin\Release\Fonts\mrz_font.ttf" />
+    <None Include="bin\Release\x64\UFExtractor.lib" />
+    <None Include="bin\Release\x64\UFMatcher.lib" />
+    <None Include="bin\Release\x64\UFScanner.lib" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\Logo_INSPECTION-SYSTEM.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\12_Identify_Doc.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\15_RFID.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\16_Signature.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\coppyIcon.png" />
+    <Resource Include="Resource\vn_the_can_cuoc_cong_dan_3x4cm.jpg" />
+    <Resource Include="Resource\13_Left_Index.jpg" />
+    <Resource Include="Resource\14_Right_Index.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\01_icon_1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\02_MRZ.ico" />
+    <Resource Include="Resource\03_SAC.ico" />
+    <Resource Include="Resource\05_AA.ico" />
+    <Resource Include="Resource\06_CA.ico" />
+    <Resource Include="Resource\07_TA.ico" />
+    <Resource Include="Resource\09_SOD.ico" />
+    <Resource Include="Resource\10_CSC.png" />
+    <Resource Include="Resource\11_SF.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\10_CSC_New.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\11_SF_New.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\mobileid_logo_exe.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="mobileid_logo_exe.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\02_Completed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\03_Invalid.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\In_Processing.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\02_Completed_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\03_Invalid_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\In_Processing_1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\icons8_copy_5.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\copyMRZ.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\Logo_INSPECTION-SYSTEM_White.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\02_Completed_3.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\03_Invalid_3.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\In_Processing_2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\03_Invalid_100x100.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\02_Completed_100x100.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\In_Processing_100x100.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\In_Processing_16x16.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\icons8_time_machine.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\Knob-Refresh-icon.png" />
+    <Resource Include="Resource\Time-Machine-icon.png" />
+    <Resource Include="Resource\success-icon.png" />
+    <Resource Include="Resource\Everaldo-Crystal-Clear-App-clock.ico" />
+    <Resource Include="Resource\Custom-Icon-Design-Pretty-Office-8-Accept.ico" />
+    <Resource Include="Resource\Button-warning-icon.png" />
+    <Resource Include="Resource\Clear-icon.png" />
+    <Resource Include="Resource\export-icon.png" />
+    <Resource Include="Resource\document-page-next-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\document-page-previous-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\33_CRL.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\UK64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\VN64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\refresh-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\AR64.png" />
+    <Resource Include="Resource\AS64.png" />
+    <Resource Include="Resource\AU64.png" />
+    <Resource Include="Resource\BR64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\CG64.png" />
+    <Resource Include="Resource\CL64.png" />
+    <Resource Include="Resource\CN64.png" />
+    <Resource Include="Resource\CO64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\CU64.png" />
+    <Resource Include="Resource\DE64.png" />
+    <Resource Include="Resource\DK64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\FR64.png" />
+    <Resource Include="Resource\HK64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\IT64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\refresh-32.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\33_CRL.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\34_Master_List.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\35_CSCA.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\icons8-settings-64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\37_DS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\39_CVCA.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\40_Enroll.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\36_DVCA.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\AL64.png" />
+    <Resource Include="Resource\US64.png" />
+    <Resource Include="Resource\AF64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="lib\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
