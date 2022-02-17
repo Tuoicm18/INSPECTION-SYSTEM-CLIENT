@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using ClientInspectionSystem.RenderToLayout;
+using ClientInspectionSystem.SocketClient.Request;
 using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
@@ -76,51 +77,73 @@ namespace ClientInspectionSystem {
         }
         //Submit
         private void btnSubmit_Click(object sender, RoutedEventArgs e) {
+            ordinaryClick = 0;
+            DialogResult = true;
+        }
+
+        //Button Copy Json
+        private void btnCopyJson_Click(object sender, RoutedEventArgs e) {
             try {
-                //Logmanager.Instance.writeLog("JSON CONTENT LIST " + JsonConvert.SerializeObject(renderLayoutPlainText.getDataContentListFromLayout()));
+                AuthorizationData authorizationData = new AuthorizationData();
+                authorizationData.authContentList = renderLayoutPlainText.getDataContentListFromLayout();
+                authorizationData.multipleSelectList = renderLayoutMultiple.getDataMultipleChoices();
+                authorizationData.singleSelectList = renderLayoutSingleChoices.getDataSingleChoices();
+                authorizationData.nameValuePairList = renderLayoutNVP.getDataNVP();
+                AuthorizationDataReq authorizationDataReq = new AuthorizationDataReq();
+                authorizationDataReq.authorizationData = authorizationData;
+                //Json String
                 JsonSerializerSettings settings = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
-                string jsonMultiple = JsonConvert.SerializeObject(renderLayoutMultiple.getDataMultipleChoices(), Formatting.Indented, settings);
-                Logmanager.Instance.writeLog("\nJSON MULTIPLE CHOICES \n" + jsonMultiple);
-            } catch(Exception eSubmit) {
-                Logmanager.Instance.writeLog("BUTTON <OK> ERROR " + eSubmit.ToString());
+                string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationDataReq, Formatting.Indented, settings);
+                Clipboard.SetText(strAuthorizationDataReq);
+            }
+            catch (Exception eSubmit) {
+                Logmanager.Instance.writeLog("BUTTON <COPY JSON> ERROR " + eSubmit.ToString());
             } finally {
                 ordinaryClick = 0;
-                DialogResult = true;
             }
         }
         //Add Group Box
         private void btnSubmitAdd_Click(object sender, RoutedEventArgs e) {
             if (checkButtonClick == BTN_ADD_TEXT) {
-                //For ordinary
-                ordinaryClick++;
                 //Render layout plain text
                 renderLayoutPlainText.renderPlaintText(scvAll, lvAll, txtGroupHeader.Text,
                                                        txtAddDescription.Text, txtStringAndVKeyNVP.Text,
                                                        lbValidationGruop, btnSubmitAdd, ordinaryClick);
+                //For ordinary
+                ordinaryClick++;
             }
             else if (checkButtonClick == BTN_MULTIPLE_CHOICES) {
-                //For ordinary
-                if(renderLayoutMultiple.cbHasSameGroup == false) {
-                    ordinaryClick++;
-                }
                 //Render layout mutiple
                 renderLayoutMultiple.renderMultipleChoices(txtGroupHeader.Text, txtStringAndVKeyNVP.Text,
                                                            txtAddDescription.Text, lvAll,
                                                            scvAll, lbValidationContent,
                                                            btnSubmitAdd, ordinaryClick);
+                //For ordinary
+                if (renderLayoutMultiple.cbHasSameGroup == false) {
+                    ordinaryClick++;
+                }
                 //Remove Hover Listview multiple
                 removeHoverListView(renderLayoutMultiple.listViewMultiple);
             }
             else if (checkButtonClick == BTN_SINGLE_CHOICES) {
                 renderLayoutSingleChoices.renderSingleChoices(txtStringAndVKeyNVP.Text, txtAddDescription.Text,
-                                                              txtGroupHeader.Text, lvAll, scvAll);
+                                                              txtGroupHeader.Text, lvAll,
+                                                              scvAll, ordinaryClick);
+                //For Ordinary
+                if (renderLayoutSingleChoices.radioSameGroup == false) {
+                    ordinaryClick++;
+                }
                 //Remove Hover ListView single
                 removeHoverListView(renderLayoutSingleChoices.listViewSingle);
             }
             else {
                 renderLayoutNVP.renderNVP(txtStringAndVKeyNVP.Text, txtStringValueNVP.Text,
                                           txtGroupHeader.Text, txtAddDescription.Text,
-                                          lvAll, scvAll);
+                                          lvAll, scvAll, ordinaryClick);
+                //For Ordinary
+                if (renderLayoutNVP.checkDataGridSame == false) {
+                    ordinaryClick++;
+                }
                 //Remove Hover Listview NVP
                 removeHoverListView(renderLayoutNVP.listViewNVP);
             }

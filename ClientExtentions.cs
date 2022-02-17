@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace ClientInspectionSystem {
             }
         }
 
+        //JsonConverter For List<KeyValuePair<string, object>
         public class KeyValuePairConverter : JsonConverter {
             public override bool CanConvert(Type objectType) {
                 return objectType == typeof(List<KeyValuePair<string, object>>);

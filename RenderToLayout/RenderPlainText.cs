@@ -106,7 +106,11 @@ namespace ClientInspectionSystem.RenderToLayout {
 
         #region GET DATA FROM LAYOUT
         public List<AuthorizationElement> getDataContentListFromLayout() {
-            return this.authorizationsContentList;
+            if(null != this.authorizationsContentList) {
+                return this.authorizationsContentList;
+            } else {
+                return null;
+            }
         }
         #endregion
     }

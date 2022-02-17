@@ -21,10 +21,6 @@ namespace ClientInspectionSystem.RenderToLayout {
         public List<GroupBox> GroupBoxesMultiple {
             get { return this.groupBoxesMultiple; }
         }
-        private List<CheckBox> checkBoxesMultiple = new List<CheckBox>();
-        public List<CheckBox> CheckBoxesMultiple {
-            get { return this.checkBoxesMultiple; }
-        }
 
         private List<string> getTitleMultiple = new List<string>();
         private List<MultipleSelectModel> multipleSelectModels = new List<MultipleSelectModel>();
@@ -37,8 +33,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                                            string description, ListView lvAll,
                                            ScrollViewer scvAll, Label lbValidationConetn,
                                            Button btnSubmitAdd, int ordinaryInput) {
-            cbHasSameGroup = checkCbHasSameGroup(groupBoxesMultiple, headerGroup);
-            try {          
+            try {
+                cbHasSameGroup = checkCbHasSameGroup(groupBoxesMultiple, headerGroup);
                 //UUID
                 string uuid = string.Empty;
                 uuid = "G_" + Guid.NewGuid().ToString("N");
@@ -53,8 +49,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                     checkBoxMultiple.Foreground = Brushes.White;
                     checkBoxMultiple.Content = contentCheckBox;
                     //Add To List Check Box For get Data & Validtion
-                    checkBoxesMultiple.Add(checkBoxMultiple);
                     getTitleMultiple.Add(headerGroup + uuid);
+                    //Render
                     listViewMultiple.Items.Add(checkBoxMultiple);
                 }
                 else {
@@ -82,7 +78,6 @@ namespace ClientInspectionSystem.RenderToLayout {
                     listViewMultiple.Items.Add(checkBoxMultiple);
                     groupBoxMultiple.Content = listViewMultiple;
                     //Add To List Check Box For get Data & Validtion
-                    checkBoxesMultiple.Add(checkBoxMultiple);
                     getTitleMultiple.Add(headerGroup + uuid);
                 }
                 if (null != lvAll.Items) {
@@ -160,7 +155,7 @@ namespace ClientInspectionSystem.RenderToLayout {
             Dictionary<string, AuthorizationElement> dictAuthElement = new Dictionary<string, AuthorizationElement>();
             string uuidCheckBox;
             string uuidTitleGroupBox;
-             if (null != multipleSelectModels) {
+            if (null != multipleSelectModels) {
                 for (int models = 0; models < multipleSelectModels.Count; models++) {
                     AuthorizationElement val;
                     //Ordinary
@@ -194,7 +189,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                                     val.multipleSelect = new List<KeyValuePair<string, object>>();
                                     dictAuthElement.Add(titleGroupBox, val);
                                 }
-                                val.multipleSelect.Add(new KeyValuePair<string, object> (contentCheckBox, isCheckedCheckBox));
+                                val.multipleSelect.Add(new KeyValuePair<string, object>(contentCheckBox, isCheckedCheckBox));
                             }
                         }
                     }

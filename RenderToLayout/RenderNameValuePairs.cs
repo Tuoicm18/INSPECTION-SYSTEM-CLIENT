@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ClientInspectionSystem.RenderToLayout.Models;
+using ClientInspectionSystem.SocketClient.Request;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,57 +28,32 @@ namespace ClientInspectionSystem.RenderToLayout {
         public List<string> DescriptionList {
             get { return this.descriptionList; }
         }
+
+        private List<string> getTitleNVP = new List<string>();
+        private List<NameValuePairsModel> NVPModels = new List<NameValuePairsModel>();
+        public bool checkDataGridSame { get; set; }
+
         #endregion
 
         #region RENDER
         public void renderNVP(string keyContent, string valueContent,
                               string headerGroup, string description,
-                              ListView lvAll, ScrollViewer scvAll) {
+                              ListView lvAll, ScrollViewer scvAll,
+                              int ordinaryInput) {
             try {
-                bool checkDataGridSame = checkDataGridSameGroup(groupBoxesNVP, headerGroup);
-
+                checkDataGridSame = checkDataGridSameGroup(groupBoxesNVP, headerGroup);
+                //UUID
+                string uuid = string.Empty;
+                uuid = "G_" + Guid.NewGuid().ToString("N");
                 if (checkDataGridSame) {
-                    bool checkSameDescription = checkDescriptionSameGroup(descriptionList, description);
-                    if(checkSameDescription) {
-                        dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = "    " + valueContent });
-                        if(null != listViewNVP.Items) {
-                            listViewNVP.Items.Remove(dataGridNameValuePair);
-                        }
-                        listViewNVP.Items.Add(dataGridNameValuePair);
-                        //Add to List for get data
-                        groupBoxesNVP.Add(groupBoxNameValuePair);
-                        descriptionList.Add(description);
-                    } else {
-                        //Data Grid NVP
-                        dataGridNameValuePair = new DataGrid();
-                        dataGridNameValuePair.Background = Brushes.Black;
-                        dataGridNameValuePair.RowBackground = (Brush)bc.ConvertFrom("#111111");
-                        dataGridNameValuePair.AlternatingRowBackground = (Brush)bc.ConvertFrom("#282828");
-                        dataGridNameValuePair.MaxWidth = ClientContants.DATA_GRID_MAX_WIDTH;
-                        dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = "    " + valueContent });
-                        //KEY COLUMN
-                        dataGridBoundColumnKey = new DataGridTextColumn();
-                        styleDataGridTextColumn(dataGridBoundColumnKey, true); // Style
-                        dataGridBoundColumnKey.Binding = new Binding("key"); // Binding data
-                        dataGridNameValuePair.Columns.Add(dataGridBoundColumnKey);
-                        //VALUE COLUMN
-                        dataGridBoundColumnValue = new DataGridTextColumn();
-                        styleDataGridTextColumn(dataGridBoundColumnValue, false);
-                        dataGridBoundColumnValue.Binding = new Binding("value");
-                        dataGridNameValuePair.Columns.Add(dataGridBoundColumnValue);
-                        //Textblock Description
-                        textBlockDescriptionNVP = new TextBlock();
-                        textBlockDescriptionNVP.TextWrapping = TextWrapping.Wrap;
-                        textBlockDescriptionNVP.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
-                        textBlockDescriptionNVP.Text = description;
-                        //Add to List for get data
-                        groupBoxesNVP.Add(groupBoxNameValuePair);
-                        descriptionList.Add(description);
-                        //Render
-                        listViewNVP.Items.Add(textBlockDescriptionNVP);
-                        listViewNVP.Items.Add(dataGridNameValuePair);
-                        groupBoxNameValuePair.Content = listViewNVP;
-                    }
+                    //Textblock Description
+                    textBlockDescriptionNVP.TextWrapping = TextWrapping.Wrap;
+                    textBlockDescriptionNVP.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
+                    textBlockDescriptionNVP.Text = description;
+                    //Data Grid NVP
+                    dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = " " + valueContent });
+                    //Add to list for get Data
+                    getTitleNVP.Add(headerGroup + uuid);
                 }
                 else {
                     //List View NVP
@@ -94,11 +71,12 @@ namespace ClientInspectionSystem.RenderToLayout {
                     textBlockDescriptionNVP.Text = description;
                     //Data Grid NVP
                     dataGridNameValuePair = new DataGrid();
+                    dataGridNameValuePair.Name = uuid;
                     dataGridNameValuePair.Background = Brushes.Black;
                     dataGridNameValuePair.RowBackground = (Brush)bc.ConvertFrom("#111111");
                     dataGridNameValuePair.AlternatingRowBackground = (Brush)bc.ConvertFrom("#282828");
                     dataGridNameValuePair.MaxWidth = ClientContants.DATA_GRID_MAX_WIDTH;
-                    dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = "    " + valueContent });
+                    dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = " " + valueContent });
                     //KEY COLUMN
                     dataGridBoundColumnKey = new DataGridTextColumn();
                     styleDataGridTextColumn(dataGridBoundColumnKey, true); // Style
@@ -113,6 +91,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                     listViewNVP.Items.Add(textBlockDescriptionNVP);
                     listViewNVP.Items.Add(dataGridNameValuePair);
                     groupBoxNameValuePair.Content = listViewNVP;
+                    //Add to list for get data
+                    getTitleNVP.Add(headerGroup + uuid);
                 }
                 if (null != lvAll.Items) {
                     lvAll.Items.Remove(groupBoxNameValuePair);
@@ -122,6 +102,17 @@ namespace ClientInspectionSystem.RenderToLayout {
             }
             catch (Exception eNVP) {
                 Logmanager.Instance.writeLog("RENDER LAYOUT NVP ERROR " + eNVP.ToString());
+            } finally {
+                //Add To List For Get Data
+                NVPModels.Add(new NameValuePairsModel {
+                    ordinaryNVP = ordinaryInput,
+                    description = textBlockDescriptionNVP,
+                    title = headerGroup,
+                    dataGrid = dataGridNameValuePair,
+                    keyData = keyContent,
+                    valueData = valueContent,
+                    groupBox = groupBoxNameValuePair
+                });
             }
         }
         //Check Same Group Data Grid
@@ -147,6 +138,7 @@ namespace ClientInspectionSystem.RenderToLayout {
             }
             return false;
         }
+        //Style Cell Data Grid
         private void styleDataGridTextColumn(DataGridTextColumn dataGridTextColumn, bool isKey) {
             if (isKey) {
                 //KEY COLUMN
@@ -186,6 +178,59 @@ namespace ClientInspectionSystem.RenderToLayout {
                 elementStyleValue.Setters.Add(new Setter(TextBlock.MarginProperty, new Thickness(15, 0, 0, 0)));
                 dataGridTextColumn.ElementStyle = elementStyleValue;
             }
+        }
+        #endregion
+
+        #region GET DATA FROM LAYOUT NVP
+        public List<AuthorizationElement> getDataNVP() {
+            List<AuthorizationElement> authorizationElementsNVP = new List<AuthorizationElement>();
+            Dictionary<string, AuthorizationElement> dictAuthElement = new Dictionary<string, AuthorizationElement>();
+
+            if(null != NVPModels) {
+                for(int nvp = 0; nvp < NVPModels.Count; nvp++) {
+                    //Ordinary 
+                    int ordinary = NVPModels[nvp].ordinaryNVP;
+                    //Description
+                    TextBlock des = NVPModels[nvp].description;
+                    //Title
+                    string title = NVPModels[nvp].title;
+                    //Data grid
+                    DataGrid dataGrid = NVPModels[nvp].dataGrid;
+                    //Data key
+                    string keyData = NVPModels[nvp].keyData;
+                    //Value key
+                    string valueData = NVPModels[nvp].valueData;
+                    //Group Box
+                    GroupBox groupBox = NVPModels[nvp].groupBox;
+                    for(int t = 0; t < getTitleNVP.Count; t++) {
+                        AuthorizationElement val;
+                        string uuidDataGrid = ClientExtentions.subStringRight(getTitleNVP[t], dataGrid.Name.Length);
+                        string uuidTitleDataGrid = getTitleNVP[t];
+                        if(uuidDataGrid.ToLower().Equals(dataGrid.Name.ToLower())) {
+                            string titleGroupBoxDataGird = groupBox.Header.ToString();
+                            if(uuidTitleDataGrid.ToLower().Contains(titleGroupBoxDataGird.ToLower())) {
+                                if (dictAuthElement.ContainsKey(titleGroupBoxDataGird)) {
+                                    dictAuthElement.TryGetValue(titleGroupBoxDataGird, out val);
+                                }
+                                else {
+                                    val = new AuthorizationElement();
+                                    val.ordinary = ordinary;
+                                    val.description = des.Text;
+                                    val.title = titleGroupBoxDataGird;
+                                    val.nameValuePair = new List<KeyValuePair<string, object>>();
+                                    dictAuthElement.Add(titleGroupBoxDataGird, val);
+                                }
+                                val.nameValuePair.Add(new KeyValuePair<string, object>(keyData, valueData));
+                            }
+                        }
+                        foreach (var eml in dictAuthElement) {
+                            authorizationElementsNVP.Add(eml.Value);
+                        }
+                    }
+                }
+            }
+            authorizationElementsNVP = authorizationElementsNVP.GroupBy(g => g.title).Select(s => s.First()).ToList();
+            return authorizationElementsNVP;
         }
         #endregion
     }

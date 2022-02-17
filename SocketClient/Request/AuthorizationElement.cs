@@ -13,15 +13,15 @@ namespace ClientInspectionSystem.SocketClient.Request {
 
         public string title { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-
         public string text { get; set; }
+
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<KeyValuePair<string, object>> multipleSelect { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, bool> singleSelect { get; set; }
+        public List<KeyValuePair<string, object>> singleSelect { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, string> nameValuePair { get; set; }
+        public List<KeyValuePair<string, object>> nameValuePair { get; set; }
     }
 }

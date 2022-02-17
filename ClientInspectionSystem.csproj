@@ -205,6 +205,8 @@
     <Compile Include="Models\DeviceDetails.cs" />
     <Compile Include="RenderToLayout\ModelBindingDataNVP.cs" />
     <Compile Include="RenderToLayout\Models\MultipleSelectModel.cs" />
+    <Compile Include="RenderToLayout\Models\NameValuePairsModel.cs" />
+    <Compile Include="RenderToLayout\Models\SingleSelectModel.cs" />
     <Compile Include="RenderToLayout\RenderMultipleChoices.cs" />
     <Compile Include="RenderToLayout\RenderNameValuePairs.cs" />
     <Compile Include="RenderToLayout\RenderPlainText.cs" />

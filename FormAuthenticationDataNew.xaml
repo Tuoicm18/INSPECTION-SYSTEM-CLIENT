@@ -260,16 +260,42 @@
             </ScrollViewer>
         </GroupBox>
         <!--#endregion-->
-
-        <!--Button Submit-->
-        <Button
-            x:Name="btnSubmit"
-            Click="btnSubmit_Click"
-            Content="OK"
+        
+        <!--#region BUTTON SUBMIT & COPY JSON-->
+        <Grid
+            x:Name="gridBottom"
+            Background="Transparent"
             VerticalAlignment="Bottom"
-            Width="100"
+            Height="35"
             Margin="5,5,5,5">
-            
-        </Button>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--Button Submit-->
+            <Button
+                x:Name="btnSubmit"
+                Click="btnSubmit_Click"
+                Content="OK"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                Width="100"
+                Grid.Column="0"
+                Margin="5,5,5,5">
+            </Button>
+            <!--Button Copy Json-->
+            <Button
+                x:Name="btnCopyJson"
+                Click="btnCopyJson_Click"
+                Content="COPY JSON"
+                Width="100"
+                Grid.Column="2"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                Margin="5,5,5,5">
+            </Button>
+        </Grid>
+        <!--#endregion-->
     </Grid>
 </mah:MetroWindow>
