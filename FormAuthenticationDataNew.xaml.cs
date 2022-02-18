@@ -84,30 +84,29 @@ namespace ClientInspectionSystem {
         //Button Copy Json
         private void btnCopyJson_Click(object sender, RoutedEventArgs e) {
             try {
-                PrepareAuthData prepareAuthData = new PrepareAuthData();
+                AuthorizationData authorizationData = new AuthorizationData();
                 //Content List
                 List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
                 if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
-                    prepareAuthData.authContentList = authorizationsContentList;
+                    authorizationData.authContentList = authorizationsContentList;
                 }
                 //Multiple
                 List<AuthorizationElement> authorizationsMultiple = renderLayoutMultiple.getDataMultipleChoices();
 
                 if (null != authorizationsMultiple && authorizationsMultiple.Count > 0) {
-                    prepareAuthData.multipleSelectList = authorizationsMultiple;
+                    authorizationData.multipleSelectList = authorizationsMultiple;
                 }
                 //Single
                 List<AuthorizationElement> authorizationsSingle = renderLayoutSingleChoices.getDataSingleChoices();
                 if (null != authorizationsSingle && authorizationsSingle.Count > 0) {
-                    prepareAuthData.singleSelectList = authorizationsSingle;
+                    authorizationData.singleSelectList = authorizationsSingle;
                 }
                 //Namve Value Pairs
                 List<AuthorizationElement> authorizationsNVP = renderLayoutNVP.getDataNVP();
                 if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
-                    prepareAuthData.nameValuePairList = authorizationsNVP;
+                    authorizationData.nameValuePairList = authorizationsNVP;
                 }
-                AuthorizationData authorizationData = new AuthorizationData();
-                authorizationData.authorizationData = prepareAuthData;
+                
                 //Json String
                 string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
                 Clipboard.SetText(strAuthorizationDataReq);
@@ -144,7 +143,8 @@ namespace ClientInspectionSystem {
             else if (checkButtonClick == BTN_SINGLE_CHOICES) {
                 renderLayoutSingleChoices.renderSingleChoices(txtStringAndVKeyNVP.Text, txtAddDescription.Text,
                                                               txtGroupHeader.Text, lvAll,
-                                                              scvAll, ordinaryClick);
+                                                              scvAll, ordinaryClick,
+                                                              lbValidationContent, btnSubmitAdd);
                 //For Ordinary
                 if (renderLayoutSingleChoices.radioSameGroup == false) {
                     ordinaryClick++;
@@ -193,6 +193,17 @@ namespace ClientInspectionSystem {
             //renderLayoutPlainText.checkDuplicateGroupPlaintText(renderLayoutPlainText.GroubBoxesContentList, txtGroupHeader.Text,
             //                                                   lbValidationGruop, btnSubmitAdd);
 
+
+            //Validation Multiple Content Checkbox
+            if (txtGroupHeader.Text.Equals(string.Empty) == false) {
+                if (checkButtonClick == BTN_MULTIPLE_CHOICES) {
+                    renderLayoutMultiple.CheckBoxesMultiple.Clear();
+                    lbValidationContent.Visibility = Visibility.Collapsed;
+                } else if(checkButtonClick == BTN_SINGLE_CHOICES) {
+                    renderLayoutSingleChoices.RadioButtonList.Clear();
+                    lbValidationContent.Visibility = Visibility.Collapsed;
+                }
+            }
         }
         //Plaint Text & Key
         private void txtStringAndVKeyNVP_TextChanged(object sender, TextChangedEventArgs e) {
@@ -208,9 +219,17 @@ namespace ClientInspectionSystem {
                 }
             }
             //Validation Multiple Content Checkbox
-            //renderLayoutMultiple.checkDuplicateContent(lbValidationContent, btnSubmitAdd, 
-            //                                           txtStringAndVKeyNVP.Text, renderLayoutMultiple.CheckBoxesMultiple,
-            //                                           renderLayoutMultiple.GroupBoxesMultiple, txtGroupHeader.Text);
+            if(txtStringAndVKeyNVP.Text.Equals(string.Empty) == false) {
+                if (checkButtonClick == BTN_MULTIPLE_CHOICES) {
+                    renderLayoutMultiple.checkDuplicateContent(lbValidationContent, btnSubmitAdd,
+                                                               txtStringAndVKeyNVP.Text, renderLayoutMultiple.CheckBoxesMultiple,
+                                                               renderLayoutMultiple.GroupBoxesMultiple, txtGroupHeader.Text);
+                } else if(checkButtonClick == BTN_SINGLE_CHOICES) {
+                    renderLayoutSingleChoices.checkDuplicateContent(lbValidationContent, btnSubmitAdd,
+                                                                    txtStringAndVKeyNVP.Text, renderLayoutSingleChoices.RadioButtonList,
+                                                                    renderLayoutSingleChoices.GroupBoxessingle, txtGroupHeader.Text);
+                }
+            }
         }
         //Value NVP
         private void txtStringValueNVP_TextChanged(object sender, TextChangedEventArgs e) {
@@ -270,6 +289,9 @@ namespace ClientInspectionSystem {
                 txtStringAndVKeyNVP.Text = string.Empty;
                 txtAddDescription.Text = string.Empty;
                 txtStringValueNVP.Text = string.Empty;
+                //Validation Label
+                lbValidationContent.Visibility = Visibility.Collapsed;
+                lbValidationGruop.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex) {
                 Logmanager.Instance.writeLog("CHANGE LABEL FOR NVP ERROR " + ex.ToString());
@@ -379,19 +401,35 @@ namespace ClientInspectionSystem {
         #region GET DATA FROM LAYOUT
         //Plain Text
         public List<AuthorizationElement> getDataContentList() {
-            return renderLayoutPlainText.getDataContentListFromLayout();
+            List<AuthorizationElement> elementsContentList = null;
+            this.Dispatcher.Invoke(() => {
+                elementsContentList = renderLayoutPlainText.getDataContentListFromLayout();
+            });
+            return elementsContentList;
         }
         //Multiple Choices
         public List<AuthorizationElement> getDataMultipleChoices() {
-            return renderLayoutMultiple.getDataMultipleChoices();
+            List<AuthorizationElement> elementsMultiple = null;
+            this.Dispatcher.Invoke(() => {
+                elementsMultiple =  renderLayoutMultiple.getDataMultipleChoices();
+            });
+            return elementsMultiple;
         }
         //Single Choices
         public List<AuthorizationElement> getDataSingleChoices() {
-            return renderLayoutSingleChoices.getDataSingleChoices();
+            List<AuthorizationElement> elementSingle = null;
+            this.Dispatcher.Invoke(() => {
+                elementSingle = renderLayoutSingleChoices.getDataSingleChoices();
+            });
+            return elementSingle;
         }
         //Name Value Pairs
         public List<AuthorizationElement> getDataNVP() {
-            return renderLayoutNVP.getDataNVP();
+            List<AuthorizationElement> elementNVP = null;
+            this.Dispatcher.Invoke(() => {
+                elementNVP = renderLayoutNVP.getDataNVP();
+            });
+            return elementNVP;
         }
         #endregion
     }

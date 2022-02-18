@@ -21,7 +21,7 @@ namespace ClientInspectionSystem.SocketClient {
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        private readonly int FIND_CONNECT_INTEVAL = 2000;
+        private readonly int FIND_CONNECT_INTEVAL = 10000;
         private readonly int MAX_PING = 10;
         private DeleagteConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
@@ -156,8 +156,7 @@ namespace ClientInspectionSystem.SocketClient {
         //Get Device Details
         public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled, TimeSpan timeOutResp) {
             try {
-                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled,
-                                                                     timeOutResp);
+                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled,timeOutResp);
                 PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
                 Logmanager.Instance.writeLog("<DEBUG> GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
                 return deviceDetailsResp;

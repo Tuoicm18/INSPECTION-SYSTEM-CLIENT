@@ -452,9 +452,15 @@ namespace ClientInspectionSystem {
 
         #region HANDLE BUTTON DISCONNECT 
         private void btnDisconnect_Click(object sender, RoutedEventArgs e) {
-            connectionSocket.shuttdown(this);
-            clearLayout(false);
-            disabledAllButton();
+            if (connectionSocket.CheckConnection == false) {
+                connectionSocket.shuttdown(this);
+                clearLayout(false);
+                disabledAllButton();
+            }
+            else {
+                clearLayout(false);
+                disabledAllButton();
+            }
         }
         #endregion
 
@@ -630,6 +636,7 @@ namespace ClientInspectionSystem {
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
                                 //initFormResultBiometricAuth(resultFaceAuth);
+                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE " + JsonConvert.SerializeObject(resultFaceAuth));
                             });
                         });
                         btnRFID.IsEnabled = true;
@@ -649,15 +656,13 @@ namespace ClientInspectionSystem {
             //bool resultAuthFace = false;
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
-                TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_1M);
-                PrepareAuthData prepareAuthData = new PrepareAuthData();
-                prepareAuthData.authContentList = formAuthorizationData.getDataContentList();
-                prepareAuthData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
-                prepareAuthData.singleSelectList = formAuthorizationData.getDataSingleChoices();
-                prepareAuthData.nameValuePairList = formAuthorizationData.getDataNVP();
+                TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_3M);
 
                 AuthorizationData authorizationData = new AuthorizationData();
-                authorizationData.authorizationData = prepareAuthData;
+                authorizationData.authContentList = formAuthorizationData.getDataContentList();
+                authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
+                authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
+                authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
 
                 BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp);
                 if (null != resultBiometric) {
@@ -667,7 +672,7 @@ namespace ClientInspectionSystem {
                 return resultBiometricResp;
             }
             catch (Exception ex) {
-                Logmanager.Instance.writeLog("ERROR GET RESULT BIOMETRIC FACE " + ex.ToString());
+                Logmanager.Instance.writeLog("ERROR GET RESULT BIOMETRIC " + ex.ToString());
                 //resultAuthFace = false;
                 throw ex;
             }
@@ -764,7 +769,7 @@ namespace ClientInspectionSystem {
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
                                 //initFormResultBiometricAuth(resultLeftFingerAuth);
-                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH " + JsonConvert.SerializeObject(resultLeftFingerAuth));
+                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER " + JsonConvert.SerializeObject(resultLeftFingerAuth));
                             });
                         });
                         btnLeftFinger.IsEnabled = true;
@@ -859,6 +864,7 @@ namespace ClientInspectionSystem {
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
                                 //initFormResultBiometricAuth(resultFingerRightAuth);
+                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER" + JsonConvert.SerializeObject(resultFingerRightAuth));
                             });
                         });
 
@@ -904,7 +910,7 @@ namespace ClientInspectionSystem {
         private void btnOption_Click(object sender, RoutedEventArgs e) {
             this.Visibility = Visibility.Collapsed;
             FormAuthenticationDataNew formAuthorizationDataNew = new FormAuthenticationDataNew();
-            
+
             if (formAuthorizationDataNew.ShowDialog() == true) {
                 this.Visibility = Visibility.Visible;
             }

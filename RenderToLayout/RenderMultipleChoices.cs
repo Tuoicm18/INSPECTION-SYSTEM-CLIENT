@@ -27,6 +27,12 @@ namespace ClientInspectionSystem.RenderToLayout {
         private List<MultipleSelectModel> multipleSelectModels = new List<MultipleSelectModel>();
 
         public bool cbHasSameGroup { get; set; }
+
+        private List<CheckBox> checkBoxes = new List<CheckBox>();
+        public List<CheckBox> CheckBoxesMultiple {
+            get { return this.checkBoxes; }
+            set { this.checkBoxes = value; }
+        }
         #endregion
 
         #region RENDER
@@ -51,6 +57,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                     checkBoxMultiple.Content = contentCheckBox;
                     //Add To List Check Box For get Data & Validtion
                     getTitleMultiple.Add(headerGroup + uuid);
+                    checkBoxes.Add(checkBoxMultiple);
                     //Render
                     listViewMultiple.Items.Add(checkBoxMultiple);
                 }
@@ -74,6 +81,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                     checkBoxMultiple.Name = uuid;
                     checkBoxMultiple.Foreground = Brushes.White;
                     checkBoxMultiple.Content = contentCheckBox;
+                    checkBoxes.Add(checkBoxMultiple);
                     //Render
                     listViewMultiple.Items.Add(textBlockMultipleDesc);
                     listViewMultiple.Items.Add(checkBoxMultiple);
@@ -86,6 +94,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                 }
                 lvAll.Items.Add(groupBoxMultiple);
                 scvAll.Content = lvAll;
+                //Validation 
+                checkDuplicateContent(lbValidationConetn, btnSubmitAdd, contentCheckBox, this.checkBoxes, groupBoxesMultiple, headerGroup);
             }
             catch (Exception eMulti) {
                 Logmanager.Instance.writeLog("RENDER MULTIPLE CHOICES ERROR " + eMulti.ToString());

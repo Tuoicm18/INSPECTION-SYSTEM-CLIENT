@@ -25,12 +25,20 @@ namespace ClientInspectionSystem.RenderToLayout {
         private List<string> getTitlesSingle = new List<string>();
         private List<SingleSelectModel> singleSelectModels = new List<SingleSelectModel>();
         public bool radioSameGroup { get; set; }
+
+        //For Validation
+        private List<RadioButton> radioButtonList = new List<RadioButton>();
+        public List<RadioButton> RadioButtonList {
+            get { return this.radioButtonList; }
+            set { this.radioButtonList = value; }
+        }
         #endregion
 
         #region RENDER
         public void renderSingleChoices(string contentRadio, string description,
                                         string headerGroup, ListView lvAll,
-                                        ScrollViewer scvAll, int ordinaryInput) {
+                                        ScrollViewer scvAll, int ordinaryInput,
+                                        Label lbValidationConetn, Button btnSubmitAdd) {
             try {
                 radioSameGroup = checkRadioHasSameGroup(groupBoxesSingle, headerGroup);
                 if (radioSameGroup) {
@@ -39,6 +47,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                     radioButtonSingle.Foreground = Brushes.White;
                     radioButtonSingle.Content = contentRadio;
                     radioButtonSingle.GroupName = headerGroup;
+                    //Add For Validation
+                    radioButtonList.Add(radioButtonSingle);
                     //Textblock Description
                     textBlockSingleDesc.TextWrapping = TextWrapping.Wrap;
                     textBlockSingleDesc.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
@@ -68,6 +78,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                     radioButtonSingle.Foreground = Brushes.White;
                     radioButtonSingle.Content = contentRadio;
                     radioButtonSingle.GroupName = headerGroup;
+                    //Add For Validation
+                    radioButtonList.Add(radioButtonSingle);
                     //Render
                     listViewSingle.Items.Add(textBlockSingleDesc);
                     listViewSingle.Items.Add(radioButtonSingle);
@@ -80,6 +92,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                 }
                 lvAll.Items.Add(groupBoxSingle);
                 scvAll.Content = lvAll;
+                //Validation
+                checkDuplicateContent(lbValidationConetn, btnSubmitAdd, contentRadio, radioButtonList, groupBoxesSingle, headerGroup);
             }
             catch (Exception eSingle) {
                 Logmanager.Instance.writeLog("RENDER LAYOUT SINGLE CHOICE ERROR " + eSingle.ToString());
@@ -151,6 +165,44 @@ namespace ClientInspectionSystem.RenderToLayout {
             authorizationElementsSingle = authorizationElementsSingle.GroupBy(g => g.title).Select(s => s.First()).ToList();
             return authorizationElementsSingle;
         }
-        #endregion 
+        #endregion
+
+
+        #region VALIDATION
+        public void checkDuplicateContent(Label lbValidationContent, Button btnSubmitAdd,
+                                          string contentRadioButton, List<RadioButton> radioButtons,
+                                          List<GroupBox> groupBoxes, string headerGroupBox) {
+            if (null != groupBoxes) {
+                for (int gb = 0; gb < groupBoxes.Count; gb++) {
+                    if (groupBoxes[gb].Header.ToString().ToUpper().Equals(headerGroupBox.ToUpper())) {
+                        if (null != radioButtons) {
+                            for (int cb = 0; cb < radioButtons.Count; cb++) {
+                                if (radioButtons[cb].Content.ToString().ToLower().Equals(contentRadioButton.ToLower())) {
+                                    lbValidationContent.Content = ClientContants.LABEL_VALIDATION_ADD_CONTENT;
+                                    lbValidationContent.Visibility = Visibility.Visible;
+                                    if (null != btnSubmitAdd) {
+                                        btnSubmitAdd.IsEnabled = false;
+                                    }
+                                    break;
+                                }
+                                else {
+                                    lbValidationContent.Visibility = Visibility.Collapsed;
+                                    if (null != btnSubmitAdd) {
+                                        btnSubmitAdd.IsEnabled = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        lbValidationContent.Visibility = Visibility.Collapsed;
+                        if (null != btnSubmitAdd) {
+                            btnSubmitAdd.IsEnabled = true;
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }
