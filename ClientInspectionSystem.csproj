@@ -211,6 +211,11 @@
     <Compile Include="RenderToLayout\RenderNameValuePairs.cs" />
     <Compile Include="RenderToLayout\RenderPlainText.cs" />
     <Compile Include="RenderToLayout\RenderSingleChoices.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\ModelBindDataNVP.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultContentList.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultMultipleChoices.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultNameValuePairs.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultSingleChoices.cs" />
     <Compile Include="SocketClient\Connection.cs" />
     <Compile Include="SocketClient\Request\ClientAuthorizationData.cs" />
     <Compile Include="SocketClient\Request\ClientAuthorizationElement.cs" />

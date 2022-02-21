@@ -152,10 +152,10 @@ namespace ClientInspectionSystem.RenderToLayout {
                             val.ordinary = ordinarySingle;
                             val.description = des.Text;
                             val.title = headerGroup;
-                            val.singleSelect = new List<KeyValuePair<string, object>>();
+                            val.singleSelect = new Dictionary<string, bool>();
                             dictAuthElement.Add(headerGroup, val);
                         }
-                        val.singleSelect.Add(new KeyValuePair<string, object>(contentRadio, isCheckedRadio));
+                        val.singleSelect.Add(contentRadio, isCheckedRadio);
                     }
                     foreach (var eml in dictAuthElement) {
                         authorizationElementsSingle.Add(eml.Value);

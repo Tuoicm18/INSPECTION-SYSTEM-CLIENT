@@ -452,15 +452,9 @@ namespace ClientInspectionSystem {
 
         #region HANDLE BUTTON DISCONNECT 
         private void btnDisconnect_Click(object sender, RoutedEventArgs e) {
-            if (connectionSocket.CheckConnection == false) {
-                connectionSocket.shuttdown(this);
-                clearLayout(false);
-                disabledAllButton();
-            }
-            else {
-                clearLayout(false);
-                disabledAllButton();
-            }
+            connectionSocket.shuttdown(this);
+            clearLayout(false);
+            disabledAllButton();
         }
         #endregion
 
@@ -635,7 +629,7 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                //initFormResultBiometricAuth(resultFaceAuth);
+                                initFormResultBiometricAuth(resultFaceAuth);
                                 Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE " + JsonConvert.SerializeObject(resultFaceAuth));
                             });
                         });
@@ -768,8 +762,9 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                //initFormResultBiometricAuth(resultLeftFingerAuth);
-                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER " + JsonConvert.SerializeObject(resultLeftFingerAuth));
+                                initFormResultBiometricAuth(resultLeftFingerAuth);
+                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER " + 
+                                                             JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
                             });
                         });
                         btnLeftFinger.IsEnabled = true;
@@ -863,7 +858,7 @@ namespace ClientInspectionSystem {
                             }
                             this.Dispatcher.Invoke(() => {
                                 //Init Form Result Biometric Auth
-                                //initFormResultBiometricAuth(resultFingerRightAuth);
+                                initFormResultBiometricAuth(resultFingerRightAuth);
                                 Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER" + JsonConvert.SerializeObject(resultFingerRightAuth));
                             });
                         });
@@ -883,27 +878,76 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region INIT FORM RESULT BIOMETRIC AUTH
-        /*private void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
-            //Show Form Result Biometric Type
-            MultipleSelected multipleSelected = baseBiometricAuthResp.data.multipleSelected;
-            string titleMultiple = multipleSelected.title;
-            List<string> multipleContent = multipleSelected.multipleContent;
-            SingleSelected singleSelected = baseBiometricAuthResp.data.singleSelected;
-            string titleSingle = singleSelected.title;
-            string singleContent = singleSelected.singleContent;
-            FormResultAuthorizationData formResultAuthorizationData = new FormResultAuthorizationData();
-            if (null != multipleSelected || null != singleSelected) {
-                if (!titleMultiple.Equals(string.Empty) && null != multipleContent) {
-                    formResultAuthorizationData.initListBoxMultipleSelected(multipleContent);
-                    formResultAuthorizationData.setHeaderGroupMultiple(titleMultiple);
+        private void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
+            if(null != baseBiometricAuthResp) {
+                if(null != baseBiometricAuthResp.data.authorizationData) {
+                    AuthorizationData authorizedData = baseBiometricAuthResp.data.authorizationData;
+                    FormResultAuthorizationData formResultAuthorization = new FormResultAuthorizationData();
+                    formResultAuthorization.Topmost = true;
+                    if(checkNullReslutTransactionData(authorizedData) == false) {
+                        Dictionary<int, AuthorizationElement> dicRenderResult = new Dictionary<int, AuthorizationElement>();
+                        //Content List
+                        foreach (var v in authorizedData.authContentList) {
+                            v.type = AuthElementType.Content;
+                            dicRenderResult.Add(v.ordinary, v);
+                        }
+                        //Multiple
+                        foreach (var v in authorizedData.multipleSelectList) {
+                            v.type = AuthElementType.Multiple;
+                            dicRenderResult.Add(v.ordinary, v);
+                        }
+                        //Single
+                        foreach (var v in authorizedData.singleSelectList) {
+                            v.type = AuthElementType.Single;
+                            dicRenderResult.Add(v.ordinary, v);
+                        }
+                        //NVP
+                        foreach (var v in authorizedData.nameValuePairList) {
+                            v.type = AuthElementType.NVP;
+                            dicRenderResult.Add(v.ordinary, v);
+                        }
+                        int maxLoop = 1000;
+                        int count = 0;
+                        for (int i = 0; i < maxLoop; i++) {
+                            AuthorizationElement element = dicRenderResult[i];
+                            if (null == element) {
+                                continue;
+                            }
+                            //Render Layout
+                            switch (element.type) {
+                                case AuthElementType.Content:
+                                    formResultAuthorization.renderToLayoutResultContentList(element);
+                                    break;
+                                case AuthElementType.Multiple:
+                                    formResultAuthorization.renderToLayoutReslutMultiple(element);
+                                    break;
+                                case AuthElementType.Single:
+                                    formResultAuthorization.renderToLayoutResultSingle(element);
+                                    break;
+                                case AuthElementType.NVP:
+                                    formResultAuthorization.renderToLayoutNVP(element);
+                                    break;
+                            }
+                            if (++count >= dicRenderResult.Count) {
+                                break;
+                            }
+                        }
+                        if (formResultAuthorization.ShowDialog() == true) { }
+                    }
                 }
-                if (!titleSingle.Equals(string.Empty) && !singleContent.Equals(string.Empty)) {
-                    formResultAuthorizationData.initListBoxSingleSelected(singleContent);
-                    formResultAuthorizationData.setHeaderGroupSingle(titleSingle);
-                }
-                if (formResultAuthorizationData.ShowDialog() == true) { }
             }
-        }*/
+        }
+
+        //Check Null Transaction Data
+        private bool checkNullReslutTransactionData(AuthorizationData authorizedData) {
+            List<AuthorizationElement> elementContent = authorizedData.authContentList;
+            List<AuthorizationElement> elementMultiple = authorizedData.multipleSelectList;
+            List<AuthorizationElement> elementSingle = authorizedData.singleSelectList;
+            List<AuthorizationElement> elementNVP = authorizedData.nameValuePairList;
+            return elementContent.Count == 0 && elementMultiple.Count == 0
+                && elementSingle.Count == 0 && elementNVP.Count == 0;
+
+        }
         #endregion
 
         #region TEST FORM AUTHORIZATION DATA

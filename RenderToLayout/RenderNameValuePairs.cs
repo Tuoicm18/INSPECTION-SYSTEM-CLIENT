@@ -218,10 +218,10 @@ namespace ClientInspectionSystem.RenderToLayout {
                                     val.ordinary = ordinary;
                                     val.description = des.Text;
                                     val.title = titleGroupBoxDataGird;
-                                    val.nameValuePair = new List<KeyValuePair<string, object>>();
+                                    val.nameValuePair = new Dictionary<string, string>();
                                     dictAuthElement.Add(titleGroupBoxDataGird, val);
                                 }
-                                val.nameValuePair.Add(new KeyValuePair<string, object>(keyData, valueData));
+                                val.nameValuePair.Add(keyData, valueData);
                             }
                         }
                         foreach (var eml in dictAuthElement) {

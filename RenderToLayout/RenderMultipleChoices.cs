@@ -197,10 +197,10 @@ namespace ClientInspectionSystem.RenderToLayout {
                                     val.ordinary = ordianry;
                                     val.description = des.Text;
                                     val.title = titleGroupBox;
-                                    val.multipleSelect = new List<KeyValuePair<string, object>>();
+                                    val.multipleSelect = new Dictionary<string, bool>();
                                     dictAuthElement.Add(titleGroupBox, val);
                                 }
-                                val.multipleSelect.Add(new KeyValuePair<string, object>(contentCheckBox, isCheckedCheckBox));
+                                val.multipleSelect.Add(contentCheckBox, isCheckedCheckBox);
                             }
                         }
                     }

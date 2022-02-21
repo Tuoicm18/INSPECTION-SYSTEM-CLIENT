@@ -138,7 +138,7 @@ namespace ClientInspectionSystem {
                     ordinaryClick++;
                 }
                 //Remove Hover Listview multiple
-                removeHoverListView(renderLayoutMultiple.listViewMultiple);
+                ClientExtentions.removeHoverListView(renderLayoutMultiple.listViewMultiple, this);
             }
             else if (checkButtonClick == BTN_SINGLE_CHOICES) {
                 renderLayoutSingleChoices.renderSingleChoices(txtStringAndVKeyNVP.Text, txtAddDescription.Text,
@@ -150,7 +150,7 @@ namespace ClientInspectionSystem {
                     ordinaryClick++;
                 }
                 //Remove Hover ListView single
-                removeHoverListView(renderLayoutSingleChoices.listViewSingle);
+                ClientExtentions.removeHoverListView(renderLayoutSingleChoices.listViewSingle, this);
             }
             else {
                 renderLayoutNVP.renderNVP(txtStringAndVKeyNVP.Text, txtStringValueNVP.Text,
@@ -161,7 +161,7 @@ namespace ClientInspectionSystem {
                     ordinaryClick++;
                 }
                 //Remove Hover Listview NVP
-                removeHoverListView(renderLayoutNVP.listViewNVP);
+                ClientExtentions.removeHoverListView(renderLayoutNVP.listViewNVP, this);
             }
             //Scroll Viewer
             scvAll.ScrollToEnd();
@@ -383,13 +383,6 @@ namespace ClientInspectionSystem {
             catch (Exception eTxt) {
                 Logmanager.Instance.writeLog("RENDER TEXT BOX ERROR " + eTxt.ToString());
             }
-        }
-        #endregion
-
-        #region REMOVE HOVER LISTVIEW
-        private void removeHoverListView(ListView lv) {
-            //Remove Hover List View
-            lv.ItemContainerStyle = this.Resources["RemoveHoverListView"] as Style;
         }
         #endregion
 

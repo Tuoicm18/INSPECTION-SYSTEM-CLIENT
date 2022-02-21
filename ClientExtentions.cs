@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using MahApps.Metro.Controls;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ClientInspectionSystem {
     public static class ClientExtentions {
@@ -56,5 +59,13 @@ namespace ClientInspectionSystem {
                 writer.WriteEndObjectAsync();
             }
         }
+
+        #region REMOVE HOVER LISTVIEW
+        public static void removeHoverListView(ListView lv, MetroWindow metroWindow) {
+            //Remove Hover List View
+            lv.ItemContainerStyle = metroWindow.Resources["RemoveHoverListView"] as Style;
+        }
+        #endregion
+
     }
 }
