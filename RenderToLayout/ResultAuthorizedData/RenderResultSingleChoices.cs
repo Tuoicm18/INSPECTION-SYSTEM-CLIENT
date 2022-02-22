@@ -25,7 +25,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 //Get Header Group
                 string headerGr = elementSingleChoices.title;
                 //Get Description
-                string description = elementSingleChoices.description;
+                string description = elementSingleChoices.label;
                 //Check Same Group
                 radioSameGroup = checkRadioHasSameGroup(groupBoxesSingle, headerGr);
                 if (radioSameGroup) {

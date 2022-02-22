@@ -13,7 +13,7 @@ namespace ClientInspectionSystem.RenderToLayout {
         #region VARIABEL
         private GroupBox groupBoxContentList;
         private TextBlock textBlockContentList;
-        private TextBlock textBlockContentListDesc;
+        //private TextBlock textBlockContentListDesc;
         private ListView listViewContentList;
         private List<GroupBox> groupBoxesContentList = new List<GroupBox>();
         public List<GroupBox> GroubBoxesContentList {
@@ -33,10 +33,10 @@ namespace ClientInspectionSystem.RenderToLayout {
                 groupBoxContentList.Margin = new Thickness(5, 5, 5, 10);
                 groupBoxContentList.Header = headerGroup;
                 //Description
-                textBlockContentListDesc = new TextBlock();
-                textBlockContentListDesc.TextWrapping = TextWrapping.Wrap;
-                textBlockContentListDesc.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
-                textBlockContentListDesc.Text = description;
+                //textBlockContentListDesc = new TextBlock();
+                //textBlockContentListDesc.TextWrapping = TextWrapping.Wrap;
+                //textBlockContentListDesc.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
+                //textBlockContentListDesc.Text = description;
                 //Content
                 textBlockContentList = new TextBlock();
                 textBlockContentList.MaxWidth = ClientContants.TEXT_BLOCK_DESCRIPTION_MAX_WIDTH;
@@ -46,7 +46,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 listViewContentList = new ListView();
                 listViewContentList.ForceCursor = false;
                 listViewContentList.IsHitTestVisible = false;
-                listViewContentList.Items.Add(textBlockContentListDesc);
+                //listViewContentList.Items.Add(textBlockContentListDesc);
                 listViewContentList.Items.Add(textBlockContentList);
                 groupBoxContentList.Content = listViewContentList;
                 //Add group box to list for get data
@@ -59,7 +59,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 //For Get Data
                 authorizationsContentList.Add(new AuthorizationElement {
                     ordinary = ordinaryInput,
-                    description = description,
+                    //label = description,
                     title = headerGroup,
                     text = content
                 });
@@ -67,17 +67,6 @@ namespace ClientInspectionSystem.RenderToLayout {
             catch (Exception ePlaintText) {
                 Logmanager.Instance.writeLog("RENDER PLAINT TEXT ERROR " + ePlaintText.ToString());
             }
-        }
-
-        private bool checkTextHasSameGroup(List<GroupBox> groupBoxes,string header) {
-            if(null != groupBoxes) {
-                for(int g = 0; g < groupBoxes.Count; g++) {
-                    if(groupBoxes[g].Header.ToString().ToLower().Equals(header.ToLower())) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
         #endregion
 

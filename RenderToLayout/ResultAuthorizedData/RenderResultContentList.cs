@@ -22,7 +22,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 //Get Header Group
                 string headerGr = elementContentList.title;
                 //Get Description
-                string description = elementContentList.description;
+                string description = elementContentList.label;
                 //Get Text Content
                 string textContent = elementContentList.text;
                 //Create Group Box

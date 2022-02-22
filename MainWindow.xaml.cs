@@ -574,64 +574,68 @@ namespace ClientInspectionSystem {
                     FormAuthenticationDataNew formAuthorizationData = new FormAuthenticationDataNew();
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
+                        //Form Watting
                         controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
                                                                           InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerFaceAuth.SetIndeterminate();
+
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE);
                             if (null != resultFaceAuth) {
-                                if (resultFaceAuth.data.result) {
+                                if(resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
-                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
-                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_SUCCESS);
-                                        formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FACE_SUCCESS);
+                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
                                         formBiometricAuth.Topmost = true;
                                         formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(3d);
-                                        updateBackgroundBtnDG(btnFA, 2);
-                                        //Button Pass All
-                                        SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
-                                        if (null != btnPassAllBackground) {
-                                            Color colorPassAll = btnPassAllBackground.Color;
-                                            if (Colors.Red.Equals(colorPassAll)) {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                            else {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                        }
+                                        formBiometricAuth.StartCloseTimer(4d);
                                     });
-                                }
-                                else {
-                                    controllerFaceAuth.CloseAsync();
-                                    this.Dispatcher.Invoke(() => {
-                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
-                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_FAILURE);
-                                        formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FACE_FAILURE);
-                                        formBiometricAuth.Topmost = true;
-                                        formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(3d);
-                                        updateBackgroundBtnDG(btnFA, -1);
-                                        //Button Pass All
-                                        SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
-                                        if (null != btnPassAllBackground) {
-                                            Color colorPassAll = btnPassAllBackground.Color;
-                                            if (Colors.White.Equals(colorPassAll) || Colors.Red.Equals(colorPassAll)) {
-                                                btnPassAll.Background = new SolidColorBrush(Colors.Red);
+                                } else {
+                                    if (resultFaceAuth.data.result) {
+                                        controllerFaceAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+
+                                            updateBackgroundBtnDG(btnFA, 2);
+                                            //Button Pass All
+                                            SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
+                                            if (null != btnPassAllBackground) {
+                                                Color colorPassAll = btnPassAllBackground.Color;
+                                                if (Colors.Red.Equals(colorPassAll)) {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
+                                                else {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
                                             }
-                                            else {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                        });
+                                    }
+                                    else {
+                                        controllerFaceAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+
+                                            updateBackgroundBtnDG(btnFA, -1);
+                                            //Button Pass All
+                                            SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
+                                            if (null != btnPassAllBackground) {
+                                                Color colorPassAll = btnPassAllBackground.Color;
+                                                if (Colors.White.Equals(colorPassAll) || Colors.Red.Equals(colorPassAll)) {
+                                                    btnPassAll.Background = new SolidColorBrush(Colors.Red);
+                                                }
+                                                else {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
                                 }
                             }
-                            this.Dispatcher.Invoke(() => {
-                                //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultFaceAuth);
-                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE " + JsonConvert.SerializeObject(resultFaceAuth));
-                            });
                         });
                         btnRFID.IsEnabled = true;
                     }
@@ -647,16 +651,21 @@ namespace ClientInspectionSystem {
         }
 
         private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType) {
-            //bool resultAuthFace = false;
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
-                TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_3M);
+                //Set Time Out
+                TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_60M);
 
                 AuthorizationData authorizationData = new AuthorizationData();
-                authorizationData.authContentList = formAuthorizationData.getDataContentList();
-                authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
-                authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
-                authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
+
+                this.Dispatcher.Invoke(() => {
+                    authorizationData.authorizationTitle = formAuthorizationData.Title;
+
+                    authorizationData.authContentList = formAuthorizationData.getDataContentList();
+                    authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
+                    authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
+                    authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
+                });
 
                 BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp);
                 if (null != resultBiometric) {
@@ -670,24 +679,13 @@ namespace ClientInspectionSystem {
                 //resultAuthFace = false;
                 throw ex;
             }
-            //return resultAuthFace;
-            //return resultBiometricResp;
-        }
-        #endregion
-
-        #region CLOSE MAIN WINDOW
-        private void mainWindow_Closed(object sender, EventArgs e) {
-            string procName = Process.GetCurrentProcess().ProcessName;
-            Process[] pname = Process.GetProcessesByName(procName);
-            foreach (var p in pname) {
-                p.Kill();
-            }
         }
         #endregion
 
         #region BUTTON_CLICK LEFT FINGER
         private void btnLeftFinger_Click(object sender, RoutedEventArgs e) {
             ProgressDialogController controllerLeftFingerAuth = null;
+            BaseBiometricAuthResp resultLeftFingerAuth;
             this.Dispatcher.Invoke(async () => {
                 try {
                     btnLeftFinger.IsEnabled = false;
@@ -695,56 +693,53 @@ namespace ClientInspectionSystem {
                     FormAuthenticationDataNew formAuthorizationData = new FormAuthenticationDataNew();
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
+                        //Form Watting
                         controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
                                                                                 InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerLeftFingerAuth.SetIndeterminate();
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT);
+                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT);
                             if (null != resultLeftFingerAuth) {
-                                if (resultLeftFingerAuth.data.result) {
+                                if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerLeftFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_SUCCESS);
-                                        formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_LEFT_SUCCESS);
+                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
                                         formBiometricAuth.Topmost = true;
                                         formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(3d);
-                                        updateBackgroundBtnDG(btnSF, 2);
-                                        //Button Pass All
-                                        SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
-                                        if (null != btnPassAllBackground) {
-                                            Color colorPassAll = btnPassAllBackground.Color;
-                                            if (Colors.Red.Equals(colorPassAll)) {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                            else {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                        }
+                                        formBiometricAuth.StartCloseTimer(4d);
                                     });
                                 }
                                 else {
-                                    controllerLeftFingerAuth.CloseAsync();
-                                    this.Dispatcher.Invoke(() => {
-                                        //Check Score
-                                        if (resultLeftFingerAuth.data.score > 0) {
-                                            formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                            formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_FAILURE);
-                                            formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_LEFT_FAILURE);
-                                            formBiometricAuth.Topmost = true;
-                                            formBiometricAuth.Show();
-                                            formBiometricAuth.StartCloseTimer(3d);
+                                    if (resultLeftFingerAuth.data.result) {
+                                        controllerLeftFingerAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+
+                                            updateBackgroundBtnDG(btnSF, 2);
+                                            //Button Pass All
+                                            SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
+                                            if (null != btnPassAllBackground) {
+                                                Color colorPassAll = btnPassAllBackground.Color;
+                                                if (Colors.Red.Equals(colorPassAll)) {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
+                                                else {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        controllerLeftFingerAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+
                                             updateBackgroundBtnDG(btnSF, -1);
-                                        }
-                                        else {
-                                            formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                            formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_NOT_FOUND_FINGER);
-                                            formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_LEFT_NOT_FOUND);
-                                            formBiometricAuth.Topmost = true;
-                                            formBiometricAuth.Show();
-                                            formBiometricAuth.StartCloseTimer(3d);
-                                            updateBackgroundBtnDG(btnSF, 1);
                                             //Button Pass All
                                             SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
                                             if (null != btnPassAllBackground) {
@@ -756,16 +751,10 @@ namespace ClientInspectionSystem {
                                                     btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
                                                 }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
                                 }
                             }
-                            this.Dispatcher.Invoke(() => {
-                                //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultLeftFingerAuth);
-                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER " + 
-                                                             JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
-                            });
                         });
                         btnLeftFinger.IsEnabled = true;
                     }
@@ -791,55 +780,55 @@ namespace ClientInspectionSystem {
                     FormAuthenticationDataNew formAuthorizationData = new FormAuthenticationDataNew();
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
+                        //Show Form Watting
                         controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
                                                                            InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerRightFingerAuth.SetIndeterminate();
+
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT);
                             if (null != resultFingerRightAuth) {
-                                if (resultFingerRightAuth.data.result) {
+
+                                if(resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_SUCCESS);
-                                        formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_RIGHT_SUCCESS);
+                                        formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
                                         formBiometricAuth.Topmost = true;
                                         formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(3d);
-                                        updateBackgroundBtnDG(btnSF, 2);
-                                        //Button Pass All
-                                        SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
-                                        if (null != btnPassAllBackground) {
-                                            Color colorPassAll = btnPassAllBackground.Color;
-                                            if (Colors.Red.Equals(colorPassAll)) {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                            else {
-                                                btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
-                                            }
-                                        }
+                                        formBiometricAuth.StartCloseTimer(4d);
                                     });
-                                }
-                                else {
-                                    controllerRightFingerAuth.CloseAsync();
-                                    this.Dispatcher.Invoke(() => {
-                                        //Check Score
-                                        if (resultFingerRightAuth.data.score > 0) {
-                                            formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                            formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_FAILURE);
-                                            formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_RIGHT_FAILURE);
-                                            formBiometricAuth.Topmost = true;
-                                            formBiometricAuth.Show();
-                                            formBiometricAuth.StartCloseTimer(3d);
-                                            updateBackgroundBtnDG(btnSF, -1);
-                                        }
-                                        else {
-                                            formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                            formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_NOT_FOUND_FINGER);
-                                            formBiometricAuth.setImageSource(InspectionSystemContanst.PATH_IMG_FINGER_RIGHT_NOT_FOUND);
-                                            formBiometricAuth.Topmost = true;
-                                            formBiometricAuth.Show();
-                                            formBiometricAuth.StartCloseTimer(3d);
+                                } else {
+                                    if (resultFingerRightAuth.data.result) {
+                                        controllerRightFingerAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
+                                                                         JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
+
+                                            updateBackgroundBtnDG(btnSF, 2);
+                                            //Button Pass All
+                                            SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
+                                            if (null != btnPassAllBackground) {
+                                                Color colorPassAll = btnPassAllBackground.Color;
+                                                if (Colors.Red.Equals(colorPassAll)) {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
+                                                else {
+                                                    btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
+                                                }
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        controllerRightFingerAuth.CloseAsync();
+                                        this.Dispatcher.Invoke(() => {
+                                            //Init Form Result Biometric Auth
+                                            initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
+                                                                         JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
+
                                             updateBackgroundBtnDG(btnSF, 1);
                                             //Button Pass All
                                             SolidColorBrush btnPassAllBackground = btnPassAll.Background as SolidColorBrush;
@@ -852,17 +841,11 @@ namespace ClientInspectionSystem {
                                                     btnPassAll.Background = (Brush)brushConverter.ConvertFrom(InspectionSystemContanst.SET_BACKGROUND_BTN_PASSALL);
                                                 }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
                                 }
                             }
-                            this.Dispatcher.Invoke(() => {
-                                //Init Form Result Biometric Auth
-                                initFormResultBiometricAuth(resultFingerRightAuth);
-                                Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER" + JsonConvert.SerializeObject(resultFingerRightAuth));
-                            });
                         });
-
                         btnRightFinger.IsEnabled = true;
                     }
                 }
@@ -878,13 +861,16 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region INIT FORM RESULT BIOMETRIC AUTH
-        private void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
-            if(null != baseBiometricAuthResp) {
-                if(null != baseBiometricAuthResp.data.authorizationData) {
+        public void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp, ProgressDialogController controllerLeftFingerAuth, string biometricType) {
+            if (null != baseBiometricAuthResp) {
+                if (null != baseBiometricAuthResp.data.authorizationData) {
                     AuthorizationData authorizedData = baseBiometricAuthResp.data.authorizationData;
                     FormResultAuthorizationData formResultAuthorization = new FormResultAuthorizationData();
                     formResultAuthorization.Topmost = true;
-                    if(checkNullReslutTransactionData(authorizedData) == false) {
+                    if (checkNullReslutTransactionData(authorizedData) == false) {
+                        //Render Title Form Result Biometric Auth
+                        formResultAuthorization.renderTitleForm(baseBiometricAuthResp.data.authorizationData.authorizationTitle);
+
                         Dictionary<int, AuthorizationElement> dicRenderResult = new Dictionary<int, AuthorizationElement>();
                         //Content List
                         foreach (var v in authorizedData.authContentList) {
@@ -932,7 +918,29 @@ namespace ClientInspectionSystem {
                                 break;
                             }
                         }
+                        //Render Result Biometric Auth
+                        formResultAuthorization.renderResultBiometricAuht(baseBiometricAuthResp.data.biometricType,
+                                                                          baseBiometricAuthResp.data.result,
+                                                                          baseBiometricAuthResp.data.score);
                         if (formResultAuthorization.ShowDialog() == true) { }
+                    }
+                } else {
+                    if(baseBiometricAuthResp.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_SUCCESS) {
+                        if(BiometricType.TYPE_FINGER_LEFT.Equals(biometricType)) {
+                            controllerLeftFingerAuth.CloseAsync();
+                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                            this.Dispatcher.Invoke(() => {
+                                formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
+                                formBiometricAuth.setContentLabelType(baseBiometricAuthResp.data.biometricType);
+                                formBiometricAuth.lbType.Visibility = Visibility.Visible;
+                                formBiometricAuth.setContentLabelScore(baseBiometricAuthResp.data.score.ToString());
+                                formBiometricAuth.lbScore.Visibility = Visibility.Visible;
+                                formBiometricAuth.Topmost = true;
+                                formBiometricAuth.Show();
+                                formBiometricAuth.StartCloseTimer(4d);
+                            });
+                        }
                     }
                 }
             }
@@ -947,6 +955,16 @@ namespace ClientInspectionSystem {
             return elementContent.Count == 0 && elementMultiple.Count == 0
                 && elementSingle.Count == 0 && elementNVP.Count == 0;
 
+        }
+        #endregion
+
+        #region CLOSE MAIN WINDOW
+        private void mainWindow_Closed(object sender, EventArgs e) {
+            string procName = Process.GetCurrentProcess().ProcessName;
+            Process[] pname = Process.GetProcessesByName(procName);
+            foreach (var p in pname) {
+                p.Kill();
+            }
         }
         #endregion
 

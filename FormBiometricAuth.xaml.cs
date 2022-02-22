@@ -4,13 +4,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using MahApps.Metro.Controls;
+using Newtonsoft.Json;
+using PluginICAOClientSDK.Response.BiometricAuth;
 
 namespace ClientInspectionSystem {
     /// <summary>
     /// Interaction logic for FormBiometricAuth.xaml
     /// </summary>
     public partial class FormBiometricAuth : MetroWindow {
-        public MainWindow mainWindow = new MainWindow();
+        private MainWindow mainWindow = new MainWindow();
         public FormBiometricAuth() {
             InitializeComponent();
         }
@@ -19,9 +21,16 @@ namespace ClientInspectionSystem {
             imgResult.Source = new BitmapImage(new Uri(path, UriKind.Relative));
         }
         public void setContenLabelResult(string content) {
-            lbResult.Content = content;
+            lbResult.Content = lbResult.Content.ToString() + "     " + content;
         }
 
+        public void setContentLabelType(string content) {
+            lbType.Content = lbType.Content.ToString() + "      " + content;
+        }
+
+        public void setContentLabelScore(string score) {
+            lbScore.Content = lbScore.Content.ToString() + "      " + score;
+        }
         public void setTitleLabel(string content) {
             lbTitleResult.Content = content;
         }

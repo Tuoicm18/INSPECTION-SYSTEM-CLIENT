@@ -19,10 +19,11 @@
         BorderThickness="0"
         Background="#252525" 
         Height="235.333" 
-        Width="295.833">
+        Width="600">
     <Grid>
         <Image
             x:Name="imgResult"
+            Visibility="Collapsed"
             Source="Resource/02_left_hand_1.png"
             Stretch="Fill" 
             Margin="65,60,65,45"/>
@@ -34,19 +35,48 @@
             FontSize="16"
             Content="BIOMETRIC AUTHENTICATION"
             HorizontalContentAlignment="Center"
-            VerticalContentAlignment="Center"
-            Margin="0,0,0,192"/>
+            VerticalContentAlignment="Center" Height="43" VerticalAlignment="Top"/>
         
+        <!--Label Type-->
         <Label 
-            x:Name="lbResult"
+            x:Name="lbType"
+            Visibility="Collapsed"
+            Width="590"
             Foreground="White"
-            FontSize="14"
-            HorizontalAlignment="Left" 
-            HorizontalContentAlignment="Center"
+            Content="BIOMETRIC TYPE"
+            FontSize="16"
+            HorizontalAlignment="Center" 
+            HorizontalContentAlignment="Left"
             Height="30"
-            Margin="10,195,0,0" 
             VerticalAlignment="Top" 
             VerticalContentAlignment="Center"
-            Width="276"/>
+            Margin="5,70,5,5"/>
+        <!--Label Result-->
+        <Label 
+            x:Name="lbResult"
+            Width="590"
+            Foreground="White"
+            Content="BIOMETRIC RESULT"
+            FontSize="16"
+            HorizontalAlignment="Center" 
+            HorizontalContentAlignment="Left"
+            Height="30"
+            VerticalAlignment="Center" 
+            VerticalContentAlignment="Center"
+            Margin="5,40,5,5"/>
+        <!--Label Score-->
+        <Label 
+            x:Name="lbScore"
+            Visibility="Collapsed"
+            Width="590"
+            Foreground="White"
+            Content="SOCRE"
+            FontSize="16"
+            HorizontalAlignment="Center" 
+            HorizontalContentAlignment="Left"
+            Height="30"
+            VerticalAlignment="Bottom" 
+            VerticalContentAlignment="Center"
+            Margin="5,5,5,30"/>
     </Grid>
 </mah:MetroWindow>

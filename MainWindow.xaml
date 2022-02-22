@@ -73,9 +73,13 @@
                 </Button.ContextMenu>
             </Button>
             <!--Option             <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button> -->
-            <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button>
+            <Button x:Name="btnOption"
+                    Visibility="Visible"
+                    Click="btnOption_Click">OPTIONS</Button>
             <!--Disconnect-->
-            <Button x:Name="btnDisconnect" Click="btnDisconnect_Click" Content="DISCONNECT"/>
+            <Button x:Name="btnDisconnect"
+                    Click="btnDisconnect_Click" 
+                    Content="DISCONNECT"/>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 
@@ -1215,7 +1219,7 @@
             FontSize="10"
             x:Name="lbVersion"
             Foreground="White"
-            Content=" V1.0.220221" 
+            Content=" V1.0.220222" 
             VerticalContentAlignment="Center"
             HorizontalAlignment="Left" 
             Height="24" 

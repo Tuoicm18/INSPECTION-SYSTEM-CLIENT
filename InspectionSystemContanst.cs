@@ -64,6 +64,7 @@ namespace ClientInspectionSystem {
         public static int TIME_OUT_RESP_SOCKET_3M = 3;
         public static int TIME_OUT_RESP_SOCKET_4M = 4;
         public static int TIME_OUT_RESP_SOCKET_5M = 5;
+        public static int TIME_OUT_RESP_SOCKET_60M = 60;
         //Connect Socket
         public static string SUB_URL = "/ISPlugin";
 
@@ -72,6 +73,7 @@ namespace ClientInspectionSystem {
         public static string TITLE_FORM_BIOMETRIC_AUTH_FINGER= "FINGER VERIFICATION";
         public static string RESUT_FORM_BIOMETRIC_AUTH_SUCCESS = "SUCCESS";
         public static string RESUT_FORM_BIOMETRIC_AUTH_FAILURE = "FAILURE";
+        public static string RESUT_FORM_BIOMETRIC_AUTH_DENIED = "AUTHENTICATION REQUEST DENIED";
         public static string RESUT_FORM_BIOMETRIC_AUTH_NOT_FOUND_FINGER = "NO FINGER FOUND";
         public static string PATH_IMG_FACE_SUCCESS = "/Resource/47_FA_passed.png";
         public static string PATH_IMG_FACE_FAILURE = "/Resource/47_FA_failed.png";

@@ -229,6 +229,9 @@
     <Compile Include="UserControlsClientIS\ConnectSocketControl.xaml.cs">
       <DependentUpon>ConnectSocketControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControlsClientIS\InputTitleControl.xaml.cs">
+      <DependentUpon>InputTitleControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControlsClientIS\OptionsControl.xaml.cs">
       <DependentUpon>OptionsControl.xaml</DependentUpon>
     </Compile>
@@ -266,6 +269,10 @@
     <Page Include="UserControlsClientIS\ConnectSocketControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControlsClientIS\InputTitleControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControlsClientIS\OptionsControl.xaml">
       <SubType>Designer</SubType>

@@ -25,7 +25,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 //Get Header Group
                 string headerGr = elementMultiple.title;
                 //Get Description
-                string description = elementMultiple.description;
+                string description = elementMultiple.label;
                 //Check Same Group
                 this.checkBoxSameGroup = checkBoxHasSameGroup(groupBoxesMultiple, headerGr);
                 if (this.checkBoxSameGroup) {

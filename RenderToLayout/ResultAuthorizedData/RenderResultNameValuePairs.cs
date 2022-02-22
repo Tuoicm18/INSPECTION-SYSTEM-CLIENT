@@ -24,7 +24,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 //Get Header Group
                 string headerGr = elementNVP.title;
                 //Get Description
-                string description = elementNVP.description;
+                string description = elementNVP.label;
                 //Create Group Box
                 groupBoxNVP = new GroupBox();
                 groupBoxNVP.Margin = new Thickness(5, 5, 5, 10);

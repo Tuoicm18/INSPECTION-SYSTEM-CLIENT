@@ -33,6 +33,11 @@ namespace ClientInspectionSystem.RenderToLayout {
         private List<string> getTitleNVP = new List<string>();
         private List<NameValuePairsModel> NVPModels = new List<NameValuePairsModel>();
         public bool checkDataGridSame { get; set; }
+        //For Validation
+        private List<DataGrid> dataGridList = new List<DataGrid>();
+        public List<DataGrid> DataGridList {
+            get { return this.dataGridList; }
+        }
 
         #endregion
 
@@ -40,7 +45,8 @@ namespace ClientInspectionSystem.RenderToLayout {
         public void renderNVP(string keyContent, string valueContent,
                               string headerGroup, string description,
                               ListView lvAll, ScrollViewer scvAll,
-                              int ordinaryInput) {
+                              int ordinaryInput, Label lbValidationKey,
+                              Button btnSubmitAdd) {
             try {
                 checkDataGridSame = checkDataGridSameGroup(groupBoxesNVP, headerGroup);
                 //UUID
@@ -78,6 +84,9 @@ namespace ClientInspectionSystem.RenderToLayout {
                     dataGridNameValuePair.AlternatingRowBackground = (Brush)bc.ConvertFrom("#282828");
                     dataGridNameValuePair.MaxWidth = ClientContants.DATA_GRID_MAX_WIDTH;
                     dataGridNameValuePair.Items.Add(new ModelBindingDataNVP { key = keyContent, value = " " + valueContent });
+                    //For Validation
+                    dataGridList.Add(dataGridNameValuePair);
+
                     //KEY COLUMN
                     dataGridBoundColumnKey = new DataGridTextColumn();
                     styleDataGridTextColumn(dataGridBoundColumnKey, true); // Style
@@ -100,6 +109,8 @@ namespace ClientInspectionSystem.RenderToLayout {
                 }
                 lvAll.Items.Add(groupBoxNameValuePair);
                 scvAll.Content = lvAll;
+                //Validation
+                checkDuplicateKey(lbValidationKey, btnSubmitAdd, keyContent, dataGridList, groupBoxesNVP, headerGroup);
             }
             catch (Exception eNVP) {
                 Logmanager.Instance.writeLog("RENDER LAYOUT NVP ERROR " + eNVP.ToString());
@@ -187,8 +198,8 @@ namespace ClientInspectionSystem.RenderToLayout {
             List<AuthorizationElement> authorizationElementsNVP = new List<AuthorizationElement>();
             Dictionary<string, AuthorizationElement> dictAuthElement = new Dictionary<string, AuthorizationElement>();
 
-            if(null != NVPModels) {
-                for(int nvp = 0; nvp < NVPModels.Count; nvp++) {
+            if (null != NVPModels) {
+                for (int nvp = 0; nvp < NVPModels.Count; nvp++) {
                     //Ordinary 
                     int ordinary = NVPModels[nvp].ordinaryNVP;
                     //Description
@@ -203,20 +214,20 @@ namespace ClientInspectionSystem.RenderToLayout {
                     string valueData = NVPModels[nvp].valueData;
                     //Group Box
                     GroupBox groupBox = NVPModels[nvp].groupBox;
-                    for(int t = 0; t < getTitleNVP.Count; t++) {
+                    for (int t = 0; t < getTitleNVP.Count; t++) {
                         AuthorizationElement val;
                         string uuidDataGrid = ClientExtentions.subStringRight(getTitleNVP[t], dataGrid.Name.Length);
                         string uuidTitleDataGrid = getTitleNVP[t];
-                        if(uuidDataGrid.ToLower().Equals(dataGrid.Name.ToLower())) {
+                        if (uuidDataGrid.ToLower().Equals(dataGrid.Name.ToLower())) {
                             string titleGroupBoxDataGird = groupBox.Header.ToString();
-                            if(uuidTitleDataGrid.ToLower().Contains(titleGroupBoxDataGird.ToLower())) {
+                            if (uuidTitleDataGrid.ToLower().Contains(titleGroupBoxDataGird.ToLower())) {
                                 if (dictAuthElement.ContainsKey(titleGroupBoxDataGird)) {
                                     dictAuthElement.TryGetValue(titleGroupBoxDataGird, out val);
                                 }
                                 else {
                                     val = new AuthorizationElement();
                                     val.ordinary = ordinary;
-                                    val.description = des.Text;
+                                    val.label = des.Text;
                                     val.title = titleGroupBoxDataGird;
                                     val.nameValuePair = new Dictionary<string, string>();
                                     dictAuthElement.Add(titleGroupBoxDataGird, val);
@@ -232,6 +243,47 @@ namespace ClientInspectionSystem.RenderToLayout {
             }
             authorizationElementsNVP = authorizationElementsNVP.GroupBy(g => g.title).Select(s => s.First()).ToList();
             return authorizationElementsNVP;
+        }
+        #endregion
+
+        #region VALIDATION 
+        public void checkDuplicateKey(Label lbValidationKey, Button btnSubmitAdd,
+                                      string keyInput, List<DataGrid> dataGrids,
+                                      List<GroupBox> groupBoxes, string headerGroupBox) {
+            if (null != groupBoxes) {
+                ModelBindingDataNVP modelBindingDataNVP;
+                for (int gb = 0; gb < groupBoxes.Count; gb++) {
+                    if (groupBoxes[gb].Header.ToString().ToUpper().Equals(headerGroupBox.ToUpper())) {
+                        if (null != dataGrids) {
+                            for (int dt = 0; dt < dataGrids.Count; dt++) {
+                                for (int item = 0; item < dataGrids[dt].Items.Count; item++) {
+                                    modelBindingDataNVP = (ModelBindingDataNVP)dataGrids[dt].Items[item];
+                                    if (modelBindingDataNVP.key.ToLower().Equals(keyInput.ToLower())) {
+                                        lbValidationKey.Content = ClientContants.LABEL_VALIDATION_ADD_KEY;
+                                        lbValidationKey.Visibility = Visibility.Visible;
+                                        if (null != btnSubmitAdd) {
+                                            btnSubmitAdd.IsEnabled = false;
+                                        }
+                                        break;
+                                    }
+                                    else {
+                                        lbValidationKey.Visibility = Visibility.Collapsed;
+                                        if (null != btnSubmitAdd) {
+                                            btnSubmitAdd.IsEnabled = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        lbValidationKey.Visibility = Visibility.Collapsed;
+                        if (null != btnSubmitAdd) {
+                            btnSubmitAdd.IsEnabled = true;
+                        }
+                    }
+                }
+            }
         }
         #endregion
     }

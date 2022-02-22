@@ -8,6 +8,7 @@ using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using PluginICAOClientSDK.Request;
 using ClientInspectionSystem.RenderToLayout.ResultAuthorizedData;
+using PluginICAOClientSDK.Models;
 
 namespace ClientInspectionSystem {
     /// <summary>
@@ -35,6 +36,7 @@ namespace ClientInspectionSystem {
 
         #region EVENT BUTTON CLICK
         private void btnSubmitOk_Click(object sender, System.Windows.RoutedEventArgs e) {
+            this.Topmost = false;
             DialogResult = true;
         }
         #endregion
@@ -48,6 +50,45 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region GET DATA RESULT AUTHOIRZED
+        //Title Form
+        public void renderTitleForm(string title) {
+            this.Title = title;
+        }
+        //Render Result Biometric Auth
+        public void renderResultBiometricAuht(string biometricType, bool result, float score) {
+            if(biometricType.Equals(BiometricType.TYPE_FINGER_LEFT) || biometricType.Equals(BiometricType.TYPE_FINGER_RIGHT)) {
+                lbTitleScore.Visibility = System.Windows.Visibility.Visible;
+                lbtScore.Visibility = System.Windows.Visibility.Visible;
+                if(result) {
+                    lbType.Content = biometricType;
+                    lbResult.Content = result.ToString();
+                    lbtScore.Content = score.ToString();
+                } else {
+                    //Check Score
+                    if(score == 0) {
+                        lbType.Content = biometricType;
+                        lbResult.Content = ClientContants.LB_NOT_FOUND_FINGER;
+                        lbtScore.Content = 0.ToString();
+                    } else {
+                        lbType.Content = biometricType;
+                        lbResult.Content = result.ToString();
+                        lbtScore.Content = score.ToString();
+                    }
+                }
+            } else {
+                lbTitleScore.Visibility = System.Windows.Visibility.Collapsed;
+                lbtScore.Visibility = System.Windows.Visibility.Collapsed;
+                if (result) {
+                    lbType.Content = biometricType;
+                    lbResult.Content = result.ToString();
+                }
+                else {
+                    lbType.Content = biometricType;
+                    lbResult.Content = result.ToString();
+                }
+            }
+        }
+
         //Content List
         public void renderToLayoutResultContentList(AuthorizationElement elementContentList) {
             try {

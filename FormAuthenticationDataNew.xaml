@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInspectionSystem"
+        xmlns:ucInputTitleForm ="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
         mc:Ignorable="d"
         WindowStartupLocation ="CenterScreen"
         ResizeMode="NoResize"
@@ -14,7 +15,6 @@
         ShowInTaskbar="False"
         BorderBrush="#0767b3"
         BorderThickness="2"
-        Title="AUTHORIZATION DATA" 
         TitleAlignment="Center"
         x:Name="authDataWindow"
         Height="500" 
@@ -130,7 +130,7 @@
                 <!--Label Add Description-->
                 <Label
                     x:Name="lbDescription"
-                    Content="DESCRIPTION"
+                    Content="LABEL"
                     Height="30"
                     Grid.Column="0"
                     VerticalContentAlignment="Center"
@@ -203,6 +203,16 @@
                 <!--Label Validation Content-->
                 <Label
                     x:Name="lbValidationContent"
+                    Foreground="Red"
+                    Height="30"
+                    Visibility="Collapsed"
+                    VerticalAlignment="Bottom"
+                    HorizontalContentAlignment="Left"
+                    Margin="0,0,0,45"
+                    Grid.Column="4"/>
+                <!--Label Validation Key-->
+                <Label
+                    x:Name="lbValidationKey"
                     Foreground="Red"
                     Height="30"
                     Visibility="Collapsed"
@@ -296,6 +306,20 @@
                 Margin="5,5,5,5">
             </Button>
         </Grid>
+        <!--#endregion-->
+        
+        <!--#region USER CONTROL-->
+        <!--User Control Input Title Form-->
+        <ucInputTitleForm:InputTitleControl
+            x:Name="inputTitleFormControl"
+            Visibility="Collapsed"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Height="110"
+            Width="500"
+            Margin="5,5,5,5">
+            
+        </ucInputTitleForm:InputTitleControl>
         <!--#endregion-->
     </Grid>
 </mah:MetroWindow>

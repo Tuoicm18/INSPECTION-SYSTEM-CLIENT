@@ -195,7 +195,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                                 else {
                                     val = new AuthorizationElement();
                                     val.ordinary = ordianry;
-                                    val.description = des.Text;
+                                    val.label = des.Text;
                                     val.title = titleGroupBox;
                                     val.multipleSelect = new Dictionary<string, bool>();
                                     dictAuthElement.Add(titleGroupBox, val);

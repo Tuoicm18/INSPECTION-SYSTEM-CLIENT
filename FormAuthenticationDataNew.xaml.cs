@@ -45,6 +45,15 @@ namespace ClientInspectionSystem {
             // Set the window theme to Dark Mode
             ThemeManager.Current.ChangeTheme(this, "Dark.Blue");
             btnSubmitAdd.IsEnabled = false;
+            initControlTitleInput();
+        }
+        #endregion
+
+        #region INIT USER CONTROL
+        private void initControlTitleInput() {
+            inputTitleFormControl.formAuthDataNew = this;
+            disableButtonForInitTitleForm();
+            inputTitleFormControl.Visibility = Visibility.Visible;
         }
         #endregion
 
@@ -85,6 +94,8 @@ namespace ClientInspectionSystem {
         private void btnCopyJson_Click(object sender, RoutedEventArgs e) {
             try {
                 AuthorizationData authorizationData = new AuthorizationData();
+                //Title Form
+                authorizationData.authorizationTitle = getTitleForm();
                 //Content List
                 List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
                 if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
@@ -106,7 +117,7 @@ namespace ClientInspectionSystem {
                 if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
                     authorizationData.nameValuePairList = authorizationsNVP;
                 }
-                
+
                 //Json String
                 string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
                 Clipboard.SetText(strAuthorizationDataReq);
@@ -155,7 +166,8 @@ namespace ClientInspectionSystem {
             else {
                 renderLayoutNVP.renderNVP(txtStringAndVKeyNVP.Text, txtStringValueNVP.Text,
                                           txtGroupHeader.Text, txtAddDescription.Text,
-                                          lvAll, scvAll, ordinaryClick);
+                                          lvAll, scvAll, ordinaryClick,
+                                          lbValidationKey, btnSubmitAdd);
                 //For Ordinary
                 if (renderLayoutNVP.checkDataGridSame == false) {
                     ordinaryClick++;
@@ -178,16 +190,19 @@ namespace ClientInspectionSystem {
         #region EVENT TEXT CHANGED TEXT BOX
         //Header (Title)
         private void txtGroupHeader_TextChanged(object sender, TextChangedEventArgs e) {
-            if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty)
-                || txtAddDescription.Text.Equals(string.Empty)) {
-                if (btnSubmitAdd != null) {
-                    btnSubmitAdd.IsEnabled = false;
+            if(checkButtonClick != BTN_ADD_TEXT) {
+                if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty) || txtAddDescription.Text.Equals(string.Empty)) {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = false;
+                    }
                 }
-            }
-            else {
-                if (btnSubmitAdd != null) {
-                    btnSubmitAdd.IsEnabled = true;
+                else {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = true;
+                    }
                 }
+            } else {
+
             }
             //Validation Content Add Plain Text
             //renderLayoutPlainText.checkDuplicateGroupPlaintText(renderLayoutPlainText.GroubBoxesContentList, txtGroupHeader.Text,
@@ -199,35 +214,57 @@ namespace ClientInspectionSystem {
                 if (checkButtonClick == BTN_MULTIPLE_CHOICES) {
                     renderLayoutMultiple.CheckBoxesMultiple.Clear();
                     lbValidationContent.Visibility = Visibility.Collapsed;
-                } else if(checkButtonClick == BTN_SINGLE_CHOICES) {
+                }
+                else if (checkButtonClick == BTN_SINGLE_CHOICES) {
                     renderLayoutSingleChoices.RadioButtonList.Clear();
                     lbValidationContent.Visibility = Visibility.Collapsed;
+                }
+                else {
+                    renderLayoutNVP.DataGridList.Clear();
+                    lbValidationKey.Visibility = Visibility.Collapsed;
                 }
             }
         }
         //Plaint Text & Key
         private void txtStringAndVKeyNVP_TextChanged(object sender, TextChangedEventArgs e) {
-            if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty)
-                || txtAddDescription.Text.Equals(string.Empty)) {
-                if (btnSubmitAdd != null) {
-                    btnSubmitAdd.IsEnabled = false;
+            if(checkButtonClick != BTN_ADD_TEXT) {
+                if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty) || txtAddDescription.Text.Equals(string.Empty)) {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = false;
+                    }
                 }
-            }
-            else {
-                if (btnSubmitAdd != null) {
-                    btnSubmitAdd.IsEnabled = true;
+                else {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = true;
+                    }
+                }
+            } else {
+                if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty)) {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = false;
+                    }
+                }
+                else {
+                    if (btnSubmitAdd != null) {
+                        btnSubmitAdd.IsEnabled = true;
+                    }
                 }
             }
             //Validation Multiple Content Checkbox
-            if(txtStringAndVKeyNVP.Text.Equals(string.Empty) == false) {
+            if (txtStringAndVKeyNVP.Text.Equals(string.Empty) == false) {
                 if (checkButtonClick == BTN_MULTIPLE_CHOICES) {
                     renderLayoutMultiple.checkDuplicateContent(lbValidationContent, btnSubmitAdd,
                                                                txtStringAndVKeyNVP.Text, renderLayoutMultiple.CheckBoxesMultiple,
                                                                renderLayoutMultiple.GroupBoxesMultiple, txtGroupHeader.Text);
-                } else if(checkButtonClick == BTN_SINGLE_CHOICES) {
+                }
+                else if (checkButtonClick == BTN_SINGLE_CHOICES) {
                     renderLayoutSingleChoices.checkDuplicateContent(lbValidationContent, btnSubmitAdd,
                                                                     txtStringAndVKeyNVP.Text, renderLayoutSingleChoices.RadioButtonList,
                                                                     renderLayoutSingleChoices.GroupBoxessingle, txtGroupHeader.Text);
+                } else if(checkButtonClick == BTN_ADD_NVP){
+                    renderLayoutNVP.checkDuplicateKey(lbValidationKey, btnSubmitAdd,
+                                                      txtStringAndVKeyNVP.Text, renderLayoutNVP.DataGridList,
+                                                      renderLayoutNVP.GroupBoxesNVP, txtGroupHeader.Text);
                 }
             }
         }
@@ -256,8 +293,7 @@ namespace ClientInspectionSystem {
         //Description 
         private void txtAddDescription_TextChanged(object sender, TextChangedEventArgs e) {
             txtStringAndVKeyNVP.Text = string.Empty;
-            if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty)
-               || txtAddDescription.Text.Equals(string.Empty)) {
+            if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty) || txtAddDescription.Text.Equals(string.Empty)) {
                 if (btnSubmitAdd != null) {
                     btnSubmitAdd.IsEnabled = false;
                 }
@@ -292,6 +328,7 @@ namespace ClientInspectionSystem {
                 //Validation Label
                 lbValidationContent.Visibility = Visibility.Collapsed;
                 lbValidationGruop.Visibility = Visibility.Collapsed;
+                lbValidationKey.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex) {
                 Logmanager.Instance.writeLog("CHANGE LABEL FOR NVP ERROR " + ex.ToString());
@@ -303,6 +340,8 @@ namespace ClientInspectionSystem {
         public void renderTextBox(int checkButton) {
             try {
                 if (checkButton == BTN_ADD_TEXT) {
+                    // Textbox Description
+                    txtAddDescription.IsEnabled = false;
                     //Button Add Text
                     btnAddText.FontWeight = FontWeights.Bold;
                     btnAddText.FontSize = 15;
@@ -321,6 +360,8 @@ namespace ClientInspectionSystem {
                     btnAddNVP.Background = Brushes.Transparent;
                 }
                 else if (checkButton == BTN_MULTIPLE_CHOICES) {
+                    // Textbox Description
+                    txtAddDescription.IsEnabled = true;
                     //Button Multiple
                     btnAddMultiChoices.FontWeight = FontWeights.Bold;
                     btnAddMultiChoices.FontSize = 15;
@@ -339,6 +380,8 @@ namespace ClientInspectionSystem {
                     btnAddNVP.Background = Brushes.Transparent;
                 }
                 else if (checkButton == BTN_SINGLE_CHOICES) {
+                    // Textbox Description
+                    txtAddDescription.IsEnabled = true;
                     //Button Single Choice
                     btnAddSingleChoices.FontWeight = FontWeights.Bold;
                     btnAddSingleChoices.FontSize = 15;
@@ -357,6 +400,8 @@ namespace ClientInspectionSystem {
                     btnAddNVP.Background = Brushes.Transparent;
                 }
                 else {
+                    // Textbox Description
+                    txtAddDescription.IsEnabled = true;
                     //Button NVP
                     btnAddNVP.FontWeight = FontWeights.Bold;
                     btnAddNVP.FontSize = 15;
@@ -392,6 +437,10 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region GET DATA FROM LAYOUT
+        //Title Form
+        public string getTitleForm() {
+            return this.Title;
+        }
         //Plain Text
         public List<AuthorizationElement> getDataContentList() {
             List<AuthorizationElement> elementsContentList = null;
@@ -404,7 +453,7 @@ namespace ClientInspectionSystem {
         public List<AuthorizationElement> getDataMultipleChoices() {
             List<AuthorizationElement> elementsMultiple = null;
             this.Dispatcher.Invoke(() => {
-                elementsMultiple =  renderLayoutMultiple.getDataMultipleChoices();
+                elementsMultiple = renderLayoutMultiple.getDataMultipleChoices();
             });
             return elementsMultiple;
         }
@@ -423,6 +472,26 @@ namespace ClientInspectionSystem {
                 elementNVP = renderLayoutNVP.getDataNVP();
             });
             return elementNVP;
+        }
+        #endregion
+
+        #region DISABLE/ENABLE BUTTON
+        public void disableButtonForInitTitleForm() {
+            btnAddText.IsEnabled = false;
+            btnAddMultiChoices.IsEnabled = false;
+            btnAddSingleChoices.IsEnabled = false;
+            btnAddNVP.IsEnabled = false;
+            btnSubmitAdd.IsEnabled = false;
+            btnCopyJson.IsEnabled = false;
+        }
+
+        public void enableButtonForInitTitleForm() {
+            btnAddText.IsEnabled = true;
+            btnAddMultiChoices.IsEnabled = true;
+            btnAddSingleChoices.IsEnabled = true;
+            btnAddNVP.IsEnabled = true;
+            btnSubmitAdd.IsEnabled = true;
+            btnCopyJson.IsEnabled = true;
         }
         #endregion
     }

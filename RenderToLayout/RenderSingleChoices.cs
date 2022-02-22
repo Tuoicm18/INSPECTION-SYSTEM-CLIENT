@@ -150,7 +150,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                         else {
                             val = new AuthorizationElement();
                             val.ordinary = ordinarySingle;
-                            val.description = des.Text;
+                            val.label = des.Text;
                             val.title = headerGroup;
                             val.singleSelect = new Dictionary<string, bool>();
                             dictAuthElement.Add(headerGroup, val);
@@ -166,7 +166,6 @@ namespace ClientInspectionSystem.RenderToLayout {
             return authorizationElementsSingle;
         }
         #endregion
-
 
         #region VALIDATION
         public void checkDuplicateContent(Label lbValidationContent, Button btnSubmitAdd,
