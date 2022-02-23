@@ -14,7 +14,7 @@ namespace ClientInspectionSystem {
         public static readonly string LABEL_VALIDATION_ADD_CONTENT = "DUPLICATE CONTENT";
         public static readonly string LABEL_VALIDATION_ADD_KEY = "DUPLICATE KEY";
 
-        //WINDOW CONTROL FORM AUTHORIZATION DATA
+        //WINDOW CONTROL FORM AUTHORIZATION DATA NEW
         public static readonly double TEXT_BLOCK_DESCRIPTION_MAX_WIDTH = 740;
         public static readonly double DATA_GRID_MAX_WIDTH = 740;
         public static int MAX_WIDTH_TEXT_BLOCK = 850;
@@ -24,6 +24,8 @@ namespace ClientInspectionSystem {
         public static string HEADER_VALUE_COLUMN = "     VALUE";
         public static string CODE_COLOR_ROW_DATA_GRID = "#111111";
         public static string CODE_COLOR_ALTERNATING_ROW_DATA_GRID = "#282828";
+        public static string CONTENT_BTN_IMPORT_JSON = "IMPORT JSON";
+        public static string CONTENT_BTN_IMPORT_JSON_CANCEL = "CANCEL";
 
         //WINDOW CONTROL FORM AUTHORIZATION DATA RESLUT
         public static string LB_NOT_FOUND_FINGER = "NOT FOUND FINGER";

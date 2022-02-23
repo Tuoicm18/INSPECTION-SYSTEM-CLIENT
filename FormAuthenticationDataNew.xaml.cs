@@ -21,6 +21,7 @@ namespace ClientInspectionSystem {
     /// Interaction logic for FormAuthenticationDataNew.xaml
     /// </summary>
     public partial class FormAuthenticationDataNew : MetroWindow {
+
         #region VARIABLE
         private int ordinaryClick = 0;
         private int checkButtonClick = 0;
@@ -28,6 +29,10 @@ namespace ClientInspectionSystem {
         private readonly int BTN_MULTIPLE_CHOICES = 2;
         private readonly int BTN_SINGLE_CHOICES = 3;
         private readonly int BTN_ADD_NVP = 4;
+        private bool checkImportJson = false;
+        public bool CheckImportJson {
+            get { return this.checkImportJson; }
+        }
 
         //Plain Text
         private RenderPlainText renderLayoutPlainText = new RenderPlainText();
@@ -93,40 +98,63 @@ namespace ClientInspectionSystem {
         //Button Copy Json
         private void btnCopyJson_Click(object sender, RoutedEventArgs e) {
             try {
-                AuthorizationData authorizationData = new AuthorizationData();
-                //Title Form
-                authorizationData.authorizationTitle = getTitleForm();
-                //Content List
-                List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
-                if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
-                    authorizationData.authContentList = authorizationsContentList;
-                }
-                //Multiple
-                List<AuthorizationElement> authorizationsMultiple = renderLayoutMultiple.getDataMultipleChoices();
+                if(checkImportJson) {
+                    Clipboard.SetText(txtImportJson.Text);
+                } else {
+                    AuthorizationData authorizationData = new AuthorizationData();
+                    //Title Form
+                    authorizationData.authorizationTitle = getTitleForm();
+                    //Content List
+                    List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
+                    if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
+                        authorizationData.authContentList = authorizationsContentList;
+                    }
+                    //Multiple
+                    List<AuthorizationElement> authorizationsMultiple = renderLayoutMultiple.getDataMultipleChoices();
 
-                if (null != authorizationsMultiple && authorizationsMultiple.Count > 0) {
-                    authorizationData.multipleSelectList = authorizationsMultiple;
-                }
-                //Single
-                List<AuthorizationElement> authorizationsSingle = renderLayoutSingleChoices.getDataSingleChoices();
-                if (null != authorizationsSingle && authorizationsSingle.Count > 0) {
-                    authorizationData.singleSelectList = authorizationsSingle;
-                }
-                //Namve Value Pairs
-                List<AuthorizationElement> authorizationsNVP = renderLayoutNVP.getDataNVP();
-                if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
-                    authorizationData.nameValuePairList = authorizationsNVP;
-                }
+                    if (null != authorizationsMultiple && authorizationsMultiple.Count > 0) {
+                        authorizationData.multipleSelectList = authorizationsMultiple;
+                    }
+                    //Single
+                    List<AuthorizationElement> authorizationsSingle = renderLayoutSingleChoices.getDataSingleChoices();
+                    if (null != authorizationsSingle && authorizationsSingle.Count > 0) {
+                        authorizationData.singleSelectList = authorizationsSingle;
+                    }
+                    //Namve Value Pairs
+                    List<AuthorizationElement> authorizationsNVP = renderLayoutNVP.getDataNVP();
+                    if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
+                        authorizationData.nameValuePairList = authorizationsNVP;
+                    }
 
-                //Json String
-                string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
-                Clipboard.SetText(strAuthorizationDataReq);
+                    //Json String
+                    string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
+                    Clipboard.SetText(strAuthorizationDataReq);
+                }
             }
             catch (Exception eSubmit) {
                 Logmanager.Instance.writeLog("BUTTON <COPY JSON> ERROR " + eSubmit.ToString());
             } finally {
                 ordinaryClick = 0;
             }
+        }
+
+        //Button Import Json
+        private void btnImportJson_Click(object sender, RoutedEventArgs e) {
+            this.Dispatcher.Invoke(() => {
+                try {
+                    if(btnImportJson.Content.ToString().Equals(ClientContants.CONTENT_BTN_IMPORT_JSON)) {
+                        checkImportJson = true;
+                        btnImportJson.Content = ClientContants.CONTENT_BTN_IMPORT_JSON_CANCEL;
+                    } else {
+                        checkImportJson = false;
+                        btnImportJson.Content = ClientContants.CONTENT_BTN_IMPORT_JSON;
+                    }
+                    initLayoutForImportJson(btnImportJson.Content.ToString());
+                }
+                catch (Exception eImportJson) {
+                    Logmanager.Instance.writeLog("BUTTON IMPORT JSON ERR " + eImportJson.ToString());
+                }
+            });
         }
         //Add Group Box
         private void btnSubmitAdd_Click(object sender, RoutedEventArgs e) {
@@ -180,17 +208,24 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        //Event Scroll
+        #region EVENT SCROLL VIEWER
         private void scvAll_PreviewMouseWheel(object sender, MouseWheelEventArgs e) {
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
             e.Handled = true;
         }
 
+        private void scvImportJson_PreviewMouseWheel(object sender, MouseWheelEventArgs e) {
+            ScrollViewer scv = (ScrollViewer)sender;
+            scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
+            e.Handled = true;
+        }
+        #endregion
+
         #region EVENT TEXT CHANGED TEXT BOX
         //Header (Title)
         private void txtGroupHeader_TextChanged(object sender, TextChangedEventArgs e) {
-            if(checkButtonClick != BTN_ADD_TEXT) {
+            if (checkButtonClick != BTN_ADD_TEXT) {
                 if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty) || txtAddDescription.Text.Equals(string.Empty)) {
                     if (btnSubmitAdd != null) {
                         btnSubmitAdd.IsEnabled = false;
@@ -201,7 +236,8 @@ namespace ClientInspectionSystem {
                         btnSubmitAdd.IsEnabled = true;
                     }
                 }
-            } else {
+            }
+            else {
 
             }
             //Validation Content Add Plain Text
@@ -227,7 +263,7 @@ namespace ClientInspectionSystem {
         }
         //Plaint Text & Key
         private void txtStringAndVKeyNVP_TextChanged(object sender, TextChangedEventArgs e) {
-            if(checkButtonClick != BTN_ADD_TEXT) {
+            if (checkButtonClick != BTN_ADD_TEXT) {
                 if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty) || txtAddDescription.Text.Equals(string.Empty)) {
                     if (btnSubmitAdd != null) {
                         btnSubmitAdd.IsEnabled = false;
@@ -238,7 +274,8 @@ namespace ClientInspectionSystem {
                         btnSubmitAdd.IsEnabled = true;
                     }
                 }
-            } else {
+            }
+            else {
                 if (txtGroupHeader.Text.Equals(string.Empty) || txtStringAndVKeyNVP.Text.Equals(string.Empty)) {
                     if (btnSubmitAdd != null) {
                         btnSubmitAdd.IsEnabled = false;
@@ -261,7 +298,8 @@ namespace ClientInspectionSystem {
                     renderLayoutSingleChoices.checkDuplicateContent(lbValidationContent, btnSubmitAdd,
                                                                     txtStringAndVKeyNVP.Text, renderLayoutSingleChoices.RadioButtonList,
                                                                     renderLayoutSingleChoices.GroupBoxessingle, txtGroupHeader.Text);
-                } else if(checkButtonClick == BTN_ADD_NVP){
+                }
+                else if (checkButtonClick == BTN_ADD_NVP) {
                     renderLayoutNVP.checkDuplicateKey(lbValidationKey, btnSubmitAdd,
                                                       txtStringAndVKeyNVP.Text, renderLayoutNVP.DataGridList,
                                                       renderLayoutNVP.GroupBoxesNVP, txtGroupHeader.Text);
@@ -424,6 +462,7 @@ namespace ClientInspectionSystem {
                 groubBoxResult.Height = 380;
                 groubBoxResult.Margin = new Thickness(5, 245, 5, 5);
                 borderGridFormAddValue.Visibility = Visibility.Visible;
+                groubBoxResult.Visibility = Visibility.Visible;
             }
             catch (Exception eTxt) {
                 Logmanager.Instance.writeLog("RENDER TEXT BOX ERROR " + eTxt.ToString());
@@ -437,6 +476,10 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region GET DATA FROM LAYOUT
+        //Get Json Form Inport Json
+        public string getImportJson() {
+            return txtImportJson.Text;
+        }
         //Title Form
         public string getTitleForm() {
             return this.Title;
@@ -475,7 +518,7 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        #region DISABLE/ENABLE BUTTON
+        #region DISABLE/ENABLE CONTROL WINDOW
         public void disableButtonForInitTitleForm() {
             btnAddText.IsEnabled = false;
             btnAddMultiChoices.IsEnabled = false;
@@ -492,6 +535,31 @@ namespace ClientInspectionSystem {
             btnAddNVP.IsEnabled = true;
             btnSubmitAdd.IsEnabled = true;
             btnCopyJson.IsEnabled = true;
+        }
+
+        public void initLayoutForImportJson(string contentButton) {
+            if (contentButton.Equals("IMPORT JSON")) {
+                //Hide
+                scvImportJson.Visibility = Visibility.Collapsed;
+                //Show
+                borderGridButtonAdd.Visibility = Visibility.Visible;
+                borderGridFormAddValue.Visibility = Visibility.Collapsed;
+                groubBoxResult.Visibility = Visibility.Collapsed;
+                //Check Title Form
+                //if (this.Title.Equals(string.Empty)) {
+                //    inputTitleFormControl.Visibility = Visibility.Visible;
+                //}
+            }
+            else {
+                //show
+                scvImportJson.Visibility = Visibility.Visible;
+                //Hide
+                inputTitleFormControl.Visibility = Visibility.Collapsed;
+                borderGridButtonAdd.Visibility = Visibility.Collapsed;
+                borderGridFormAddValue.Visibility = Visibility.Collapsed;
+                groubBoxResult.Visibility = Visibility.Collapsed;
+                enableButtonForInitTitleForm();
+            }
         }
         #endregion
     }

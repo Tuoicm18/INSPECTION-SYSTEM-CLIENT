@@ -585,11 +585,11 @@ namespace ClientInspectionSystem {
                                 if(resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
-                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                        formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
                                         formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
                                         formBiometricAuth.Topmost = true;
-                                        formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(4d);
+                                        formBiometricAuth.hideLabelForDeniedAuth();
+                                        if (formBiometricAuth.ShowDialog() == true) { }
                                     });
                                 } else {
                                     if (resultFaceAuth.data.result) {
@@ -656,15 +656,19 @@ namespace ClientInspectionSystem {
                 //Set Time Out
                 TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_60M);
 
-                AuthorizationData authorizationData = new AuthorizationData();
-
+                AuthorizationData authorizationData = null;
                 this.Dispatcher.Invoke(() => {
-                    authorizationData.authorizationTitle = formAuthorizationData.Title;
-
-                    authorizationData.authContentList = formAuthorizationData.getDataContentList();
-                    authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
-                    authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
-                    authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
+                    if(formAuthorizationData.CheckImportJson) {
+                        string jsonImport = formAuthorizationData.getImportJson();
+                        authorizationData = ISExtentions.deserializeJsonAuthorizationData(jsonImport);
+                    } else {
+                        authorizationData = new AuthorizationData();
+                        authorizationData.authorizationTitle = formAuthorizationData.Title;
+                        authorizationData.authContentList = formAuthorizationData.getDataContentList();
+                        authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
+                        authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
+                        authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
+                    }
                 });
 
                 BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp);
@@ -703,11 +707,11 @@ namespace ClientInspectionSystem {
                                 if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerLeftFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
-                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                        formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
                                         formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
+                                        formBiometricAuth.hideLabelForDeniedAuth();
                                         formBiometricAuth.Topmost = true;
-                                        formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(4d);
+                                        if (formBiometricAuth.ShowDialog() == true) { }
                                     });
                                 }
                                 else {
@@ -792,11 +796,11 @@ namespace ClientInspectionSystem {
                                 if(resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
-                                        formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                        formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
                                         formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
                                         formBiometricAuth.Topmost = true;
-                                        formBiometricAuth.Show();
-                                        formBiometricAuth.StartCloseTimer(4d);
+                                        formBiometricAuth.hideLabelForDeniedAuth();
+                                        if (formBiometricAuth.ShowDialog() == true) { }
                                     });
                                 } else {
                                     if (resultFingerRightAuth.data.result) {
@@ -930,15 +934,36 @@ namespace ClientInspectionSystem {
                             controllerLeftFingerAuth.CloseAsync();
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             this.Dispatcher.Invoke(() => {
-                                formBiometricAuth.setTitleLabel(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                formBiometricAuth.setContenLabelResult(InspectionSystemContanst.RESUT_FORM_BIOMETRIC_AUTH_DENIED);
+                                formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                formBiometricAuth.setContenLabelResult(baseBiometricAuthResp.data.result.ToString());
                                 formBiometricAuth.setContentLabelType(baseBiometricAuthResp.data.biometricType);
-                                formBiometricAuth.lbType.Visibility = Visibility.Visible;
                                 formBiometricAuth.setContentLabelScore(baseBiometricAuthResp.data.score.ToString());
-                                formBiometricAuth.lbScore.Visibility = Visibility.Visible;
+                                formBiometricAuth.showHideLabelForBiometricAuth(biometricType);
                                 formBiometricAuth.Topmost = true;
-                                formBiometricAuth.Show();
-                                formBiometricAuth.StartCloseTimer(4d);
+                                if (formBiometricAuth.ShowDialog() == true) { }
+                            });
+                        } else if(BiometricType.TYPE_FINGER_RIGHT.Equals(biometricType)) {
+                            controllerLeftFingerAuth.CloseAsync();
+                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                            this.Dispatcher.Invoke(() => {
+                                formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                formBiometricAuth.setContenLabelResult(baseBiometricAuthResp.data.result.ToString());
+                                formBiometricAuth.setContentLabelType(baseBiometricAuthResp.data.biometricType);
+                                formBiometricAuth.setContentLabelScore(baseBiometricAuthResp.data.score.ToString());
+                                formBiometricAuth.showHideLabelForBiometricAuth(biometricType);
+                                formBiometricAuth.Topmost = true;
+                                if (formBiometricAuth.ShowDialog() == true) { }
+                            });
+                        } else {
+                            controllerLeftFingerAuth.CloseAsync();
+                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                            this.Dispatcher.Invoke(() => {
+                                formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                formBiometricAuth.setContenLabelResult(baseBiometricAuthResp.data.result.ToString());
+                                formBiometricAuth.setContentLabelType(baseBiometricAuthResp.data.biometricType);
+                                formBiometricAuth.showHideLabelForBiometricAuth(biometricType);
+                                formBiometricAuth.Topmost = true;
+                                if (formBiometricAuth.ShowDialog() == true) { }
                             });
                         }
                     }

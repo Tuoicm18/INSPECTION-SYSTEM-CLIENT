@@ -1,4 +1,5 @@
-﻿<mah:MetroWindow   x:Class="ClientInspectionSystem.FormAuthenticationDataNew"
+﻿<mah:MetroWindow  
+        x:Class="ClientInspectionSystem.FormAuthenticationDataNew"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -37,6 +38,27 @@
     <!--#endregion-->
     
     <Grid>
+        
+        <!--#region SCROLL VIEWER TEXT BLOCK IMPORT JSON-->
+        <ScrollViewer
+            x:Name="scvImportJson"
+            PreviewMouseWheel="scvImportJson_PreviewMouseWheel"
+            Background="Transparent"
+            Visibility="Collapsed"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Hidden"
+            Margin="5,5,5,50">
+            <!--Text Box Import Json-->
+            <TextBox
+                x:Name="txtImportJson"
+                AcceptsReturn="True"
+                FontSize="15"
+                Foreground="White"
+                Background="Transparent"
+                Margin="5,5,5,5">
+            </TextBox>
+        </ScrollViewer>
+        <!--#endregion-->
         
         <!--#region GRID SPILT BUTTON ADD-->
         <Border          
@@ -276,9 +298,11 @@
             x:Name="gridBottom"
             Background="Transparent"
             VerticalAlignment="Bottom"
-            Height="35"
+            Height="40"
             Margin="5,5,5,5">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" />
@@ -290,6 +314,7 @@
                 Content="OK"
                 VerticalAlignment="Bottom"
                 VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"
                 Width="100"
                 Grid.Column="0"
                 Margin="5,5,5,5">
@@ -303,6 +328,19 @@
                 Grid.Column="2"
                 VerticalAlignment="Bottom"
                 VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"
+                Margin="5,5,5,5">
+            </Button>
+            <!--Button Import Json-->
+            <Button
+                x:Name="btnImportJson"
+                Click="btnImportJson_Click"
+                Content="IMPORT JSON"
+                Width="100"
+                Grid.Column="4"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"
                 Margin="5,5,5,5">
             </Button>
         </Grid>
@@ -321,5 +359,6 @@
             
         </ucInputTitleForm:InputTitleControl>
         <!--#endregion-->
+        
     </Grid>
 </mah:MetroWindow>

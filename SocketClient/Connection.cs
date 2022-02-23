@@ -21,7 +21,7 @@ namespace ClientInspectionSystem.SocketClient {
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        private readonly int FIND_CONNECT_INTEVAL = 5000;
+        private readonly int FIND_CONNECT_INTEVAL = 1000;
         private readonly int MAX_PING = 10;
         private DeleagteConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;

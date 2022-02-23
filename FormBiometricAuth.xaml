@@ -7,76 +7,125 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInspectionSystem"
         mc:Ignorable="d"
-        WindowStartupLocation="CenterScreen"
+        Title="BIOMETRIC AUTHENTICATION"
+        TitleAlignment="Center"
+        WindowStartupLocation ="CenterScreen"
         ResizeMode="NoResize"
         ShowCloseButton="False"
         ShowMinButton="False"
         ShowMaxRestoreButton="False"
         ShowInTaskbar="False"
-        WindowStyle="None"
-        ShowTitleBar="False"
-        BorderBrush="#252525"
-        BorderThickness="0"
-        Background="#252525" 
-        Height="235.333" 
+        BorderBrush="#0767b3"
+        BorderThickness="2"
+        Height="240" 
         Width="600">
+    
     <Grid>
-        <Image
-            x:Name="imgResult"
-            Visibility="Collapsed"
-            Source="Resource/02_left_hand_1.png"
-            Stretch="Fill" 
-            Margin="65,60,65,45"/>
-
-        <Label
-            x:Name="lbTitleResult"
-            Foreground="White"
-            Background="#0767b3"
-            FontSize="16"
-            Content="BIOMETRIC AUTHENTICATION"
-            HorizontalContentAlignment="Center"
-            VerticalContentAlignment="Center" Height="43" VerticalAlignment="Top"/>
         
-        <!--Label Type-->
-        <Label 
-            x:Name="lbType"
-            Visibility="Collapsed"
-            Width="590"
-            Foreground="White"
-            Content="BIOMETRIC TYPE"
-            FontSize="16"
-            HorizontalAlignment="Center" 
-            HorizontalContentAlignment="Left"
-            Height="30"
-            VerticalAlignment="Top" 
-            VerticalContentAlignment="Center"
-            Margin="5,70,5,5"/>
-        <!--Label Result-->
-        <Label 
-            x:Name="lbResult"
-            Width="590"
-            Foreground="White"
-            Content="BIOMETRIC RESULT"
-            FontSize="16"
-            HorizontalAlignment="Center" 
-            HorizontalContentAlignment="Left"
-            Height="30"
-            VerticalAlignment="Center" 
-            VerticalContentAlignment="Center"
-            Margin="5,40,5,5"/>
-        <!--Label Score-->
-        <Label 
-            x:Name="lbScore"
-            Visibility="Collapsed"
-            Width="590"
-            Foreground="White"
-            Content="SOCRE"
-            FontSize="16"
-            HorizontalAlignment="Center" 
-            HorizontalContentAlignment="Left"
-            Height="30"
-            VerticalAlignment="Bottom" 
-            VerticalContentAlignment="Center"
-            Margin="5,5,5,30"/>
+        <!--#region IMAGE-->
+        <!--
+            <Image
+                x:Name="imgResult"
+                Visibility="Collapsed"
+                Source="Resource/02_left_hand_1.png"
+                Stretch="Fill" 
+                Margin="65,60,65,45"/>
+        -->
+        <!--#endregion-->
+
+        <!--#region GRID LABEL-->
+        <Grid
+            x:Name="gridLabel"
+            Background="Transparent"
+            Height="150"
+            VerticalAlignment="Top"
+            Margin="5,5,5,5">
+            <!--#endregion-->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="35*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="65*" />
+            </Grid.ColumnDefinitions>
+
+            <!--Label Type-->
+            <Label 
+                x:Name="lbType"
+                Foreground="White"
+                Content="BIOMETRIC TYPE"
+                FontSize="14"
+                VerticalAlignment="Top"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Height="30"
+                Margin="5,5,5,5"/>
+            <Label
+                x:Name="lbTypeResult"
+                Foreground="White"
+                VerticalAlignment="Top"
+                VerticalContentAlignment="Center"
+                Grid.Column="2"
+                FontSize="14"
+                Height="30"
+                Margin="5,5,5,5"/>
+            <!--Label Result-->
+            <Label 
+                x:Name="lbTitleResult"
+                Foreground="White"
+                Content="BIOMETRIC RESULT"
+                FontSize="14"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Height="30"
+                Margin="5,5,5,5"/>
+            <Label
+                Name="lbResult"
+                Foreground="White"
+                FontSize="14"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                Grid.Column="2"
+                Height="30"
+                Margin="5,5,5,5"/>
+            <!--Label Score-->
+            <Label 
+                x:Name="lbScore"
+                Foreground="White"
+                Content="SOCRE"
+                FontSize="14"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Height="30"
+                Margin="5,5,5,5"/>
+            <Label
+                Name="lbScoreResult"
+                Foreground="White"
+                FontSize="14"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                Grid.Column="2"
+                Height="30"
+                Margin="5,5,5,5"/>
+        </Grid>
+
+        <!--#region GIRD BOTTOM-->
+        <Grid
+            x:Name="gridBottom"
+            VerticalAlignment="Bottom"
+            Background="Transparent"
+            Height="40"
+            Margin="5,5,5,5">
+            <!--Button OK-->
+            <Button
+                x:Name="btnOK"
+                Click="btnOK_Click"
+                Width="100"
+                Content="OK"
+                Margin="5,5,5,5"/>
+        </Grid>
     </Grid>
+   
+    <!--#endregion-->
+    
 </mah:MetroWindow>

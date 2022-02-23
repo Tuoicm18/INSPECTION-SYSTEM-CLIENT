@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.BiometricAuth;
 
 namespace ClientInspectionSystem {
@@ -15,24 +17,27 @@ namespace ClientInspectionSystem {
         private MainWindow mainWindow = new MainWindow();
         public FormBiometricAuth() {
             InitializeComponent();
+            // Set the window theme to Dark Mode
+            ThemeManager.Current.ChangeTheme(this, "Dark.Blue");
         }
 
-        public void setImageSource(string path) {
-            imgResult.Source = new BitmapImage(new Uri(path, UriKind.Relative));
-        }
+        //public void setImageSource(string path) {
+        //    imgResult.Source = new BitmapImage(new Uri(path, UriKind.Relative));
+        //}
+
         public void setContenLabelResult(string content) {
-            lbResult.Content = lbResult.Content.ToString() + "     " + content;
+            lbResult.Content = content;
         }
 
         public void setContentLabelType(string content) {
-            lbType.Content = lbType.Content.ToString() + "      " + content;
+            lbTypeResult.Content = content;
         }
 
         public void setContentLabelScore(string score) {
-            lbScore.Content = lbScore.Content.ToString() + "      " + score;
+            lbScoreResult.Content = score;
         }
-        public void setTitleLabel(string content) {
-            lbTitleResult.Content = content;
+        public void setTitleForm(string content) {
+            this.Dispatcher.Invoke(() => this.Title = content);
         }
 
         public void StartCloseTimer(double timeout) {
@@ -52,5 +57,24 @@ namespace ClientInspectionSystem {
             mainWindow.IsEnabled = true;
         }
 
+        private void btnOK_Click(object sender, System.Windows.RoutedEventArgs e) {
+            DialogResult = true;
+        }
+
+        public void showHideLabelForBiometricAuth(string biometricType) {
+            if(BiometricType.TYPE_FINGER_LEFT.Equals(biometricType) || BiometricType.TYPE_FINGER_RIGHT.Equals(biometricType)) {
+                lbScore.Visibility = System.Windows.Visibility.Visible;
+                lbScoreResult.Visibility = System.Windows.Visibility.Visible;
+            } else {
+                lbScore.Visibility = System.Windows.Visibility.Collapsed;
+                lbScoreResult.Visibility = System.Windows.Visibility.Collapsed;
+            }
+        }
+        public void hideLabelForDeniedAuth() {
+            lbType.Visibility = System.Windows.Visibility.Collapsed;
+            lbTypeResult.Visibility = System.Windows.Visibility.Collapsed;
+            lbScore.Visibility = System.Windows.Visibility.Collapsed;
+            lbScoreResult.Visibility = System.Windows.Visibility.Collapsed;
+        }
     }
 }
