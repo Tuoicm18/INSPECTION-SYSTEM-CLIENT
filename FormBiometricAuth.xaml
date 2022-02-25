@@ -16,12 +16,32 @@
         ShowMaxRestoreButton="False"
         ShowInTaskbar="False"
         BorderBrush="#0767b3"
+        Background="Black"
         BorderThickness="2"
-        Height="240" 
+        SizeToContent="Height"
+        MaxHeight="400"
         Width="600">
-    
+
+
+    <!--#region STYLE-->
+    <Window.Resources>
+        <Style x:Key="MyButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <!--#endregion-->
+
     <Grid>
-        
+
         <!--#region IMAGE-->
         <!--
             <Image
@@ -36,84 +56,180 @@
         <!--#region GRID LABEL-->
         <Grid
             x:Name="gridLabel"
+            Height="300"
             Background="Transparent"
-            Height="150"
-            VerticalAlignment="Top"
-            Margin="5,5,5,5">
-            <!--#endregion-->
+            VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="35*" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="65*" />
             </Grid.ColumnDefinitions>
+            <!--Grid Row-->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
+            <!--#region GRID FOR VIEW JWT-->
+            <Grid
+                x:Name="gridForViewJWT"
+                Background="Transparent"       
+                Visibility="Collapsed"
+                Margin="5,5,5,5" 
+                HorizontalAlignment="Center"
+                Width="600"
+                Grid.RowSpan="4" 
+                Grid.ColumnSpan="3">
+                <ScrollViewer
+                    PreviewMouseWheel="lvAllLabel_PreviewMouseWheel"
+                    HorizontalScrollBarVisibility="Hidden"
+                    VerticalScrollBarVisibility="Hidden"
+                    Margin="5,5,5,5">
+                    <TextBox
+                        x:Name="txtViewJWT"
+                        Background="Transparent"
+                        Width="590"
+                        TextWrapping="Wrap"
+                        Foreground="White"/>
+                </ScrollViewer>
+            </Grid>
+            <!--#endregion-->
+            
+            <!--Label Response Code-->
+            <Label
+                x:Name="lbResponseCode"
+                Content="RESPONSE CODE"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Grid.Row="0"
+                Margin="5,5,5,5"/>
+            <Label
+                x:Name="lbResultResponseCode"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Grid.Column="2"
+                Grid.Row="0"
+                Margin="5,5,5,5"/>
             <!--Label Type-->
             <Label 
                 x:Name="lbType"
                 Foreground="White"
                 Content="BIOMETRIC TYPE"
-                FontSize="14"
-                VerticalAlignment="Top"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Height="30"
+                Grid.Row="1"
                 Margin="5,5,5,5"/>
             <Label
                 x:Name="lbTypeResult"
                 Foreground="White"
-                VerticalAlignment="Top"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                FontSize="14"
-                Height="30"
+                Grid.Row="1"
                 Margin="5,5,5,5"/>
             <!--Label Result-->
             <Label 
                 x:Name="lbTitleResult"
                 Foreground="White"
                 Content="BIOMETRIC RESULT"
-                FontSize="14"
-                VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Height="30"
+                Grid.Row="2"
                 Margin="5,5,5,5"/>
             <Label
                 Name="lbResult"
                 Foreground="White"
-                FontSize="14"
-                VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                Height="30"
+                Grid.Row="2"
                 Margin="5,5,5,5"/>
             <!--Label Score-->
             <Label 
                 x:Name="lbScore"
                 Foreground="White"
-                Content="SOCRE"
-                FontSize="14"
-                VerticalAlignment="Bottom"
+                Content="SCORE"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Height="30"
+                Grid.Row="3"
                 Margin="5,5,5,5"/>
             <Label
                 Name="lbScoreResult"
                 Foreground="White"
-                FontSize="14"
-                VerticalAlignment="Bottom"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                Height="30"
+                Grid.Row="3"
+                Margin="5,5,5,5"/>
+            <!--Label JWT-->
+            <Label
+                x:Name="lbJWT"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Grid.Row="4"
+                Content="JWT"
+                Margin="5,5,5,5"/>
+            <!--Textblock JWT-->
+            <TextBlock
+                x:Name="textBlockJWT"
+                Foreground="White"
+                VerticalAlignment="Center"
+                Grid.Column="2"
+                Grid.Row="4"
+                TextTrimming="WordEllipsis"
+                TextWrapping="NoWrap"/>
+            <!--Button View JWT-->
+            <Button
+                x:Name="btnViewJWT"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0" 
+                Click="btnViewJWT_Click"
+                HorizontalAlignment="Right"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Width="50"
+                Grid.Column="0"
+                Grid.Row="4"
+                Style="{StaticResource MyButtonStyle}"
+                Margin="5,5,5,5">
+                <Image
+                    Source="Resource/eye-24.ico"
+                    x:Name="VIEW" 
+                    Height="20" 
+                    Width="20"/>
+            </Button>
+
+            <!--Label Issue Details-->
+            <Label
+                x:Name="lbIssueDetails"
+                Visibility="Collapsed"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Content="ISSUE DETAILS"
+                Grid.Column="0"
+                Grid.Row="5"
+                Margin="5,5,5,5"/>
+            <Label
+                x:Name="lbIssueDetailsResult"
+                Visibility="Collapsed"
+                VerticalContentAlignment="Center"
+                Foreground="White"
+                Grid.Column="2"
+                Grid.Row="5 "
                 Margin="5,5,5,5"/>
         </Grid>
+        <!--#endregion-->
 
         <!--#region GIRD BOTTOM-->
         <Grid
             x:Name="gridBottom"
             VerticalAlignment="Bottom"
             Background="Transparent"
+            Grid.Row="2"
             Height="40"
             Margin="5,5,5,5">
             <!--Button OK-->
@@ -125,7 +241,7 @@
                 Margin="5,5,5,5"/>
         </Grid>
     </Grid>
-   
+
     <!--#endregion-->
-    
+
 </mah:MetroWindow>

@@ -74,7 +74,7 @@
             </Button>
             <!--Option             <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button> -->
             <Button x:Name="btnOption"
-                    Visibility="Visible"
+                    Visibility="Collapsed"
                     Click="btnOption_Click">OPTIONS</Button>
             <!--Disconnect-->
             <Button x:Name="btnDisconnect"
@@ -1219,7 +1219,7 @@
             FontSize="10"
             x:Name="lbVersion"
             Foreground="White"
-            Content=" V1.0.220223" 
+            Content=" V1.0.220224" 
             VerticalContentAlignment="Center"
             HorizontalAlignment="Left" 
             Height="24" 

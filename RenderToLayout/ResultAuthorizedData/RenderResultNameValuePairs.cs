@@ -36,7 +36,6 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 textBlockDescriptionNVP.Text = description;
                 textBlockDescriptionNVP.MaxWidth = ClientContants.MAX_WIDTH_TEXT_BLOCK;
                 textBlockDescriptionNVP.TextWrapping = TextWrapping.Wrap;
-                textBlockDescriptionNVP.FontWeight = FontWeights.Bold;
                 //Create Data Grid
                 dataGridNVP = new DataGrid();
                 dataGridNVP.Background = Brushes.Black;
@@ -80,7 +79,6 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 dataGridTextColumn.Header = ClientContants.HEADER_KEY_COLUMN;
                 dataGridTextColumn.CanUserResize = false;
                 dataGridTextColumn.Width = ClientContants.WIDTH_KEY_COLUMN;
-                dataGridTextColumn.FontWeight = FontWeights.Bold;
                 //Style Header
                 Style headerStyleKey = new Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader));
                 headerStyleKey.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.BackgroundProperty, Brushes.Black));

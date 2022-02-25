@@ -12,7 +12,6 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
         #region VARIABLE
         private GroupBox groupBoxContentList;
         public ListView listViewContentList;
-        private TextBlock textBlockDescription;
         private TextBlock textBlockContent;
         #endregion
 
@@ -32,17 +31,11 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 //Create List View
                 listViewContentList = new ListView();
                 //Create Text Block Description
-                textBlockDescription = new TextBlock();
-                textBlockDescription.Text = description;
-                textBlockDescription.MaxWidth = ClientContants.MAX_WIDTH_TEXT_BLOCK;
-                textBlockDescription.TextWrapping = TextWrapping.Wrap;
-                //Create Text Block Description
                 textBlockContent = new TextBlock();
                 textBlockContent.Text = textContent;
                 textBlockContent.MaxWidth = ClientContants.MAX_WIDTH_TEXT_BLOCK;
                 textBlockContent.TextWrapping = TextWrapping.Wrap;
                 //Render To Layout
-                listViewContentList.Items.Add(textBlockDescription);
                 listViewContentList.Items.Add(textBlockContent);
                 groupBoxContentList.Content = listViewContentList;
                 lvAll.Items.Add(groupBoxContentList);

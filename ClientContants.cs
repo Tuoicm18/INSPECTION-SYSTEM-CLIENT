@@ -26,6 +26,8 @@ namespace ClientInspectionSystem {
         public static string CODE_COLOR_ALTERNATING_ROW_DATA_GRID = "#282828";
         public static string CONTENT_BTN_IMPORT_JSON = "IMPORT JSON";
         public static string CONTENT_BTN_IMPORT_JSON_CANCEL = "CANCEL";
+        public static string CONTENT_BTN_VIEW_JWT = "VIEW";
+        public static string CONTENT_BTN_VIEW_JWT_CANCEL = "CANCEL";
 
         //WINDOW CONTROL FORM AUTHORIZATION DATA RESLUT
         public static string LB_NOT_FOUND_FINGER = "NOT FOUND FINGER";

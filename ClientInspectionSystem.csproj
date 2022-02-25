@@ -294,6 +294,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resource\icons8-hidden-24.png" />
+    <Resource Include="Resource\eye-24.ico" />
     <Resource Include="Resource\47_FA_passed.png" />
     <Resource Include="Resource\47_FA_failed.png" />
     <Resource Include="Resource\18_INSPECTION-SYSTEM_VGCA_256x128.png" />

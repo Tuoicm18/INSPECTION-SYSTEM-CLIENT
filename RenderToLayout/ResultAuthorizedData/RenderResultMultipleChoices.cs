@@ -46,6 +46,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                     groupBoxMultiple = new GroupBox();
                     groupBoxMultiple.Margin = new Thickness(5, 5, 5, 10);
                     groupBoxMultiple.Header = headerGr;
+                    groupBoxMultiple.IsEnabled = false;
 
                     groupBoxesMultiple.Add(groupBoxMultiple);
 

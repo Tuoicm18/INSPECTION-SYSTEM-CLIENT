@@ -21,8 +21,8 @@ namespace ClientInspectionSystem.SocketClient {
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        private readonly int FIND_CONNECT_INTEVAL = 1000;
-        private readonly int MAX_PING = 10;
+        private readonly int FIND_CONNECT_INTEVAL = 500;
+        private readonly int MAX_PING = 500;
         private DeleagteConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
         private bool checkConnection;
@@ -105,8 +105,18 @@ namespace ClientInspectionSystem.SocketClient {
                                 mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
                                                                                                                     mainWindow.imgSocketConnectionStatus);
                                 mainWindow.btnConnect.IsEnabled = true;
+
+                                //Logmanager.Instance.writeLog("COUNT FAIL >>> " + countFailConnect);
+                                if(countFailConnect == MAX_PING) {
+                                    mainWindow.IsEnabled = true;
+                                    mainWindow.btnDisconnect.IsEnabled = false;
+                                    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                                    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
+                                }
                             });
                         }
+
+                        //Logmanager.Instance.writeLog("COUNT FAIL <<< " + countFailConnect);
                         if (countFailConnect == MAX_PING) {
                             mainWindow.Dispatcher.Invoke(async () => {
                                 await controllerWSClient.CloseAsync();
@@ -115,6 +125,7 @@ namespace ClientInspectionSystem.SocketClient {
                                 await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
                                 await controllerWSClientFail.CloseAsync();
                                 mainWindow.IsEnabled = true;
+                                mainWindow.btnDisconnect.IsEnabled = false;
                                 mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                                 mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
                             });
