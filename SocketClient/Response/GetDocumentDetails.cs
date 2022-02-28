@@ -12,10 +12,12 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private bool optionalDetailsEnabled;
         private TimeSpan timeOutResp;
         private ISPluginClient.DocumentDetailsListener documentDetailsListener;
-
-        public GetDocumentDetails(ISPluginClient pluginClient, bool mrzEnabled, bool imageEnabled,
-                                  bool dataGroupEnabled, bool optionalDetailsEnabled, TimeSpan timeoutResp,
-                                  ISPluginClient.DocumentDetailsListener documentDetailsListener) {
+        private int timeOutInterVal;
+        public GetDocumentDetails(ISPluginClient pluginClient, bool mrzEnabled,
+                                  bool imageEnabled, bool dataGroupEnabled, 
+                                  bool optionalDetailsEnabled, TimeSpan timeoutResp,
+                                  ISPluginClient.DocumentDetailsListener documentDetailsListener,
+                                  int timeOutInterVal) {
             this.pluginClient = pluginClient;
             this.mrzEnabled = mrzEnabled;
             this.imageEnabled = imageEnabled;
@@ -23,12 +25,14 @@ namespace ClientInspectionSystem.SocketClient.Response {
             this.optionalDetailsEnabled = optionalDetailsEnabled;
             this.timeOutResp = timeoutResp;
             this.documentDetailsListener = documentDetailsListener;
+            this.timeOutInterVal = timeOutInterVal;
         }
 
         public BaseDocumentDetailsResp getDocumentDetails() {
             return pluginClient.getDocumentDetails(mrzEnabled, imageEnabled, 
                                                    dataGroupEnabled, optionalDetailsEnabled, 
-                                                   timeOutResp, documentDetailsListener);
+                                                   timeOutResp, documentDetailsListener,
+                                                   timeOutInterVal);
         }
     }
 }

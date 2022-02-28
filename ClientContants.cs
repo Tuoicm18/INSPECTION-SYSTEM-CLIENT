@@ -35,5 +35,9 @@ namespace ClientInspectionSystem {
         //SOCKET RESPONSE CODE
         public static int SOCKET_RESP_CODE_BIO_AUTH_DENIED = 1302;
         public static int SOCKET_RESP_CODE_BIO_SUCCESS = 0;
+
+        //READ INI FILE
+        public static string SECTION_OPTIONS_SOCKET = "OPTIONS SOCKET";
+        public static string KEY_OPTIONS_SOCKET_TIME_OUT = "TIME-OUT-SECOND";
     }
 }

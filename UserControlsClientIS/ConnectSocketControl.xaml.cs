@@ -18,6 +18,10 @@ namespace ClientInspectionSystem.UserControlsClientIS {
     /// Interaction logic for ConnectSocketControl.xaml
     /// </summary>
     public partial class ConnectSocketControl : UserControl {
+
+        private IniFile iniFile = new IniFile("Data\\clientIS.ini");
+        private int timeOutSocket;
+
         public ConnectSocketControl() {
             InitializeComponent();
             if (txtIP.Text.Equals(string.Empty) || txtPort.Text.Equals(string.Empty)) {
@@ -56,9 +60,13 @@ namespace ClientInspectionSystem.UserControlsClientIS {
             mainWindow.Dispatcher.Invoke(async() => {
                 try {
                     //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
+                    //Update 2022.02.28 TIME OUT INI FILE
+                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+
                     await Task.Factory.StartNew(() => {
                         PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
-                                                                                   TimeSpan.FromSeconds(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_15S));
+                                                                                                                                                          TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                                          timeOutSocket);
                         mainWindow.Dispatcher.Invoke(() => {
                             LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
                                                                                 deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,

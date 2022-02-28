@@ -59,12 +59,16 @@ namespace ClientInspectionSystem {
         public static int TIME_OUT_RESP_SOCKET_50S = 50;
         public static int TIME_OUT_RESP_SOCKET_55S = 55;
         public static int TIME_OUT_RESP_SOCKET_60S = 60;
-        public static int TIME_OUT_RESP_SOCKET_1M = 1;
-        public static int TIME_OUT_RESP_SOCKET_2M = 2;
-        public static int TIME_OUT_RESP_SOCKET_3M = 3;
-        public static int TIME_OUT_RESP_SOCKET_4M = 4;
-        public static int TIME_OUT_RESP_SOCKET_5M = 5;
-        public static int TIME_OUT_RESP_SOCKET_60M = 60;
+        public static int TIME_OUT_RESP_SOCKET_2M = 120;
+        public static int TIME_OUT_RESP_SOCKET_3M = 180;
+        public static int TIME_OUT_RESP_SOCKET_4M = 240;
+        public static int TIME_OUT_RESP_SOCKET_5M = 300;
+        public static int TIME_OUT_RESP_SOCKET_10M = 600;
+        public static int TIME_OUT_RESP_SOCKET_15M = 900;
+        public static int TIME_OUT_RESP_SOCKET_20M = 1200;
+        public static int TIME_OUT_RESP_SOCKET_25M = 1500;
+        public static int TIME_OUT_RESP_SOCKET_30M = 1800;
+        public static int TIME_OUT_RESP_SOCKET_60M = 3600;
         //Connect Socket
         public static string SUB_URL = "/ISPlugin";
 

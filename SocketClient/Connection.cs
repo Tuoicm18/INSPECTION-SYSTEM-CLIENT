@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ClientInspectionSystem.SocketClient {
     public delegate void DeleagteConnect(bool isConnectWS);
-    public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp  documentDetailsResp);
+    public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp documentDetailsResp);
     public class Connection {
         #region VARIABLE
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
@@ -107,7 +107,7 @@ namespace ClientInspectionSystem.SocketClient {
                                 mainWindow.btnConnect.IsEnabled = true;
 
                                 //Logmanager.Instance.writeLog("COUNT FAIL >>> " + countFailConnect);
-                                if(countFailConnect == MAX_PING) {
+                                if (countFailConnect == MAX_PING) {
                                     mainWindow.IsEnabled = true;
                                     mainWindow.btnDisconnect.IsEnabled = false;
                                     mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
@@ -165,10 +165,12 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region GET DEVICE DETAILS
         //Get Device Details
-        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled, TimeSpan timeOutResp) {
+        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled,
+                                                                                                 TimeSpan timeOutResp, int timeOutInterVal) {
+            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
             try {
-                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled,timeOutResp);
-                PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
+                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+                deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
                 Logmanager.Instance.writeLog("<DEBUG> GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
                 return deviceDetailsResp;
             }
@@ -182,12 +184,13 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region GET DOCUMENT DETAILS
         public BaseDocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
-                                                      bool dataGroupEnabled, bool optionalEnabled,
-                                                      TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener) {
+                                                          bool dataGroupEnabled, bool optionalEnabled,
+                                                          TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
+                                                          int timeOutInterVal) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(wsClient, mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalEnabled, timeOutResp,
-                                                                               documentDetailsListener);
+                                                                               documentDetailsListener, timeOutInterVal);
                 BaseDocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }
@@ -200,10 +203,12 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region GET RESULT BIOMETRIC AUTH
-        public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, AuthorizationData authorizationData, TimeSpan timeOutResp) {
+        public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, AuthorizationData authorizationData,
+                                                            TimeSpan timeOutResp, int timeOutInterVal) {
             try {
                 GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(wsClient, biometricType,
-                                                                                                       authorizationData, timeOutResp);
+                                                                                                       authorizationData, timeOutResp,
+                                                                                                       timeOutInterVal);
                 BaseBiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }

@@ -198,6 +198,7 @@
     <Compile Include="FormResultAuthorizationData.xaml.cs">
       <DependentUpon>FormResultAuthorizationData.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IniFile.cs" />
     <Compile Include="InspectionSystemPraser.cs" />
     <Compile Include="Models\AuthDataKeyValue.cs" />
     <Compile Include="Models\AuthDataListValue.cs" />

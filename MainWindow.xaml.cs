@@ -44,6 +44,9 @@ namespace ClientInspectionSystem {
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
         private BrushConverter brushConverter = new BrushConverter();
+        private bool manualReadDoc = false;
+        private IniFile iniFile = new IniFile("Data\\clientIS.ini");
+        private int timeOutSocket;
         #endregion
 
         #region MAIN
@@ -110,42 +113,44 @@ namespace ClientInspectionSystem {
 
         public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
             //ProgressDialogController controllerReadChip = null;
-            this.Dispatcher.Invoke(async () => {
-                try {
-                    btnIDocument.IsEnabled = false;
-                    clearLayout(true);
-                    showMain();
-                    optionsControl.Visibility = Visibility.Collapsed;
-                    //controllerReadChip = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                    //                                                  InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX);
-                    //controllerReadChip.SetIndeterminate();
+            if(manualReadDoc == false) {
+                this.Dispatcher.Invoke(async () => {
+                    try {
+                        btnIDocument.IsEnabled = false;
+                        clearLayout(true);
+                        showMain();
+                        optionsControl.Visibility = Visibility.Collapsed;
+                        //controllerReadChip = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
+                        //                                                  InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX);
+                        //controllerReadChip.SetIndeterminate();
 
-                    await Task.Factory.StartNew(() => {
-                        bool getDocSuccess = autoGetDocumentToLayout(documentDetailsResp);
-                        if (getDocSuccess) {
-                            //controllerReadChip.CloseAsync();
-                        }
-                        else {
-                            //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                            //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                            //controllerReadChip.CloseAsync();
-                        }
-                    });
-                    btnRFID.IsEnabled = true;
-                    btnLeftFinger.IsEnabled = true;
-                    btnRightFinger.IsEnabled = true;
+                        await Task.Factory.StartNew(() => {
+                            bool getDocSuccess = autoGetDocumentToLayout(documentDetailsResp);
+                            if (getDocSuccess) {
+                                //controllerReadChip.CloseAsync();
+                            }
+                            else {
+                                //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                //controllerReadChip.CloseAsync();
+                            }
+                        });
+                        btnRFID.IsEnabled = true;
+                        btnLeftFinger.IsEnabled = true;
+                        btnRightFinger.IsEnabled = true;
 
-                }
-                catch (Exception eReadChip) {
-                    //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                    //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
-                    //await controllerReadChip.CloseAsync();
-                    clearLayout(false);
-                    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
-                } finally {
-                    btnIDocument.IsEnabled = true;
-                }
-            });
+                    }
+                    catch (Exception eReadChip) {
+                        //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
+                        //await controllerReadChip.CloseAsync();
+                        clearLayout(false);
+                        Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                    } finally {
+                        btnIDocument.IsEnabled = true;
+                    }
+                });
+            }
         }
 
         private bool autoGetDocumentToLayout(BaseDocumentDetailsResp documentDetailsResp) {
@@ -169,9 +174,12 @@ namespace ClientInspectionSystem {
                         }
 
                         LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
+                        //Update 2022.02.28 TIME OUT INI FILE
+                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                        TimeSpan timeOutGetDeviceDetails = TimeSpan.FromSeconds(timeOutSocket);
 
                         //Update Device Details
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, TimeSpan.FromSeconds(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S));
+                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeOutGetDeviceDetails, timeOutSocket);
 
                         if (null != deviceDetailsResp) {
                             LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
@@ -244,6 +252,9 @@ namespace ClientInspectionSystem {
 
         #region BUTTON_CLICK READ DOCUMENT
         private void btnIDocument_Click(object sender, RoutedEventArgs e) {
+            //Update 2022.02.28
+            manualReadDoc = true;
+
             ProgressDialogController controllerReadChip = null;
             this.Dispatcher.Invoke(async () => {
                 try {
@@ -259,19 +270,28 @@ namespace ClientInspectionSystem {
                     bool imageEnabled = true;
                     bool dataGroupEnabled = false;
                     bool optionalDetailsEnabled = true;
-                    TimeSpan timeOutForResp = TimeSpan.FromSeconds(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_20S);
+
+                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                    TimeSpan timeOutForResp = TimeSpan.FromSeconds(timeOutSocket);
 
                     //await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
                     await Task.Factory.StartNew(() => {
-                        bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
-                                                dataGroupEnabled, optionalDetailsEnabled, timeOutForResp);
-                        if (getDocSuccess) {
-                            controllerReadChip.CloseAsync();
-                        }
-                        else {
-                            controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                            Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                            controllerReadChip.CloseAsync();
+                        try {
+                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
+                        dataGroupEnabled, optionalDetailsEnabled, timeOutForResp);
+                            if (getDocSuccess) {
+                                controllerReadChip.CloseAsync();
+                            }
+                            else {
+                                controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                                controllerReadChip.CloseAsync();
+                            }
+                        } catch ( Exception exx) {
+                            //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                            //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                            //controllerReadChip.CloseAsync();
+                            throw exx;
                         }
                     });
                     btnRFID.IsEnabled = true;
@@ -280,17 +300,25 @@ namespace ClientInspectionSystem {
                 }
                 catch (Exception eReadChip) {
                     //Check if auto reviced data.
-                    if (null == lbMRZ.Content) {
-                        controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
-                        await controllerReadChip.CloseAsync();
-                        clearLayout(false);
-                        Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
-                    }
-                    else {
-                        await controllerReadChip.CloseAsync();
-                    }
+                    //if (null == lbMRZ.Content) {
+                    //    controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                    //    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                    //    await controllerReadChip.CloseAsync();
+                    //    clearLayout(false);
+                    //    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                    //}
+                    //else {
+                    //    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                    //}
+
+                    controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                    await controllerReadChip.CloseAsync();
+                    clearLayout(false);
+                    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
                 } finally {
+                    //Update 2022.02.28
+                    manualReadDoc = false;
                     btnIDocument.IsEnabled = true;
                 }
             });
@@ -302,7 +330,8 @@ namespace ClientInspectionSystem {
             try {
                 BaseDocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
                                                                                         dataGroupEnabled, optionalEnabled,
-                                                                                        timeOutResp, null);
+                                                                                        timeOutResp, null,
+                                                                                        timeOutSocket);
                 if (null != documentDetailsResp) {
                     this.Dispatcher.Invoke(() => {
                         if (mrzEnabled) {
@@ -325,9 +354,12 @@ namespace ClientInspectionSystem {
                             LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
                         }
 
+                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+
                         //Update Device Details
                         PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = connectionSocket.getDeviceDetails(true, true,
-                                                                                       TimeSpan.FromSeconds(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_1M));
+                                                                                                                                               TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                               timeOutSocket);
 
                         if (null != deviceDetailsResp) {
                             LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
@@ -655,7 +687,8 @@ namespace ClientInspectionSystem {
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
                 //Set Time Out
-                TimeSpan timeOutResp = TimeSpan.FromMinutes(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_60M);
+                timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                TimeSpan timeOutResp = TimeSpan.FromSeconds(timeOutSocket);
 
                 AuthorizationData authorizationData = null;
                 this.Dispatcher.Invoke(() => {
@@ -673,7 +706,7 @@ namespace ClientInspectionSystem {
                     }
                 });
 
-                BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp);
+                BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp, timeOutSocket);
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
                     resultBiometricResp = resultBiometric;
