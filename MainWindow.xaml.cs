@@ -52,6 +52,8 @@ namespace ClientInspectionSystem {
         #region MAIN
         public MainWindow() {
             InitializeComponent();
+            //Version APP
+            lbVersion.Content = DateTime.Now.ToString("yyyy/MM/dd").Replace("/", "");
 
             string procName = Process.GetCurrentProcess().ProcessName;
             Logmanager.Instance.writeLog(procName);

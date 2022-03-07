@@ -1219,7 +1219,7 @@
             FontSize="10"
             x:Name="lbVersion"
             Foreground="White"
-            Content=" V1.0.220224" 
+            Content=" V1.0.220228" 
             VerticalContentAlignment="Center"
             HorizontalAlignment="Left" 
             Height="24" 
