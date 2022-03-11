@@ -26,13 +26,13 @@ namespace ClientInspectionSystem {
         public static string DEVIC_SERIAL_NUMBER = "DEVICE SERIAL NUMBER";
 
         //Title & message content Metro Dialog
-        public static string TITLE_MESSAGE_BOX = "                                 CLIENT INSPECTION SYSTEM" + "\n";
-        public static string CONTENT_CONNECTING_MESSAGE_BOX = "                                                         CONNECTING SOCKET SERVER";
-        public static string CONTENT_RE_CONNECT_MESSAGE_BOX = "                                                         RE-CONNECT SOCKET SERVER";
-        public static string CONTENT_CONNECTED_MESSAGE_BOX = "                                                         SOCKET SERVER CONNECTION SUCCESSFUL";
-        public static string CONTENT_FALIL = "                                                         ISSUE FOUND. PLEASE CHECK AGAIN";
-        public static string CONTENT_READING_CHIP_MESSAGE_BOX = "                                                         READING CHIP...";
-        public static string CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX = "                                                         WATING FOR RESULT...";
+        public static string TITLE_MESSAGE_BOX = "CLIENT INSPECTION SYSTEM" + "\n";
+        public static string CONTENT_CONNECTING_MESSAGE_BOX = "CONNECTING SOCKET SERVER";
+        public static string CONTENT_RE_CONNECT_MESSAGE_BOX = "RE-CONNECT SOCKET SERVER";
+        public static string CONTENT_CONNECTED_MESSAGE_BOX = "SOCKET SERVER CONNECTION SUCCESSFUL";
+        public static string CONTENT_FALIL = "ISSUE FOUND. PLEASE CHECK AGAIN";
+        public static string CONTENT_READING_CHIP_MESSAGE_BOX = "READING CHIP...";
+        public static string CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX = "WATING FOR RESULT...";
 
 
         //Time out dialog

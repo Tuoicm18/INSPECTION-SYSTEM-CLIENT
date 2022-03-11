@@ -47,6 +47,8 @@ namespace ClientInspectionSystem {
         private bool manualReadDoc = false;
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
         private int timeOutSocket;
+        //Update 2022.03.11 For Can Value Request Read Document
+        private bool isReadByCanValue = false;
         #endregion
 
         #region MAIN
@@ -115,7 +117,7 @@ namespace ClientInspectionSystem {
 
         public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
             //ProgressDialogController controllerReadChip = null;
-            if(manualReadDoc == false) {
+            if (manualReadDoc == false) {
                 this.Dispatcher.Invoke(async () => {
                     try {
                         btnIDocument.IsEnabled = false;
@@ -259,6 +261,15 @@ namespace ClientInspectionSystem {
 
             ProgressDialogController controllerReadChip = null;
             this.Dispatcher.Invoke(async () => {
+                //Show Form Choices Read Document
+                FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
+                string txtCanValue = string.Empty;
+                if (formChoiceReadDocument.ShowDialog() == true) {
+                    if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
+                        isReadByCanValue = true;
+                        txtCanValue = formChoiceReadDocument.getCanValue();
+                    }
+                }
                 try {
                     btnIDocument.IsEnabled = false;
                     clearLayout(true);
@@ -279,8 +290,8 @@ namespace ClientInspectionSystem {
                     //await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
                     await Task.Factory.StartNew(() => {
                         try {
-                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
-                        dataGroupEnabled, optionalDetailsEnabled, timeOutForResp);
+                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled, dataGroupEnabled,
+                                                                            optionalDetailsEnabled, timeOutForResp, txtCanValue);
                             if (getDocSuccess) {
                                 controllerReadChip.CloseAsync();
                             }
@@ -289,7 +300,8 @@ namespace ClientInspectionSystem {
                                 Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
                                 controllerReadChip.CloseAsync();
                             }
-                        } catch ( Exception exx) {
+                        }
+                        catch (Exception exx) {
                             //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
                             //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
                             //controllerReadChip.CloseAsync();
@@ -328,12 +340,13 @@ namespace ClientInspectionSystem {
 
         private bool getDocumentDetailsToLayout(bool mrzEnabled, bool imageEnabled,
                                                 bool dataGroupEnabled, bool optionalEnabled,
-                                                TimeSpan timeOutResp) {
+                                                TimeSpan timeOutResp, string canValue) {
             try {
                 BaseDocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
-                                                                                        dataGroupEnabled, optionalEnabled,
-                                                                                        timeOutResp, null,
-                                                                                        timeOutSocket);
+                                                                                                  dataGroupEnabled, optionalEnabled,
+                                                                                                  timeOutResp, null,
+                                                                                                  timeOutSocket, canValue);
+                Logmanager.Instance.writeLog(JsonConvert.SerializeObject(documentDetailsResp));
                 if (null != documentDetailsResp) {
                     this.Dispatcher.Invoke(() => {
                         if (mrzEnabled) {
@@ -370,7 +383,7 @@ namespace ClientInspectionSystem {
                         }
                     });
 
-                    if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) { updateBackgroundBtnDG(btnMRZ, 2); }
+                    if (!documentDetailsResp.data.mrzString.Equals(string.Empty) && !isReadByCanValue) { updateBackgroundBtnDG(btnMRZ, 2); }
                     if (documentDetailsResp.data.bacEnabled) { updateBackgroundBtnDG(btnBAC, 2); }
                     if (documentDetailsResp.data.paceEnabled) { updateBackgroundBtnDG(btnSAC, 2); }
                     if (documentDetailsResp.data.activeAuthenticationEnabled) { updateBackgroundBtnDG(btnAA, 2); }
@@ -391,6 +404,8 @@ namespace ClientInspectionSystem {
             catch (Exception e) {
                 Logmanager.Instance.writeLog("GET DOCUMENT DETAILS IN MAIN WINDOW ERROR " + e.ToString());
                 throw e;
+            } finally {
+                isReadByCanValue = false;
             }
         }
         #endregion
@@ -428,8 +443,8 @@ namespace ClientInspectionSystem {
 
         #region HIDE MAIN WINDOW
         private void hideMain() {
-            stackPanelMainContent.Visibility = Visibility.Hidden;
-            stackPanelAvatar.Visibility = Visibility.Hidden;
+            gridAvatar.Visibility = Visibility.Hidden;
+            gridOptionalDetails.Visibility = Visibility.Hidden;
             btnCopyMRZ.Visibility = Visibility.Hidden;
             imgAvatar.Visibility = Visibility.Hidden;
             lbMRZ.Visibility = Visibility.Hidden;
@@ -439,9 +454,10 @@ namespace ClientInspectionSystem {
         #region SHOW MAIN WINDOW
         private void showMain() {
             optionsControl.Visibility = Visibility.Hidden;
-            stackPanelMainContent.Visibility = Visibility.Visible;
-            stackPanelAvatar.Visibility = Visibility.Visible;
-            //btnCopyMRZ.Visibility = Visibility.Visible;
+
+            gridAvatar.Visibility = Visibility.Visible;
+            gridOptionalDetails.Visibility = Visibility.Visible;
+            btnCopyMRZ.Visibility = Visibility.Visible;
             imgAvatar.Visibility = Visibility.Visible;
             lbMRZ.Visibility = Visibility.Visible;
         }
@@ -1037,11 +1053,49 @@ namespace ClientInspectionSystem {
 
         #region TEST FORM AUTHORIZATION DATA
         private void btnOption_Click(object sender, RoutedEventArgs e) {
-            this.Visibility = Visibility.Collapsed;
-            FormAuthenticationDataNew formAuthorizationDataNew = new FormAuthenticationDataNew();
+            //this.Visibility = Visibility.Collapsed;
+            FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
 
-            if (formAuthorizationDataNew.ShowDialog() == true) {
-                this.Visibility = Visibility.Visible;
+            if (formChoiceReadDocument.ShowDialog() == true) {
+                //this.Visibility = Visibility.Visible;
+            }
+        }
+        #endregion
+
+        #region EVENT MAIN 
+        //Update 2021.11.25 For Copy Serial Number
+        private void btnCopySNDevice_Click(object sender, RoutedEventArgs e) {
+            DeviceDetails obj = ((FrameworkElement)sender).DataContext as DeviceDetails;
+            System.Windows.Clipboard.SetText(obj.CONTENT);
+            //dataGridDetails.Items.Refresh();
+        }
+
+        //Update 2021.11.29 For Multiple Click
+        private void btnIDocument_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            if (e.ClickCount >= 2) {
+                btnIDocument.IsEnabled = false;
+                e.Handled = true;
+            }
+        }
+
+        //Disable Enter or Space Keyboard Button Left Verify Finger
+        private void btnLeftFinger_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
+            if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Space) {
+                e.Handled = true;
+            }
+        }
+
+        //Disable Enter or Space Keyboard Button RFID
+        private void btnRFID_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
+            if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Space) {
+                e.Handled = true;
+            }
+        }
+
+        //Disable Enter or Space Keyboard Button Left Verify Right
+        private void btnRightFinger_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
+            if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Space) {
+                e.Handled = true;
             }
         }
         #endregion

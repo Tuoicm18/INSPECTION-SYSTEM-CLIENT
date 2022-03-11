@@ -1,0 +1,74 @@
+﻿<mah:MetroWindow  
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        x:Class="ClientInspectionSystem.FormChoiceReadDocument"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClientInspectionSystem"
+        mc:Ignorable="d"
+        WindowStartupLocation ="CenterScreen"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        ShowCloseButton="False"
+        ShowMinButton="False"
+        ShowMaxRestoreButton="False"
+        ShowInTaskbar="False"
+        BorderBrush="#0767b3"
+        BorderThickness="2"
+        ShowTitleBar="False"
+        Height="200" 
+        Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!--Combobox Choice Read Doc-->
+        <ComboBox
+            Name="cmbChoices"
+            Height="Auto"
+            VerticalAlignment="Top"
+            DropDownClosed="cmbChoices_DropDownClosed"
+            SelectionChanged="cmbChoices_SelectionChanged"
+            SelectedIndex="0"
+            Margin="5,5,5,5">
+            <ComboBoxItem Content="MRZ"/>
+            <ComboBoxItem Content="CAN"/>
+        </ComboBox>
+        <!--Label CAN-->
+        <Label
+            x:Name="lbCanValue"
+            Visibility="Collapsed"
+            Grid.Row="0"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Left"
+            Content="CAN VALUE"
+            Margin="5,40,5,5"/>
+        <!--Button Submit-->
+        <!--Textbox Can Value-->
+        <TextBox
+            x:Name="txtCanValue"
+            Visibility="Collapsed"
+            Width="200"
+            Text="CAN VALUE"
+            TextChanged="txtCanValue_TextChanged"
+            PreviewTextInput="txtCanValue_PreviewTextInput"
+            TextInput="txtCanValue_TextInput"
+            MouseLeave="txtCanValue_MouseLeave"
+            MouseEnter="txtCanValue_MouseEnter"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            Margin="5,40,5,5"/>
+        <!--Button Submit-->
+        <Button
+            x:Name="btnOK"
+            Grid.Row="1"
+            Click="btnOK_Click"
+            Width="100"
+            Content="OK"
+            Background="Transparent"
+            VerticalAlignment="Center"
+            Margin="5,5,5,5"/>
+    </Grid>
+</mah:MetroWindow>

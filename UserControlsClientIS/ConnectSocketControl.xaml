@@ -5,76 +5,92 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="250" 
-             d:DesignWidth="500">
+             Width="350"
+             mc:Ignorable="d">
     <Grid Background="#252525">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
         <Label
             x:Name="lbTitleConnectSocket"
+            Grid.Row="0"
             Content="NORMAL SOCKET CONNECTION"
             FontSize="16"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             Foreground="White"
             Background="#0767b3" 
-            Margin="0,0,0,214.6"/>
+            Margin="0"/>
 
         <Label
             FontSize="14"
-            Height="30"
-            Width="200"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
+            Grid.Row="1"
             Foreground="White"
-            Content="IP" Margin="0,40,0,179.6"/>
+            Content="IP" 
+            Margin="0"/>
 
         <TextBox
             x:Name="txtIP"
-            Height="30"
-            Width="200"
+            Grid.Row="2"
             Text="192.168.3.170"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             PreviewTextInput="txtIP_PreviewTextInput"
             TextChanged="txtIP_TextChanged"
-            Margin="75,75,75,144.6">
+            Margin="5,5,5,5">
         </TextBox>
 
         <Label
             FontSize="14"
-            Height="30"
-            Width="200"
+            Grid.Row="3"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             Foreground="White"
-            Content="PORT" Margin="0,110,0,109.6"/>
+            Content="PORT" 
+            Margin="0"/>
 
         <TextBox
             x:Name="txtPort"
+            Grid.Row="4"
             Text="9505"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             TextChanged="txtPort_TextChanged"
             PreviewTextInput="txtPort_PreviewTextInput"
-            Width="100"
-            Height="30"
-            Margin="200,145,200,74.6">
+            Margin="5,5,5,5">
         </TextBox>
 
-        <Button
-            x:Name="btnOkConnect"
-            Click="btnOkConnect_Click"
-            Content="CONNECT"
-            Width="80"
-            Height="30"
-            Margin="150,200,270,19.6"/>
+        <Grid
+            Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button
+                x:Name="btnOkConnect"
+                Grid.Column="0"
+                Click="btnOkConnect_Click"
+                Content="CONNECT"
+                Width="80"
+                Height="30"
+                Margin="5,5,5,5"/>
 
-        <Button
-            x:Name="btnCancelConnect"
-            Click="btnCancelConnect_Click"
-            Content="CANCEL"
-            Width="80"
-            Height="30"
-            Margin="270,200,150,19.6"/>
+            <Button
+                x:Name="btnCancelConnect"
+                Grid.Column="1"
+                Click="btnCancelConnect_Click"
+                Content="CANCEL"
+                Width="80"
+                Height="30"
+                Margin="5,5,5,5"/>
+        </Grid>
     </Grid>
 </UserControl>

@@ -186,11 +186,11 @@ namespace ClientInspectionSystem.SocketClient {
         public BaseDocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
                                                           bool dataGroupEnabled, bool optionalEnabled,
                                                           TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
-                                                          int timeOutInterVal) {
+                                                          int timeOutInterVal, string canValue) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(wsClient, mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalEnabled, timeOutResp,
-                                                                               documentDetailsListener, timeOutInterVal);
+                                                                               documentDetailsListener, timeOutInterVal, canValue);
                 BaseDocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }

@@ -195,6 +195,9 @@
     <Compile Include="FormBiometricAuth.xaml.cs">
       <DependentUpon>FormBiometricAuth.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FormChoiceReadDocument.xaml.cs">
+      <DependentUpon>FormChoiceReadDocument.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FormResultAuthorizationData.xaml.cs">
       <DependentUpon>FormResultAuthorizationData.xaml</DependentUpon>
     </Compile>
@@ -241,6 +244,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="FormBiometricAuth.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FormChoiceReadDocument.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
