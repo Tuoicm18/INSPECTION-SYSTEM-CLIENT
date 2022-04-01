@@ -12,8 +12,8 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private int timeOutInterVal;
 
         public GetDeviceDetails(ISPluginClient pluginClient, bool deviceDetailsEnabled, 
-                                    bool presenceEnabled, TimeSpan timeOutResp,
-                                    int timeOutInterVal) {
+                                bool presenceEnabled, TimeSpan timeOutResp,
+                                int timeOutInterVal) {
             this.pluginClient = pluginClient;
             this.deviceDetailsEnabled = deviceDetailsEnabled;
             this.presenceEnabled = presenceEnabled;

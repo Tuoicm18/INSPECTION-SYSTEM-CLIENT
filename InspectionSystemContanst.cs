@@ -31,6 +31,7 @@ namespace ClientInspectionSystem {
         public static string CONTENT_RE_CONNECT_MESSAGE_BOX = "RE-CONNECT SOCKET SERVER";
         public static string CONTENT_CONNECTED_MESSAGE_BOX = "SOCKET SERVER CONNECTION SUCCESSFUL";
         public static string CONTENT_FALIL = "ISSUE FOUND. PLEASE CHECK AGAIN";
+        public static string CONTENT_SUCCESS = "SUCCESSFUL";
         public static string CONTENT_READING_CHIP_MESSAGE_BOX = "READING CHIP...";
         public static string CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX = "WATING FOR RESULT...";
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PluginICAOClientSDK;
 using PluginICAOClientSDK.Response;
+using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
 
 namespace ClientInspectionSystem.SocketClient.Response {
@@ -26,6 +27,10 @@ namespace ClientInspectionSystem.SocketClient.Response {
         }
 
         public void onReceive(string cmd, string id, int error, ISMessage<object> data) {
+            throw new NotImplementedException();
+        }
+
+        public bool onReceivedBiometricResult(BaseBiometricAuthResp baseBiometricAuth) {
             throw new NotImplementedException();
         }
 

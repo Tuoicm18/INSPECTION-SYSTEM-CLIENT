@@ -54,7 +54,8 @@ namespace ClientInspectionSystem.UserControlsClientIS {
 
         private void needForConnectSocket(MainWindow mainWindow) {
             mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.deleagteConnect, mainWindow.isWSS, 
-                                                                      txtIP.Text, txtPort.Text, mainWindow.delegateAutoGetDoc);
+                                                                      txtIP.Text, txtPort.Text,
+                                                                      mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric);
             //Find Connect
             mainWindow.connectionSocket.findConnect(mainWindow);
             mainWindow.Dispatcher.Invoke(async() => {

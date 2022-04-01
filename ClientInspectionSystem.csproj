@@ -201,6 +201,9 @@
     <Compile Include="FormResultAuthorizationData.xaml.cs">
       <DependentUpon>FormResultAuthorizationData.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FormResultConfigDevice.xaml.cs">
+      <DependentUpon>FormResultConfigDevice.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IniFile.cs" />
     <Compile Include="InspectionSystemPraser.cs" />
     <Compile Include="Models\AuthDataKeyValue.cs" />
@@ -225,10 +228,14 @@
     <Compile Include="SocketClient\Request\ClientAuthorizationElement.cs" />
     <Compile Include="SocketClient\Response\ClientListener.cs" />
     <Compile Include="SocketClient\Response\GetBiometricAuthentication.cs" />
+    <Compile Include="SocketClient\Response\GetConnectToDevice.cs" />
     <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />
     <Compile Include="SocketClient\Response\GetDocumentDetails.cs" />
     <Compile Include="UserControlsClientIS\AddKeyValueControl.xaml.cs">
       <DependentUpon>AddKeyValueControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControlsClientIS\ConfigConnectToDeviceControl.xaml.cs">
+      <DependentUpon>ConfigConnectToDeviceControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControlsClientIS\ConnectSocketControl.xaml.cs">
       <DependentUpon>ConnectSocketControl.xaml</DependentUpon>
@@ -255,6 +262,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="FormResultConfigDevice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -273,6 +284,10 @@
     <Page Include="UserControlsClientIS\AddKeyValueControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControlsClientIS\ConfigConnectToDeviceControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControlsClientIS\ConnectSocketControl.xaml">
       <SubType>Designer</SubType>

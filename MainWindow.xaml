@@ -8,6 +8,7 @@
         xmlns:loadin="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
         xmlns:ucOptions ="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
         xmlns:ucConnectSocket="clr-namespace:ClientInspectionSystem.UserControlsClientIS"
+        xmlns:ucConfigConnectToDevice="clr-namespace:ClientInspectionSystem.UserControlsClientIS"         
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"   
         ResizeMode="CanMinimize"
@@ -144,12 +145,16 @@
             <!--Option             <Button x:Name="btnOption" Click="btnOption_Click">OPTIONS</Button> -->
             <Button x:Name="btnOption"
                     Content="OPTIONS"
-                    Visibility="Visible"
+                    Visibility="Collapsed"
                     Click="btnOption_Click"/>
             <!--Disconnect-->
             <Button x:Name="btnDisconnect"
                     Click="btnDisconnect_Click" 
                     Content="DISCONNECT"/>
+            <Button x:Name="btnConnectToDevice"
+                    Content="CONFIG DEVICE"
+                    Visibility="Visible"
+                    Click="btnConnectToDevice_Click"/>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 
@@ -721,12 +726,18 @@
                 </Border>
                 
                 <!--CONNECT SOCKET CONTROL-->
-                <ucConnectSocket:ConnectSocketControl
-                    
+                <ucConnectSocket:ConnectSocketControl                    
                     x:Name="conncetSocketControl"
                     Visibility="Collapsed" 
                     Grid.ColumnSpan="2" 
-                    Margin="97,55,115,24"/>
+                    Margin="80,80,80,80"/>
+                
+                <!--CONFIG CONNECT TO DEVICE-->
+                <ucConnectSocket:ConfigConnectToDeviceControl                    
+                    x:Name="configConnectToDeviceControl"
+                    Visibility="Collapsed" 
+                    Grid.ColumnSpan="2" 
+                    Margin="0"/>
                 <!--OPTION CONTROL-->
                 <Grid                            
                     Grid.ColumnSpan="2"

@@ -23,6 +23,8 @@ using Newtonsoft.Json;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Models;
+using PluginICAOClientSDK.Response.ConnectToDevice;
+using ClientInspectionSystem.UserControlsClientIS;
 
 /// <summary>
 /// Main Window Class.cs
@@ -40,6 +42,7 @@ namespace ClientInspectionSystem {
         //private static readonly string endPointUrl = "ws://192.168.3.170:9505/ISPlugin";
         public DeleagteConnect deleagteConnect;
         public DelegateAutoDocument delegateAutoGetDoc;
+        public DelegateAutoBiometricResult delegateAutoBiometric;
         public Connection connectionSocket;
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
@@ -79,6 +82,7 @@ namespace ClientInspectionSystem {
             try {
                 deleagteConnect = new DeleagteConnect(delegateFindConnect);
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
+                delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
                 connectionSocket = new Connection(deleagteConnect);
                 //connectionSocket.findConnect(this);
             }
@@ -87,6 +91,7 @@ namespace ClientInspectionSystem {
             }
 
             btnDisconnect.IsEnabled = false;
+            btnConnectToDevice.IsEnabled = false;
         }
         #endregion
 
@@ -115,6 +120,7 @@ namespace ClientInspectionSystem {
             }
         }
 
+        //Auto Get Document Details
         public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
             //ProgressDialogController controllerReadChip = null;
             if (manualReadDoc == false) {
@@ -214,6 +220,34 @@ namespace ClientInspectionSystem {
             catch (Exception eAutoDoc) {
                 Logmanager.Instance.writeLog("ERROR AUTO GET DOCUMENT " + eAutoDoc);
                 throw eAutoDoc;
+            }
+        }
+
+        //Auto Get Result Biometric Auth
+        public void autoGetBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
+            try {
+                if (null != baseBiometricAuthResp) {
+                    Logmanager.Instance.writeLog("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
+                    if(baseBiometricAuthResp.data.biometricType.Equals(BiometricType.TYPE_FACE)) {
+                        this.Dispatcher.Invoke(() => {
+                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                            formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
+                            formBiometricAuth.renderResultBiometricAuht(baseBiometricAuthResp);
+                            formBiometricAuth.Topmost = true;
+                            if (formBiometricAuth.ShowDialog() == true) { }
+                        });
+                    } else {
+                        this.Dispatcher.Invoke(() => {
+                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                            formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                            formBiometricAuth.renderResultBiometricAuht(baseBiometricAuthResp);
+                            formBiometricAuth.Topmost = true;
+                            if (formBiometricAuth.ShowDialog() == true) { }
+                        });
+                    }
+                }
+            } catch(Exception eAutoBiometric) {
+                Logmanager.Instance.writeLog("AUTO BIOMETRIC AUTH ERROR " + eAutoBiometric.ToString());
             }
         }
         #endregion
@@ -1051,7 +1085,7 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        #region TEST FORM AUTHORIZATION DATA
+        #region FOR TEST
         private void btnOption_Click(object sender, RoutedEventArgs e) {
             //this.Visibility = Visibility.Collapsed;
             FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
@@ -1097,6 +1131,12 @@ namespace ClientInspectionSystem {
             if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Space) {
                 e.Handled = true;
             }
+        }
+        #endregion
+
+        #region CONNECT TO DEVICE
+        private void btnConnectToDevice_Click(object sender, RoutedEventArgs e) {
+            configConnectToDeviceControl.Visibility = Visibility.Visible;
         }
         #endregion
     }

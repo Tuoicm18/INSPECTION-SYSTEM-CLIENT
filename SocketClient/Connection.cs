@@ -6,6 +6,7 @@ using PluginICAOClientSDK;
 using PluginICAOClientSDK.Request;
 using PluginICAOClientSDK.Response;
 using PluginICAOClientSDK.Response.BiometricAuth;
+using PluginICAOClientSDK.Response.ConnectToDevice;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,17 @@ using System.Threading.Tasks;
 namespace ClientInspectionSystem.SocketClient {
     public delegate void DeleagteConnect(bool isConnectWS);
     public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp documentDetailsResp);
+    public delegate void DelegateAutoGetBiometric(BaseBiometricAuthResp baseBiometricAuthResp);
     public class Connection {
         #region VARIABLE
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
         private readonly int FIND_CONNECT_INTEVAL = 500;
-        private readonly int MAX_PING = 500;
+        private readonly int MAX_PING = 100;
         private DeleagteConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
+        private DelegateAutoBiometricResult delegateAutoBiometric;
         private bool checkConnection;
         public bool CheckConnection {
             get { return checkConnection; }
@@ -42,17 +45,20 @@ namespace ClientInspectionSystem.SocketClient {
             deleagteConnect = dlgConnect;
         }
         public Connection(DeleagteConnect dlgConnect, bool secureConnect,
-                          string ip, string port, DelegateAutoDocument dlgAutoGetDoc) {
-            deleagteConnect = dlgConnect;
-            delegateAutoGetDoc = dlgAutoGetDoc;
+                          string ip, string port,
+                          DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult) {
+            this.deleagteConnect = dlgConnect;
+            this.delegateAutoGetDoc = dlgAutoGetDoc;
+            this.delegateAutoBiometric = delegateAutoBiometricResult;
+
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
                 string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, delegateAutoGetDoc, null);
+                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric);
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, delegateAutoGetDoc, null);
+                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, delegateAutoGetDoc, null, this.delegateAutoBiometric);
             }
         }
         #endregion
@@ -81,6 +87,7 @@ namespace ClientInspectionSystem.SocketClient {
                         if (isConnectWs) {
                             mainWindow.Dispatcher.Invoke(async () => {
                                 mainWindow.btnDisconnect.IsEnabled = true;
+                                mainWindow.btnConnectToDevice.IsEnabled = true;
                                 mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                                 mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
                                 mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
@@ -110,6 +117,7 @@ namespace ClientInspectionSystem.SocketClient {
                                 if (countFailConnect == MAX_PING) {
                                     mainWindow.IsEnabled = true;
                                     mainWindow.btnDisconnect.IsEnabled = false;
+                                    mainWindow.btnConnectToDevice.IsEnabled = false;
                                     mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                                     mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
                                 }
@@ -126,6 +134,7 @@ namespace ClientInspectionSystem.SocketClient {
                                 await controllerWSClientFail.CloseAsync();
                                 mainWindow.IsEnabled = true;
                                 mainWindow.btnDisconnect.IsEnabled = false;
+                                mainWindow.btnConnectToDevice.IsEnabled = false;
                                 mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                                 mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
                             });
@@ -156,6 +165,7 @@ namespace ClientInspectionSystem.SocketClient {
                 mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
                                                                                                     mainWindow.imgSocketConnectionStatus);
                 mainWindow.btnDisconnect.IsEnabled = false;
+                mainWindow.btnConnectToDevice.IsEnabled = false;
                 mainWindow.btnConnect.IsEnabled = true;
             });
             timeFindConnectWs.Stop();
@@ -215,6 +225,24 @@ namespace ClientInspectionSystem.SocketClient {
             catch (Exception eBiometricAuth) {
                 Logmanager.Instance.writeLog("GET RESULT BIOMETRIC ERROR " + eBiometricAuth.ToString());
                 throw eBiometricAuth;
+            }
+        }
+        #endregion
+
+        #region GET RESULT CONNECT TO DEVICE
+        public BaseConnectToDeviceResp getConnectToDevice(bool confirmEnabled, string confirmCode,
+                                                          string clientName, PluginICAOClientSDK.Models.ConfigConnect configConnect,
+                                                          TimeSpan timeOutResp, int timeOutInterVal) {
+            try {
+                GetConnectToDevice getConnectToDevice = new GetConnectToDevice(wsClient, confirmEnabled,
+                                                                               confirmCode, clientName,
+                                                                               configConnect, timeOutInterVal,
+                                                                               timeOutResp);
+                BaseConnectToDeviceResp baseConnectToDeviceResp = getConnectToDevice.getConnectToDevice();
+                return baseConnectToDeviceResp;
+            } catch(Exception eConnectToDevice) {
+                Logmanager.Instance.writeLog("CONNECT TO DEVICE ERROR " + eConnectToDevice.ToString());
+                throw eConnectToDevice;
             }
         }
         #endregion
