@@ -26,3 +26,4 @@ namespace ClientInspectionSystem.SocketClient.Response {
         }
     }
 }
+

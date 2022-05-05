@@ -25,6 +25,7 @@ using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using ClientInspectionSystem.UserControlsClientIS;
+using PluginICAOClientSDK.Util;
 
 /// <summary>
 /// Main Window Class.cs
@@ -43,6 +44,7 @@ namespace ClientInspectionSystem {
         public DeleagteConnect deleagteConnect;
         public DelegateAutoDocument delegateAutoGetDoc;
         public DelegateAutoBiometricResult delegateAutoBiometric;
+        public DelegateAutoReadNofity delegateAutoReadNofity;
         public Connection connectionSocket;
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
@@ -50,6 +52,7 @@ namespace ClientInspectionSystem {
         private bool manualReadDoc = false;
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
         private int timeOutSocket;
+        private ProgressDialogController dialogControllerAutoRead = null;
         //Update 2022.03.11 For Can Value Request Read Document
         private bool isReadByCanValue = false;
         #endregion
@@ -83,6 +86,7 @@ namespace ClientInspectionSystem {
                 deleagteConnect = new DeleagteConnect(delegateFindConnect);
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
                 delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
+                delegateAutoReadNofity = new DelegateAutoReadNofity(autoReadNotify);
                 connectionSocket = new Connection(deleagteConnect);
                 //connectionSocket.findConnect(this);
             }
@@ -138,6 +142,9 @@ namespace ClientInspectionSystem {
                             bool getDocSuccess = autoGetDocumentToLayout(documentDetailsResp);
                             if (getDocSuccess) {
                                 //controllerReadChip.CloseAsync();
+                                if (null != dialogControllerAutoRead) {
+                                    this.dialogControllerAutoRead.CloseAsync();
+                                }
                             }
                             else {
                                 //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
@@ -155,7 +162,7 @@ namespace ClientInspectionSystem {
                         //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
                         //await controllerReadChip.CloseAsync();
                         clearLayout(false);
-                        Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                        Logmanager.Instance.writeLog("AUTO READ CHIP EXCEPTION " + eReadChip.ToString());
                     } finally {
                         btnIDocument.IsEnabled = true;
                     }
@@ -210,15 +217,38 @@ namespace ClientInspectionSystem {
                     if (!documentDetailsResp.data.efCardAccess.Equals(string.Empty)) { updateBackgroundBtnDG(btnCSC, 2); }
 
                     Logmanager.Instance.writeLog("AUTO GET DOCUMENT DETAILS SUCCESS");
+                    //if (null != this.dialogControllerAutoRead) {
+                    //    this.Dispatcher.Invoke(() => {
+                    //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ (AUTO GET DOCUMENT SUCCESS)");
+                    //        this.dialogControllerAutoRead.CloseAsync();
+                    //        this.dialogControllerAutoRead = null;
+                    //    });
+                    //}
                     return true;
                 }
                 else {
                     Logmanager.Instance.writeLog("AUTO GET DOCUMENT DETAILS FAILURE <DATA IS NULL>");
+                    //if (null != this.dialogControllerAutoRead) {
+                    //    this.Dispatcher.Invoke(() => {
+                    //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ (AUTO GET DOCUMENT FALIURE)");
+                    //        this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                    //        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_1S);
+                    //        this.dialogControllerAutoRead.CloseAsync();
+                    //    });
+                    //}
                     return false;
                 }
             }
             catch (Exception eAutoDoc) {
                 Logmanager.Instance.writeLog("ERROR AUTO GET DOCUMENT " + eAutoDoc);
+                //if (null != this.dialogControllerAutoRead) {
+                //    this.Dispatcher.Invoke(() => {
+                //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ EXCEPTION AUTO GET DOCUMENT " + eAutoDoc.ToString());
+                //        this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                //        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_1S);
+                //        this.dialogControllerAutoRead.CloseAsync();
+                //    });
+                //}
                 throw eAutoDoc;
             }
         }
@@ -228,7 +258,7 @@ namespace ClientInspectionSystem {
             try {
                 if (null != baseBiometricAuthResp) {
                     Logmanager.Instance.writeLog("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
-                    if(baseBiometricAuthResp.data.biometricType.Equals(BiometricType.TYPE_FACE)) {
+                    if (baseBiometricAuthResp.data.biometricType.Equals(BiometricType.TYPE_FACE)) {
                         this.Dispatcher.Invoke(() => {
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
@@ -236,7 +266,8 @@ namespace ClientInspectionSystem {
                             formBiometricAuth.Topmost = true;
                             if (formBiometricAuth.ShowDialog() == true) { }
                         });
-                    } else {
+                    }
+                    else {
                         this.Dispatcher.Invoke(() => {
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
@@ -246,8 +277,61 @@ namespace ClientInspectionSystem {
                         });
                     }
                 }
-            } catch(Exception eAutoBiometric) {
+            }
+            catch (Exception eAutoBiometric) {
                 Logmanager.Instance.writeLog("AUTO BIOMETRIC AUTH ERROR " + eAutoBiometric.ToString());
+            }
+        }
+
+        //Auto Read Notify 
+        public void autoReadNotify(string json) {
+            try {
+                //Logmanager.Instance.writeLog("<TEST AUTO READ NOTIFY> " + json);
+
+                if (json.Equals(NotifyAutoReadDocument.NOTIFY_AUTO_START)) {
+                    if (!manualReadDoc) {
+                        this.Dispatcher.Invoke(async () => {
+                            clearLayout(true);
+                            showMain();
+                            this.dialogControllerAutoRead = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX + "AUTO");
+                            this.dialogControllerAutoRead.SetIndeterminate();
+                        });
+                    }
+                }
+                else if (json.Equals(NotifyAutoReadDocument.NOTIFY_AUTO_ERROR)) {
+                    if (null != dialogControllerAutoRead) {
+                        this.Dispatcher.Invoke(async () => {
+                            Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ");
+                            clearLayout(true);
+                            showMain();
+                            this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                            await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
+                            await this.dialogControllerAutoRead.CloseAsync();
+                        });
+                    }
+                }
+            }
+            catch (Exception e) {
+                if(e is ISPluginException) {
+                    ISPluginException pluginException = (ISPluginException)e;
+                    if (null != dialogControllerAutoRead) {
+                        clearLayout(true);
+                        showMain();
+                        this.dialogControllerAutoRead.SetMessage(pluginException.errMsg.ToUpper());
+                        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_5S);
+                        this.dialogControllerAutoRead.CloseAsync();
+                    }
+                } else {
+                    if (null != dialogControllerAutoRead) {
+                        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ EXCEPTION " + e.ToString());
+                        clearLayout(true);
+                        showMain();
+                        this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_2S);
+                        this.dialogControllerAutoRead.CloseAsync();
+                    }
+                }
+                Logmanager.Instance.writeLog("DELEGATE NOTIFY AUTO READ ERROR " + e.ToString());
             }
         }
         #endregion
@@ -313,10 +397,15 @@ namespace ClientInspectionSystem {
                                                                       InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX);
                     controllerReadChip.SetIndeterminate();
                     //Call socket server
-                    bool mrzEnabled = true;
-                    bool imageEnabled = true;
-                    bool dataGroupEnabled = false;
-                    bool optionalDetailsEnabled = true;
+                    //bool mrzEnabled = true;
+                    //bool imageEnabled = true;
+                    //bool dataGroupEnabled = false;
+                    //bool optionalDetailsEnabled = true;
+
+                    bool mrzEnabled = configConnectToDeviceControl.getMRZEnabled();
+                    bool imageEnabled = configConnectToDeviceControl.getImgaeEnabled();
+                    bool dataGroupEnabled = configConnectToDeviceControl.getDataGroupEnabled();
+                    bool optionalDetailsEnabled = configConnectToDeviceControl.getOptionalDetailsEnabled();
 
                     timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
                     TimeSpan timeOutForResp = TimeSpan.FromSeconds(timeOutSocket);
@@ -359,9 +448,18 @@ namespace ClientInspectionSystem {
                     //    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
                     //}
 
-                    controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
-                    await controllerReadChip.CloseAsync();
+                    if (eReadChip is ISPluginException) {
+                        ISPluginException pluginException = (ISPluginException)eReadChip;
+                        controllerReadChip.SetMessage(pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerReadChip.CloseAsync();
+                    }
+                    else {
+                        controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerReadChip.CloseAsync();
+                    }
+
                     clearLayout(false);
                     Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
                 } finally {
@@ -415,9 +513,12 @@ namespace ClientInspectionSystem {
                                                     deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
                                                     deviceDetailsResp.data.totalPreceeded.ToString());
                         }
+
+                        if (configConnectToDeviceControl.getMRZEnabled()) {
+                            if (!documentDetailsResp.data.mrzString.Equals(string.Empty) && !isReadByCanValue) { updateBackgroundBtnDG(btnMRZ, 2); }
+                        }
                     });
 
-                    if (!documentDetailsResp.data.mrzString.Equals(string.Empty) && !isReadByCanValue) { updateBackgroundBtnDG(btnMRZ, 2); }
                     if (documentDetailsResp.data.bacEnabled) { updateBackgroundBtnDG(btnBAC, 2); }
                     if (documentDetailsResp.data.paceEnabled) { updateBackgroundBtnDG(btnSAC, 2); }
                     if (documentDetailsResp.data.activeAuthenticationEnabled) { updateBackgroundBtnDG(btnAA, 2); }
@@ -1093,6 +1194,10 @@ namespace ClientInspectionSystem {
             if (formChoiceReadDocument.ShowDialog() == true) {
                 //this.Visibility = Visibility.Visible;
             }
+        }
+
+        private void btnDG1_Click(object sender, RoutedEventArgs e) {
+            
         }
         #endregion
 

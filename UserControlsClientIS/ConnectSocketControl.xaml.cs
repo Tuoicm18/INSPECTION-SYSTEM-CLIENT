@@ -1,5 +1,7 @@
 ﻿using ClientInspectionSystem.LoadData;
 using ClientInspectionSystem.SocketClient.Response;
+using MahApps.Metro.Controls.Dialogs;
+using Newtonsoft.Json;
 using PluginICAOClientSDK.Response;
 using System;
 using System.Collections.Generic;
@@ -24,11 +26,16 @@ namespace ClientInspectionSystem.UserControlsClientIS {
 
         public ConnectSocketControl() {
             InitializeComponent();
-            if (txtIP.Text.Equals(string.Empty) || txtPort.Text.Equals(string.Empty)) {
-                if (btnOkConnect != null) {
-                    btnOkConnect.IsEnabled = false;
+
+            this.Dispatcher.Invoke(() => {
+                //txtIP.Text = ClientExtentions.GetLocalIPAddress();
+                txtIP.Text = "192.168.6.170";
+                if (txtIP.Text.Equals(string.Empty) || txtPort.Text.Equals(string.Empty)) {
+                    if (btnOkConnect != null) {
+                        btnOkConnect.IsEnabled = false;
+                    }
                 }
-            }
+            });
         }
 
         #region HANDLE BUTTON CONNECT SOCKET
@@ -53,12 +60,14 @@ namespace ClientInspectionSystem.UserControlsClientIS {
         }
 
         private void needForConnectSocket(MainWindow mainWindow) {
-            mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.deleagteConnect, mainWindow.isWSS, 
+            mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.deleagteConnect, mainWindow.isWSS,
                                                                       txtIP.Text, txtPort.Text,
-                                                                      mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric);
+                                                                      mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
+                                                                      mainWindow.delegateAutoReadNofity);
             //Find Connect
             mainWindow.connectionSocket.findConnect(mainWindow);
-            mainWindow.Dispatcher.Invoke(async() => {
+
+            mainWindow.Dispatcher.Invoke(async () => {
                 try {
                     //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
                     //Update 2022.02.28 TIME OUT INI FILE
@@ -68,6 +77,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                         PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
                                                                                                                                                           TimeSpan.FromSeconds(timeOutSocket),
                                                                                                                                                           timeOutSocket);
+
                         mainWindow.Dispatcher.Invoke(() => {
                             LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
                                                                                 deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
@@ -131,6 +141,20 @@ namespace ClientInspectionSystem.UserControlsClientIS {
             Window parentWindow = Window.GetWindow(this);
             MainWindow mainWindow = (MainWindow)parentWindow.FindName("mainWindow");
             mainWindow.btnConnect.IsEnabled = true;
+        }
+        #endregion
+
+        #region HADNLE ENTER KEY
+        private void txtIP_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter) {
+                btnOkConnect_Click(sender, e);
+            }
+        }
+
+        private void txtPort_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter) {
+                btnOkConnect_Click(sender, e);
+            }
         }
         #endregion
     }

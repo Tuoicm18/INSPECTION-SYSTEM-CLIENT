@@ -699,7 +699,7 @@
                             Click="btnCopyMRZ_Click"
                             Grid.Row="1"
                             Background="Transparent"
-                            Margin="2,2,200,2" 
+                            Margin="2,2,220,2" 
                             Width="30"
                             Height="30"
                             Foreground="White"
@@ -714,10 +714,10 @@
                         <Label
                             x:Name="lbMRZ"
                             Grid.Row="1"
-                            Width="225"
+                            Width="235"
                             Height="50"
                             Grid.Column="1"
-                            Margin="80,2,2,2" 
+                            Margin="60,2,2,2" 
                             Foreground="White"
                             FontStretch="Normal" 
                             FontFamily="Fonts/#OcrB">
@@ -1034,12 +1034,13 @@
                         <!--Btn DG1-->
                         <Viewbox>
                             <Button 
-                            x:Name="btnDG1"  
-                            Focusable="False"
-                            IsCancel="False"         
-                            Margin="3,8,3,8"
-                            Style="{StaticResource StyleButtonDG}"
-                            Grid.Column="0">
+                                x:Name="btnDG1"  
+                                Focusable="False"
+                                IsCancel="False"         
+                                Margin="3,8,3,8"
+                                Click="btnDG1_Click"
+                                Style="{StaticResource StyleButtonDG}"
+                                Grid.Column="0">
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <Viewbox>

@@ -8,6 +8,7 @@ using PluginICAOClientSDK.Response;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
+using PluginICAOClientSDK.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,16 +20,22 @@ namespace ClientInspectionSystem.SocketClient {
     public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp documentDetailsResp);
     public delegate void DelegateAutoGetBiometric(BaseBiometricAuthResp baseBiometricAuthResp);
     public class Connection {
+
         #region VARIABLE
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        private readonly int FIND_CONNECT_INTEVAL = 500;
-        private readonly int MAX_PING = 100;
+        private readonly int FIND_CONNECT_INTEVAL = 1000;
+        private readonly long MAX_PING = long.MaxValue;
         private DeleagteConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
         private DelegateAutoBiometricResult delegateAutoBiometric;
+        private DelegateAutoReadNofity delegateAutoReadNofity;
+
         private bool checkConnection;
+        private IniFile iniFile = new IniFile("Data\\clientIS.ini");
+        private int timeOutSocket;
+
         public bool CheckConnection {
             get { return checkConnection; }
         }
@@ -37,6 +44,7 @@ namespace ClientInspectionSystem.SocketClient {
         public ISPluginClient WSClient {
             get { return wsClient; }
         }
+
         private System.Timers.Timer timeFindConnectWs;
         #endregion
 
@@ -46,19 +54,21 @@ namespace ClientInspectionSystem.SocketClient {
         }
         public Connection(DeleagteConnect dlgConnect, bool secureConnect,
                           string ip, string port,
-                          DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult) {
+                          DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
+                          DelegateAutoReadNofity dlgAutoReadNotify) {
             this.deleagteConnect = dlgConnect;
             this.delegateAutoGetDoc = dlgAutoGetDoc;
             this.delegateAutoBiometric = delegateAutoBiometricResult;
+            this.delegateAutoReadNofity = dlgAutoReadNotify;
 
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
                 string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric);
+                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity);
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, delegateAutoGetDoc, null, this.delegateAutoBiometric);
+                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity);
             }
         }
         #endregion
@@ -88,6 +98,7 @@ namespace ClientInspectionSystem.SocketClient {
                             mainWindow.Dispatcher.Invoke(async () => {
                                 mainWindow.btnDisconnect.IsEnabled = true;
                                 mainWindow.btnConnectToDevice.IsEnabled = true;
+                                mainWindow.btnConnect.IsEnabled = false;
                                 mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                                 mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
                                 mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
@@ -113,35 +124,37 @@ namespace ClientInspectionSystem.SocketClient {
                                                                                                                     mainWindow.imgSocketConnectionStatus);
                                 mainWindow.btnConnect.IsEnabled = true;
 
-                                //Logmanager.Instance.writeLog("COUNT FAIL >>> " + countFailConnect);
-                                if (countFailConnect == MAX_PING) {
-                                    mainWindow.IsEnabled = true;
-                                    mainWindow.btnDisconnect.IsEnabled = false;
-                                    mainWindow.btnConnectToDevice.IsEnabled = false;
-                                    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                                    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
-                                }
+                                connect();
+
+                                ////Logmanager.Instance.writeLog("COUNT FAIL >>> " + countFailConnect);
+                                //if (countFailConnect == MAX_PING) {
+                                //    mainWindow.IsEnabled = true;
+                                //    mainWindow.btnDisconnect.IsEnabled = false;
+                                //    mainWindow.btnConnectToDevice.IsEnabled = false;
+                                //    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                                //    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL XXX";
+                                //}
                             });
                         }
 
                         //Logmanager.Instance.writeLog("COUNT FAIL <<< " + countFailConnect);
-                        if (countFailConnect == MAX_PING) {
-                            mainWindow.Dispatcher.Invoke(async () => {
-                                await controllerWSClient.CloseAsync();
-                                ProgressDialogController controllerWSClientFail = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                                                                     InspectionSystemContanst.CONTENT_FALIL);
-                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
-                                await controllerWSClientFail.CloseAsync();
-                                mainWindow.IsEnabled = true;
-                                mainWindow.btnDisconnect.IsEnabled = false;
-                                mainWindow.btnConnectToDevice.IsEnabled = false;
-                                mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                                mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL";
-                            });
-                            timeFindConnectWs.Stop();
-                            countFailConnect = 0;
-                            wsClient.shutDown();
-                        }
+                        //if (countFailConnect == MAX_PING) {
+                        //    mainWindow.Dispatcher.Invoke(async () => {
+                        //        await controllerWSClient.CloseAsync();
+                        //        ProgressDialogController controllerWSClientFail = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
+                        //                                                                                             InspectionSystemContanst.CONTENT_FALIL);
+                        //        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
+                        //        await controllerWSClientFail.CloseAsync();
+                        //        mainWindow.IsEnabled = true;
+                        //        mainWindow.btnDisconnect.IsEnabled = false;
+                        //        mainWindow.btnConnectToDevice.IsEnabled = false;
+                        //        mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                        //        mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL YYYY";
+                        //    });
+                        //    timeFindConnectWs.Stop();
+                        //    countFailConnect = 0;
+                        //    wsClient.shutDown();
+                        //}
                     };
                     timeFindConnectWs.Start();
                 });
@@ -149,6 +162,13 @@ namespace ClientInspectionSystem.SocketClient {
             catch (Exception eFindConnect) {
                 Logmanager.Instance.writeLog("FIND CONNECT ERROR " + eFindConnect.ToString());
             }
+        }
+        #endregion
+
+
+        #region CONNECT SOCKET
+        public void connect() {
+            wsClient.connectSocketServer();
         }
         #endregion
 
@@ -240,7 +260,8 @@ namespace ClientInspectionSystem.SocketClient {
                                                                                timeOutResp);
                 BaseConnectToDeviceResp baseConnectToDeviceResp = getConnectToDevice.getConnectToDevice();
                 return baseConnectToDeviceResp;
-            } catch(Exception eConnectToDevice) {
+            }
+            catch (Exception eConnectToDevice) {
                 Logmanager.Instance.writeLog("CONNECT TO DEVICE ERROR " + eConnectToDevice.ToString());
                 throw eConnectToDevice;
             }

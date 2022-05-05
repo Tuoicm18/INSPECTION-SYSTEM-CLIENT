@@ -38,12 +38,13 @@
             Grid.Row="1"
             Foreground="White"
             Content="IP" 
-            Margin="0"/>
+            Margin="25,5,5,5"/>
 
         <TextBox
             x:Name="txtIP"
             Grid.Row="1"
             Text="192.168.3.170"
+            KeyDown="txtIP_KeyDown"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             PreviewTextInput="txtIP_PreviewTextInput"
@@ -60,7 +61,7 @@
             HorizontalContentAlignment="Left"
             Foreground="White"
             Content="PORT" 
-            Margin="0"/>
+            Margin="25,5,5,5"/>
 
         <TextBox
             x:Name="txtPort"
@@ -68,6 +69,7 @@
             Text="9505"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
+            KeyDown="txtPort_KeyDown"
             TextChanged="txtPort_TextChanged"
             PreviewTextInput="txtPort_PreviewTextInput"
             Margin="110,5,5,5">

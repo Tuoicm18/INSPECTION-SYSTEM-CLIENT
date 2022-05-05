@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.ConnectToDevice;
+using PluginICAOClientSDK.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,11 +67,20 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                 }
 
             } catch (Exception eConfigConenct) {
-                mainWindow.Dispatcher.Invoke(async () => {
-                    ProgressDialogController progressDialog = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
-                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                    await progressDialog.CloseAsync();
-                });
+                if(eConfigConenct is ISPluginException) {
+                    ISPluginException pluginException = (ISPluginException)eConfigConenct;
+                    mainWindow.Dispatcher.Invoke(async () => {
+                        ProgressDialogController progressDialog = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await progressDialog.CloseAsync();
+                    });
+                } else {
+                    mainWindow.Dispatcher.Invoke(async () => {
+                        ProgressDialogController progressDialog = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await progressDialog.CloseAsync();
+                    });
+                }
                 Logmanager.Instance.writeLog("ERROR CONNECT TO DEVICE " + eConfigConenct.ToString());
             } finally {
                 this.Visibility = Visibility.Collapsed;
