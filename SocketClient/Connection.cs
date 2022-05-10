@@ -31,6 +31,7 @@ namespace ClientInspectionSystem.SocketClient {
         private DelegateAutoDocument delegateAutoGetDoc;
         private DelegateAutoBiometricResult delegateAutoBiometric;
         private DelegateAutoReadNofity delegateAutoReadNofity;
+        private DelegateCardDetectionEvent delegateCardDetectionEvent;
 
         private bool checkConnection;
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
@@ -46,7 +47,7 @@ namespace ClientInspectionSystem.SocketClient {
         }
 
         private System.Timers.Timer timeFindConnectWs;
-        #endregion
+        #endregion 
 
         #region CONSTRUCTOR
         public Connection(DeleagteConnect dlgConnect) {
@@ -55,20 +56,21 @@ namespace ClientInspectionSystem.SocketClient {
         public Connection(DeleagteConnect dlgConnect, bool secureConnect,
                           string ip, string port,
                           DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
-                          DelegateAutoReadNofity dlgAutoReadNotify) {
+                          DelegateAutoReadNofity dlgAutoReadNotify, DelegateCardDetectionEvent dlgCardEvent) {
             this.deleagteConnect = dlgConnect;
             this.delegateAutoGetDoc = dlgAutoGetDoc;
             this.delegateAutoBiometric = delegateAutoBiometricResult;
             this.delegateAutoReadNofity = dlgAutoReadNotify;
+            this.delegateCardDetectionEvent = dlgCardEvent;
 
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
                 string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity);
+                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity, this.delegateCardDetectionEvent);
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity);
+                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity, this.delegateCardDetectionEvent);
             }
         }
         #endregion
@@ -165,7 +167,6 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
-
         #region CONNECT SOCKET
         public void connect() {
             wsClient.connectSocketServer();
@@ -216,11 +217,13 @@ namespace ClientInspectionSystem.SocketClient {
         public BaseDocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
                                                           bool dataGroupEnabled, bool optionalEnabled,
                                                           TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
-                                                          int timeOutInterVal, string canValue) {
+                                                          int timeOutInterVal, string canValue,
+                                                          string challenge) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(wsClient, mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalEnabled, timeOutResp,
-                                                                               documentDetailsListener, timeOutInterVal, canValue);
+                                                                               documentDetailsListener, timeOutInterVal, 
+                                                                               canValue, challenge);
                 BaseDocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }

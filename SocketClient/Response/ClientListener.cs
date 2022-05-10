@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using PluginICAOClientSDK;
 using PluginICAOClientSDK.Response;
 using PluginICAOClientSDK.Response.BiometricAuth;
+using PluginICAOClientSDK.Response.CardDetectionEvent;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
 
 namespace ClientInspectionSystem.SocketClient.Response {
@@ -35,6 +36,10 @@ namespace ClientInspectionSystem.SocketClient.Response {
         }
 
         public bool onReceivedDocument(BaseDocumentDetailsResp document) {
+            throw new NotImplementedException();
+        }
+
+        public bool onReceviedCardDetectionEvent(BaseCardDetectionEventResp baseCardDetectionEvent) {
             throw new NotImplementedException();
         }
     }

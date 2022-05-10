@@ -14,11 +14,14 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private ISPluginClient.DocumentDetailsListener documentDetailsListener;
         private int timeOutInterVal;
         private string canValue;
+        private string challenge;
+
         public GetDocumentDetails(ISPluginClient pluginClient, bool mrzEnabled,
                                   bool imageEnabled, bool dataGroupEnabled, 
                                   bool optionalDetailsEnabled, TimeSpan timeoutResp,
                                   ISPluginClient.DocumentDetailsListener documentDetailsListener,
-                                  int timeOutInterVal, string canValue) {
+                                  int timeOutInterVal, string canValue,
+                                  string challenge) {
             this.pluginClient = pluginClient;
             this.mrzEnabled = mrzEnabled;
             this.imageEnabled = imageEnabled;
@@ -28,13 +31,15 @@ namespace ClientInspectionSystem.SocketClient.Response {
             this.documentDetailsListener = documentDetailsListener;
             this.timeOutInterVal = timeOutInterVal;
             this.canValue = canValue;
+            this.challenge = challenge;
         }
 
         public BaseDocumentDetailsResp getDocumentDetails() {
             return pluginClient.getDocumentDetails(mrzEnabled, imageEnabled, 
                                                    dataGroupEnabled, optionalDetailsEnabled, 
                                                    timeOutResp, documentDetailsListener,
-                                                   timeOutInterVal, canValue);
+                                                   timeOutInterVal, canValue,
+                                                   challenge);
         }
     }
 }

@@ -34,6 +34,8 @@ namespace ClientInspectionSystem {
         public static string CONTENT_SUCCESS = "SUCCESSFUL";
         public static string CONTENT_READING_CHIP_MESSAGE_BOX = "READING CHIP...";
         public static string CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX = "WATING FOR RESULT...";
+        public static string CONTENT_CARD_DETECTION_EVENT = "DETECT CARD";
+        public static string CONTENT_CARD_NOT_DETECTED_EVENT = "CARD NOT DETECTED";
 
 
         //Time out dialog

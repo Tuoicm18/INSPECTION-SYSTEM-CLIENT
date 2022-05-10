@@ -63,7 +63,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
             mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.deleagteConnect, mainWindow.isWSS,
                                                                       txtIP.Text, txtPort.Text,
                                                                       mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
-                                                                      mainWindow.delegateAutoReadNofity);
+                                                                      mainWindow.delegateAutoReadNofity, mainWindow.delegateCardDetectionEvent);
             //Find Connect
             mainWindow.connectionSocket.findConnect(mainWindow);
 

@@ -78,8 +78,10 @@ namespace ClientInspectionSystem {
             lbResult.Visibility = System.Windows.Visibility.Collapsed;
             lbScore.Visibility = System.Windows.Visibility.Collapsed;
             lbScoreResult.Visibility = System.Windows.Visibility.Collapsed;
-            lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
-            lbIssueDetailsResult.Visibility = System.Windows.Visibility.Collapsed;
+            lbIssueDetailCode.Visibility = System.Windows.Visibility.Collapsed;
+            lbResultIssueCode.Visibility = System.Windows.Visibility.Collapsed;
+            lbIssueDetailMessage.Visibility = System.Windows.Visibility.Collapsed;
+            lbResultIssueMessage.Visibility = System.Windows.Visibility.Collapsed;
             lbJWT.Visibility = System.Windows.Visibility.Collapsed;
             btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
             //Set height Form
@@ -91,15 +93,17 @@ namespace ClientInspectionSystem {
             string biometricType = baseBiometricAuthResp.data.biometricType;
             bool biometricResult = baseBiometricAuthResp.data.result;
             int biometricScore = baseBiometricAuthResp.data.score;
-            string issueDetails = baseBiometricAuthResp.data.issueDetails;
+            int issueDetailCode = baseBiometricAuthResp.data.issueDetailCode;
+            string issueDetailMsg = baseBiometricAuthResp.data.issueDetailMessage;
             int responseCode = baseBiometricAuthResp.errorCode;
             string responseMessage = baseBiometricAuthResp.errorMessage;
             string jwt = baseBiometricAuthResp.data.JWT;
-  
+
+            lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
+            lbResultIssueCode.Content = issueDetailCode.ToString();
+            lbResultIssueMessage.Content = issueDetailMsg;
 
             if (responseCode == 0) {
-                lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
-
                 if (biometricType.Equals(BiometricType.TYPE_FINGER_LEFT) || biometricType.Equals(BiometricType.TYPE_FINGER_RIGHT)) {
                     lbTypeResult.Content = biometricType;
                     lbResult.Content = biometricResult.ToString().ToLower();
@@ -113,41 +117,53 @@ namespace ClientInspectionSystem {
                         //scvJWT.Visibility = System.Windows.Visibility.Collapsed;
                     }
                     //Hide Label Issue Details
-                    lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
-                    lbIssueDetailsResult.Visibility = System.Windows.Visibility.Collapsed;
+                    //lbIssueDetailCode.Visibility = System.Windows.Visibility.Collapsed;
+                    //lbResultIssueCode.Visibility = System.Windows.Visibility.Collapsed;
+                    //lbIssueDetailMessage.Visibility = System.Windows.Visibility.Collapsed;
+                    //lbResultIssueMessage.Visibility = System.Windows.Visibility.Collapsed;
                 }
                 else {
                     lbTypeResult.Content = biometricType;
                     lbResult.Content = biometricResult.ToString().ToLower();
                     lbScoreResult.Content = biometricScore.ToString();
-                    if (!biometricResult) {
-                        if (!string.IsNullOrEmpty(issueDetails)) {
-                            //Show Label Issue Details
-                            //lbIssueDetailsResult.Content = issueDetails;
-                            //lbIssueDetails.Visibility = System.Windows.Visibility.Visible;
-                            //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Visible;
-                            lbJWT.Content = lbIssueDetails.Content;
-                            textBlockJWT.Text = issueDetails;
-                            textBlockJWT.Visibility = System.Windows.Visibility.Visible;
-                            btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
-                        }
-                        //Hide Label JWT
-                        //scvJWT.Visibility = System.Windows.Visibility.Collapsed;
-                        //lbJWT.Visibility = System.Windows.Visibility.Collapsed;
-                        //btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
+
+                    if (biometricResult) {
+                        textBlockJWT.Text = jwt;
                     }
                     else {
-                        //Hide Label Issue Details
-                        //lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
-                        //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Collapsed;
-
-                        //Show Label JWT
-                        lbJWT.Content = "JWT";
-                        textBlockJWT.Text = jwt;
-                        //scvJWT.Visibility = System.Windows.Visibility.Visible;
-                        lbJWT.Visibility = System.Windows.Visibility.Visible;
-                        btnViewJWT.Visibility = System.Windows.Visibility.Visible;
+                        lbJWT.Visibility = System.Windows.Visibility.Collapsed;
+                        btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
+                        //scvJWT.Visibility = System.Windows.Visibility.Collapsed;
                     }
+
+                    //if (!biometricResult) {
+                    //    if (!string.IsNullOrEmpty(issueDetails)) {
+                    //        //Show Label Issue Details
+                    //        //lbIssueDetailsResult.Content = issueDetails;
+                    //        //lbIssueDetails.Visibility = System.Windows.Visibility.Visible;
+                    //        //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Visible;
+                    //        lbJWT.Content = lbIssueDetails.Content;
+                    //        textBlockJWT.Text = issueDetails;
+                    //        textBlockJWT.Visibility = System.Windows.Visibility.Visible;
+                    //        btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
+                    //    }
+                    //    //Hide Label JWT
+                    //    //scvJWT.Visibility = System.Windows.Visibility.Collapsed;
+                    //    //lbJWT.Visibility = System.Windows.Visibility.Collapsed;
+                    //    //btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
+                    //}
+                    //else {
+                    //    //Hide Label Issue Details
+                    //    //lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
+                    //    //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Collapsed;
+
+                    //    //Show Label JWT
+                    //    lbJWT.Content = "JWT";
+                    //    textBlockJWT.Text = jwt;
+                    //    //scvJWT.Visibility = System.Windows.Visibility.Visible;
+                    //    lbJWT.Visibility = System.Windows.Visibility.Visible;
+                    //    btnViewJWT.Visibility = System.Windows.Visibility.Visible;
+                    //}
                 }
             }
             else {
@@ -157,7 +173,7 @@ namespace ClientInspectionSystem {
                 }
                 lbType.Visibility = System.Windows.Visibility.Collapsed;
                 lbTitleResult.Visibility = System.Windows.Visibility.Collapsed;
-                lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
+                //lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
                 //scvJWT.Visibility = System.Windows.Visibility.Collapsed;
                 lbJWT.Visibility = System.Windows.Visibility.Collapsed;
                 btnViewJWT.Visibility = System.Windows.Visibility.Collapsed;
@@ -206,9 +222,12 @@ namespace ClientInspectionSystem {
                 lbResult.Visibility = System.Windows.Visibility.Collapsed;
                 lbScore.Visibility = System.Windows.Visibility.Collapsed;
                 lbScoreResult.Visibility = System.Windows.Visibility.Collapsed;
-                //lbIssueDetails.Visibility = System.Windows.Visibility.Collapsed;
-                //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Collapsed;
-            } else {
+                lbIssueDetailCode.Visibility = System.Windows.Visibility.Collapsed;
+                lbResultIssueCode.Visibility = System.Windows.Visibility.Collapsed;
+                lbIssueDetailMessage.Visibility = System.Windows.Visibility.Collapsed;
+                lbResultIssueMessage.Visibility = System.Windows.Visibility.Collapsed;
+            }
+            else {
                 gridForViewJWT.Visibility = System.Windows.Visibility.Collapsed;
                 txtViewJWT.Text = string.Empty;
                 //Show Label
@@ -220,8 +239,10 @@ namespace ClientInspectionSystem {
                 lbResult.Visibility = System.Windows.Visibility.Visible;
                 lbScore.Visibility = System.Windows.Visibility.Visible;
                 lbScoreResult.Visibility = System.Windows.Visibility.Visible;
-                //lbIssueDetails.Visibility = System.Windows.Visibility.Visible;
-                //lbIssueDetailsResult.Visibility = System.Windows.Visibility.Visible;
+                lbIssueDetailCode.Visibility = System.Windows.Visibility.Visible;
+                lbResultIssueCode.Visibility = System.Windows.Visibility.Visible;
+                lbIssueDetailMessage.Visibility = System.Windows.Visibility.Visible;
+                lbResultIssueMessage.Visibility = System.Windows.Visibility.Visible;
             }
         }
     }

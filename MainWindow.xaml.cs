@@ -26,6 +26,7 @@ using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using ClientInspectionSystem.UserControlsClientIS;
 using PluginICAOClientSDK.Util;
+using PluginICAOClientSDK.Response.CardDetectionEvent;
 
 /// <summary>
 /// Main Window Class.cs
@@ -38,6 +39,7 @@ using PluginICAOClientSDK.Util;
 /// </date>
 namespace ClientInspectionSystem {
     public partial class MainWindow : MetroWindow {
+
         #region VARIABLE
         private string logPath = Path.Combine(Environment.CurrentDirectory, @"Data\", "clientIS.log");
         //private static readonly string endPointUrl = "ws://192.168.3.170:9505/ISPlugin";
@@ -45,6 +47,7 @@ namespace ClientInspectionSystem {
         public DelegateAutoDocument delegateAutoGetDoc;
         public DelegateAutoBiometricResult delegateAutoBiometric;
         public DelegateAutoReadNofity delegateAutoReadNofity;
+        public DelegateCardDetectionEvent delegateCardDetectionEvent;
         public Connection connectionSocket;
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
@@ -87,6 +90,7 @@ namespace ClientInspectionSystem {
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
                 delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
                 delegateAutoReadNofity = new DelegateAutoReadNofity(autoReadNotify);
+                delegateCardDetectionEvent = new DelegateCardDetectionEvent(delegateCardDetection);
                 connectionSocket = new Connection(deleagteConnect);
                 //connectionSocket.findConnect(this);
             }
@@ -334,6 +338,27 @@ namespace ClientInspectionSystem {
                 Logmanager.Instance.writeLog("DELEGATE NOTIFY AUTO READ ERROR " + e.ToString());
             }
         }
+
+        //Update 2022.05.10 Test Card Detection Event
+        private void delegateCardDetection(BaseCardDetectionEventResp baseCardDetectionEventResp) {
+            try {
+                if (null != baseCardDetectionEventResp) {
+                    if (baseCardDetectionEventResp.errorCode == 0) {
+                        this.Dispatcher.Invoke(async () => {
+                            if (baseCardDetectionEventResp.data.cardDetected) {
+                                await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_CARD_DETECTION_EVENT);
+                            }
+                            else {
+                                //await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_CARD_NOT_DETECTED_EVENT);
+                                clearLayout(false);
+                            }
+                        });
+                    }
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+        }
         #endregion
 
         #region HYPER LINK QUEQUE TEXT
@@ -477,7 +502,8 @@ namespace ClientInspectionSystem {
                 BaseDocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
                                                                                                   dataGroupEnabled, optionalEnabled,
                                                                                                   timeOutResp, null,
-                                                                                                  timeOutSocket, canValue);
+                                                                                                  timeOutSocket, canValue,
+                                                                                                  "XXXXXXXXXXX");
                 Logmanager.Instance.writeLog(JsonConvert.SerializeObject(documentDetailsResp));
                 if (null != documentDetailsResp) {
                     this.Dispatcher.Invoke(() => {
@@ -828,9 +854,16 @@ namespace ClientInspectionSystem {
                 }
                 catch (Exception ex) {
                     Logmanager.Instance.writeLog("ERROR FACE AUTH " + ex.ToString());
-                    controllerFaceAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                    await controllerFaceAuth.CloseAsync();
+                    if(ex is ISPluginException) {
+                        ISPluginException pluginException = (ISPluginException)ex;
+                        controllerFaceAuth.SetMessage(pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerFaceAuth.CloseAsync();
+                    } else {
+                        controllerFaceAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerFaceAuth.CloseAsync();
+                    }
                     btnRFID.IsEnabled = true;
                 }
             });

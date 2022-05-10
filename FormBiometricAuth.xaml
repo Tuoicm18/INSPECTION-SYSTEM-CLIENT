@@ -72,6 +72,8 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!--#region GRID FOR VIEW JWT-->
@@ -82,7 +84,7 @@
                 Margin="5,5,5,5" 
                 HorizontalAlignment="Center"
                 Width="600"
-                Grid.RowSpan="4" 
+                Grid.RowSpan="6" 
                 Grid.ColumnSpan="3">
                 <ScrollViewer
                     PreviewMouseWheel="lvAllLabel_PreviewMouseWheel"
@@ -169,7 +171,7 @@
                 Foreground="White"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Grid.Row="4"
+                Grid.Row="6"
                 Content="JWT"
                 Margin="5,5,5,5"/>
             <!--Textblock JWT-->
@@ -178,7 +180,7 @@
                 Foreground="White"
                 VerticalAlignment="Center"
                 Grid.Column="2"
-                Grid.Row="4"
+                Grid.Row="6"
                 TextTrimming="WordEllipsis"
                 TextWrapping="NoWrap"/>
             <!--Button View JWT-->
@@ -193,7 +195,7 @@
                 VerticalContentAlignment="Center"
                 Width="50"
                 Grid.Column="0"
-                Grid.Row="4"
+                Grid.Row="6"
                 Style="{StaticResource MyButtonStyle}"
                 Margin="5,5,5,5">
                 <Image
@@ -203,23 +205,40 @@
                     Width="20"/>
             </Button>
 
-            <!--Label Issue Details-->
+            <!--Label Issue Detail Code-->
             <Label
-                x:Name="lbIssueDetails"
-                Visibility="Collapsed"
+                x:Name="lbIssueDetailCode"
+                Visibility="Visible"
                 Foreground="White"
                 VerticalContentAlignment="Center"
-                Content="ISSUE DETAILS"
+                Content="ISSUE DETAIL CODE"
+                Grid.Column="0"
+                Grid.Row="4"
+                Margin="5,5,5,5"/>
+            <Label
+                x:Name="lbResultIssueCode"
+                VerticalContentAlignment="Center"
+                Foreground="White"
+                Grid.Column="2"
+                Grid.Row="4"
+                Margin="5,5,5,5"/>
+
+            <!--Label Issue Detail Message-->
+            <Label
+                x:Name="lbIssueDetailMessage"
+                Visibility="Visible"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Content="ISSUE DETAIL MESSAGE"
                 Grid.Column="0"
                 Grid.Row="5"
                 Margin="5,5,5,5"/>
             <Label
-                x:Name="lbIssueDetailsResult"
-                Visibility="Collapsed"
+                x:Name="lbResultIssueMessage"
                 VerticalContentAlignment="Center"
                 Foreground="White"
                 Grid.Column="2"
-                Grid.Row="5 "
+                Grid.Row="5"
                 Margin="5,5,5,5"/>
         </Grid>
         <!--#endregion-->
