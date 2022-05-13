@@ -97,7 +97,7 @@ namespace ClientInspectionSystem {
             string issueDetailMsg = baseBiometricAuthResp.data.issueDetailMessage;
             int responseCode = baseBiometricAuthResp.errorCode;
             string responseMessage = baseBiometricAuthResp.errorMessage;
-            string jwt = baseBiometricAuthResp.data.JWT;
+            string jwt = baseBiometricAuthResp.data.jwt;
 
             lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
             lbResultIssueCode.Content = issueDetailCode.ToString();

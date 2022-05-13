@@ -9,20 +9,22 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private string biometricType;
         private AuthorizationData authorizationData;
         private int timeOutInterVal;
+        private string challenge;
         public TimeSpan timeOutResp;
 
         public GetBiometricAuthentication(ISPluginClient pluginClient, string biometricType,
                                           AuthorizationData authorizationData, TimeSpan timeOutResp,
-                                          int timeOutInterVal) {
+                                          int timeOutInterVal, string challenge) {
             this.clientPlugin = pluginClient;
             this.biometricType = biometricType;
             this.authorizationData = authorizationData;
             this.timeOutResp = timeOutResp;
             this.timeOutInterVal = timeOutInterVal;
+            this.challenge = challenge;
         }
 
         public BaseBiometricAuthResp getResultBiometricAuth() {
-            return clientPlugin.biometricAuthentication(biometricType, authorizationData, timeOutResp, timeOutInterVal);
+            return clientPlugin.biometricAuthentication(biometricType, authorizationData, timeOutResp, timeOutInterVal, challenge);
         }
     }
 }

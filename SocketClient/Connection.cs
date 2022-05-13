@@ -237,11 +237,12 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region GET RESULT BIOMETRIC AUTH
         public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, AuthorizationData authorizationData,
-                                                            TimeSpan timeOutResp, int timeOutInterVal) {
+                                                            TimeSpan timeOutResp, int timeOutInterVal,
+                                                            string challenge) {
             try {
                 GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(wsClient, biometricType,
                                                                                                        authorizationData, timeOutResp,
-                                                                                                       timeOutInterVal);
+                                                                                                       timeOutInterVal, challenge);
                 BaseBiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }

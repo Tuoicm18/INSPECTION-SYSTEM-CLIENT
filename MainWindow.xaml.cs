@@ -178,6 +178,9 @@ namespace ClientInspectionSystem {
             try {
                 if (null != documentDetailsResp) {
                     //Logmanager.Instance.writeLog("<DEBUG> AUTO GET DOCUMENT RESPONSE " + JsonConvert.SerializeObject(documentDetailsResp));
+                    //2022.05.11 Update get jwt PA from server
+                    Logmanager.Instance.writeLog("DEBUG (AUTO READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
+
                     this.Dispatcher.Invoke(() => {
                         if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) {
                             string mrzSubString = documentDetailsResp.data.mrzString.Substring(0, 30) + "\n" +
@@ -506,6 +509,8 @@ namespace ClientInspectionSystem {
                                                                                                   "XXXXXXXXXXX");
                 Logmanager.Instance.writeLog(JsonConvert.SerializeObject(documentDetailsResp));
                 if (null != documentDetailsResp) {
+                    //2022.05.11 Update get jwt PA from server
+                    Logmanager.Instance.writeLog("DEBUG (MANUAL READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
                     this.Dispatcher.Invoke(() => {
                         if (mrzEnabled) {
                             if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) {
@@ -791,7 +796,7 @@ namespace ClientInspectionSystem {
                         controllerFaceAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE);
+                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, "Client C# FACE AUTH"); // 2022.05.12 Update challenge
                             if (null != resultFaceAuth) {
                                 if (resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerFaceAuth.CloseAsync();
@@ -869,7 +874,7 @@ namespace ClientInspectionSystem {
             });
         }
 
-        private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType) {
+        private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType, string challenge) {
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
                 //Set Time Out
@@ -884,6 +889,7 @@ namespace ClientInspectionSystem {
                     }
                     else {
                         authorizationData = new AuthorizationData();
+                        authorizationData.challenge = challenge;
                         authorizationData.authorizationTitle = formAuthorizationData.Title;
                         authorizationData.authContentList = formAuthorizationData.getDataContentList();
                         authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
@@ -892,7 +898,7 @@ namespace ClientInspectionSystem {
                     }
                 });
 
-                BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp, timeOutSocket);
+                BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp, timeOutSocket, challenge);
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
                     resultBiometricResp = resultBiometric;
@@ -923,7 +929,7 @@ namespace ClientInspectionSystem {
                                                                                 InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerLeftFingerAuth.SetIndeterminate();
                         await Task.Factory.StartNew(() => {
-                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT);
+                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, "Client C# LEFT FINGER AUTH"); // 2022.05.12 Update challenge
                             if (null != resultLeftFingerAuth) {
                                 if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerLeftFingerAuth.CloseAsync();
@@ -1011,7 +1017,7 @@ namespace ClientInspectionSystem {
                         controllerRightFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT);
+                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, "Client C# RIGHT FINGER AUTH"); // 2022.05.12 Update challenge
                             if (null != resultFingerRightAuth) {
 
                                 if (resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
