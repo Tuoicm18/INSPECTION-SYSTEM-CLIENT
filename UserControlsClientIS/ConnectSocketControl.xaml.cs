@@ -1,5 +1,6 @@
 ﻿using ClientInspectionSystem.LoadData;
 using ClientInspectionSystem.SocketClient.Response;
+using log4net;
 using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using PluginICAOClientSDK.Response;
@@ -22,6 +23,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
     public partial class ConnectSocketControl : UserControl {
 
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private int timeOutSocket;
 
         public ConnectSocketControl() {
@@ -54,18 +56,19 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                 this.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex) {
-                Logmanager.Instance.writeLog("ERROR BUTTON CONNECT SOCKET " + ex.ToString());
+                logger.Error(ex);
                 this.Visibility = Visibility.Collapsed;
             }
         }
 
         private void needForConnectSocket(MainWindow mainWindow) {
-            mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.deleagteConnect, mainWindow.isWSS,
-                                                                      txtIP.Text, txtPort.Text,
-                                                                      mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
-                                                                      mainWindow.delegateAutoReadNofity, mainWindow.delegateCardDetectionEvent);
+            mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.isWSS, txtIP.Text,
+                                          txtPort.Text,
+                                          mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
+                                          mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK);
+
             //Find Connect
-            mainWindow.connectionSocket.findConnect(mainWindow);
+            mainWindow.connectionSocket.connectSocketServer(mainWindow);
 
             mainWindow.Dispatcher.Invoke(async () => {
                 try {
@@ -86,9 +89,9 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                     });
                 }
                 catch (Exception eDeviceDetails) {
-                    Logmanager.Instance.writeLog("GET DEVICE DETAILS ERROR " + eDeviceDetails.ToString());
+                    logger.Error(eDeviceDetails);
                     LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, string.Empty,
-                                                                        string.Empty, string.Empty, string.Empty);
+                                                                         string.Empty, string.Empty, string.Empty);
                 }
             });
         }

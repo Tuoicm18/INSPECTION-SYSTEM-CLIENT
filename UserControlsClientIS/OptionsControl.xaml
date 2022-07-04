@@ -51,7 +51,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Width="74"
-                            Content="WSS" 
+                            Content="LIVENESS" 
                             FontWeight="Bold"
                             Margin="10,10,0,189" 
                             RenderTransformOrigin="0.521,1.346" 
@@ -59,13 +59,15 @@
                         <!--RIGHT SIDE-->
                         <!--Toggle WSS-->
                         <mah:ToggleSwitch 
-                            x:Name="toggleSwitchWSS"  
+                            x:Name="toggleSwitchLivenessTest"  
+                            Visibility="Visible"
                             HorizontalAlignment="Stretch"
                             Height="34"
-                            Margin="141.6,10,0,180.8" 
+                            Margin="100,7,218,183.8" 
                             OffContent="OFF" 
                             OnContent="ON" 
-                            Grid.Column="2"/>
+                            IsOn="True"
+                            Grid.ColumnSpan="3"/>
                         <!--Hyper Link-->
                         <!--
                             <TextBlock
@@ -94,6 +96,7 @@
                         <Label
                             x:Name="lbPortSocket" 
                             FontWeight="Bold"
+                            Visibility="Collapsed"
                             Width="74"
                             Height="25"
                             HorizontalAlignment="Left"
@@ -103,6 +106,7 @@
                         <!-- End Operator-->
                         <TextBox 
                             x:Name="txtPortSocket"
+                            Visibility="Collapsed"
                             Width="82"
                             HorizontalAlignment="Right"
                             HorizontalContentAlignment="Left"

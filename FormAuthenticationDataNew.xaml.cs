@@ -12,8 +12,10 @@ using System.Windows.Media;
 using ClientInspectionSystem.RenderToLayout;
 using ClientInspectionSystem.SocketClient.Request;
 using ControlzEx.Theming;
+using log4net;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem {
@@ -30,8 +32,15 @@ namespace ClientInspectionSystem {
         private readonly int BTN_SINGLE_CHOICES = 3;
         private readonly int BTN_ADD_NVP = 4;
         private bool checkImportJson = false;
+        private bool checkImportString = false;
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public bool CheckImportJson {
             get { return this.checkImportJson; }
+        }
+
+        public bool CheckImportString {
+            get { return this.checkImportString; }
         }
 
         //Plain Text
@@ -101,38 +110,38 @@ namespace ClientInspectionSystem {
                 if(checkImportJson) {
                     Clipboard.SetText(txtImportJson.Text);
                 } else {
-                    AuthorizationData authorizationData = new AuthorizationData();
+                    TransactionDataBiometricAuth transactionData = new TransactionDataBiometricAuth();
                     //Title Form
-                    authorizationData.authorizationTitle = getTitleForm();
+                    transactionData.transactionTitle = getTitleForm();
                     //Content List
                     List<AuthorizationElement> authorizationsContentList = renderLayoutPlainText.getDataContentListFromLayout();
                     if (null != authorizationsContentList && authorizationsContentList.Count > 0) {
-                        authorizationData.authContentList = authorizationsContentList;
+                        transactionData.authContentList = authorizationsContentList;
                     }
                     //Multiple
                     List<AuthorizationElement> authorizationsMultiple = renderLayoutMultiple.getDataMultipleChoices();
 
                     if (null != authorizationsMultiple && authorizationsMultiple.Count > 0) {
-                        authorizationData.multipleSelectList = authorizationsMultiple;
+                        transactionData.multipleSelectList = authorizationsMultiple;
                     }
                     //Single
                     List<AuthorizationElement> authorizationsSingle = renderLayoutSingleChoices.getDataSingleChoices();
                     if (null != authorizationsSingle && authorizationsSingle.Count > 0) {
-                        authorizationData.singleSelectList = authorizationsSingle;
+                        transactionData.singleSelectList = authorizationsSingle;
                     }
                     //Namve Value Pairs
                     List<AuthorizationElement> authorizationsNVP = renderLayoutNVP.getDataNVP();
                     if (null != authorizationsNVP && authorizationsNVP.Count > 0) {
-                        authorizationData.nameValuePairList = authorizationsNVP;
+                        transactionData.nameValuePairList = authorizationsNVP;
                     }
 
                     //Json String
-                    string strAuthorizationDataReq = JsonConvert.SerializeObject(authorizationData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
+                    string strAuthorizationDataReq = JsonConvert.SerializeObject(transactionData, Formatting.Indented, ClientExtentions.settingsJsonDuplicateDic);
                     Clipboard.SetText(strAuthorizationDataReq);
                 }
             }
             catch (Exception eSubmit) {
-                Logmanager.Instance.writeLog("BUTTON <COPY JSON> ERROR " + eSubmit.ToString());
+                logger.Error(eSubmit);
             } finally {
                 ordinaryClick = 0;
             }
@@ -152,7 +161,27 @@ namespace ClientInspectionSystem {
                     initLayoutForImportJson(btnImportJson.Content.ToString());
                 }
                 catch (Exception eImportJson) {
-                    Logmanager.Instance.writeLog("BUTTON IMPORT JSON ERR " + eImportJson.ToString());
+                    logger.Error(eImportJson);
+                }
+            });
+        }
+
+        //Button Import String Json
+        private void btnImportString_Click(object sender, RoutedEventArgs e) {
+            this.Dispatcher.Invoke(() => {
+                try {
+                    if (btnImportJson.Content.ToString().Equals(ClientContants.CONTENT_BTN_IMPORT_JSON)) {
+                        checkImportString = true;
+                        btnImportJson.Content = ClientContants.CONTENT_BTN_IMPORT_JSON_CANCEL;
+                    }
+                    else {
+                        checkImportString = false;
+                        btnImportJson.Content = ClientContants.CONTENT_BTN_IMPORT_STRING;
+                    }
+                    initLayoutForImportJson(btnImportJson.Content.ToString());
+                }
+                catch (Exception eImportJson) {
+                    logger.Error(eImportJson);
                 }
             });
         }
@@ -369,7 +398,7 @@ namespace ClientInspectionSystem {
                 lbValidationKey.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex) {
-                Logmanager.Instance.writeLog("CHANGE LABEL FOR NVP ERROR " + ex.ToString());
+                logger.Error(ex);
             }
         }
         #endregion
@@ -465,7 +494,7 @@ namespace ClientInspectionSystem {
                 groubBoxResult.Visibility = Visibility.Visible;
             }
             catch (Exception eTxt) {
-                Logmanager.Instance.writeLog("RENDER TEXT BOX ERROR " + eTxt.ToString());
+                logger.Error(eTxt);
             }
         }
         #endregion
@@ -538,7 +567,7 @@ namespace ClientInspectionSystem {
         }
 
         public void initLayoutForImportJson(string contentButton) {
-            if (contentButton.Equals("IMPORT JSON")) {
+            if (contentButton.Equals("IMPORT JSON") || contentButton.Equals("IMPORT STRING")) {
                 //Hide
                 scvImportJson.Visibility = Visibility.Collapsed;
                 //Show

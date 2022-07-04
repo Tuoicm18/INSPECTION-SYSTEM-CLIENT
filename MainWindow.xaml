@@ -21,7 +21,7 @@
         x:Name="mainWindow"
         Closed="mainWindow_Closed"
         TitleAlignment="Center"
-        Title="CLIENT INSPECTION SYSTEM">
+        Title="CHECKID CLIENT DEMO">
 
     <!--Syte For WindowCommands Mahapps Metro-->
     <Window.Resources>
@@ -153,7 +153,7 @@
                     Content="DISCONNECT"/>
             <Button x:Name="btnConnectToDevice"
                     Content="CONFIG DEVICE"
-                    Visibility="Visible"
+                    Visibility="Collapsed"
                     Click="btnConnectToDevice_Click"/>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
@@ -161,7 +161,8 @@
     <!--RIGHT WINDOW-->
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Label x:Name="lbSocketConnectionStatus" Content="STATUS SOCKET"/>
+            <Label x:Name="lbSocketConnectionStatus" 
+                   Content="STATUS SOCKET"/>
 
             <!-- LoadingIndicatorArcsStyle -->
             <loadin:LoadingIndicator 
@@ -244,7 +245,7 @@
                             <Label                       
                                 HorizontalContentAlignment="Left"
                                 VerticalContentAlignment="Center"
-                                Content="WELCOME TO INSPECTION SYSTEM" 
+                                Content="WELCOME TO CHECKID CLIENT DEMO" 
                                 FontSize="20" 
                                 x:Name="lbLinkHeader" 
                                 Canvas.Left="0" 
@@ -1381,15 +1382,16 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             Stretch="Uniform"
-                            Height="120"
-                            Source="Resource/18_INSPECTION-SYSTEM_VGCA_256x128.png" Margin="0,-39,0,-31"/>
+                            Height="80"
+                            Source="Resource/32_CheckID_Fixed_256x128.png" 
+                            Margin="5,-18,0,-22"/>
                         <!--Label Version-->
                         <Label
                             Grid.Column="1"
-                            FontSize="10"
+                            FontSize="11"
                             x:Name="lbVersion"
                             VerticalAlignment="Center"
-                            Margin="0,15,120,0"
+                            Margin="0,28,120,0"
                             Foreground="White"
                             Content=" V1.0.220228"/>
                         <!--Label Support Email-->
@@ -1400,7 +1402,7 @@
                             VerticalAlignment="Top"
                             HorizontalAlignment="Right"
                             Foreground="White"
-                            Content="SUPPORT MAIL CA@BCY.GOV.VN"/>
+                            Content="SUPPORT MAIL SUPPORT@MOBILE-ID.VN"/>
                         <!--Label Hotline-->
                         <Label 
                             x:Name="lbJotLine"
@@ -1409,7 +1411,7 @@
                             HorizontalAlignment="Right"
                             FontSize="12" 
                             Foreground="White"
-                            Content="HOTLINE (024) 3773 8668 | (024) 3222 2665"/>
+                            Content="HOTLINE +84 28 3636 6015"/>
                     </Grid>
                 </Grid>
             </Border>

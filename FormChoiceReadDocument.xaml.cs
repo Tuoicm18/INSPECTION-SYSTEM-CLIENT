@@ -20,6 +20,7 @@ namespace ClientInspectionSystem {
     /// Interaction logic for FormChoiceReadDocument.xaml
     /// </summary>
     public partial class FormChoiceReadDocument : MetroWindow {
+        public bool isClose = false;
         public FormChoiceReadDocument() {
             InitializeComponent();
             // Set the window theme to Dark Mode
@@ -118,5 +119,21 @@ namespace ClientInspectionSystem {
             }
         }
 
+        private void btnCancel_Click(object sender, RoutedEventArgs e) {
+            isClose = true;
+            this.Close();
+        }
+
+        public bool getValueCheckBoxCA() {
+            return (bool)cbCa.IsChecked;
+        }
+
+        public bool getValueCheckBoxTA() {
+            return (bool)cbTa.IsChecked;
+        }
+
+        public bool getValueCheckBoxLiveness() {
+            return (bool)cbLiveness.IsChecked;
+        }
     }
 }

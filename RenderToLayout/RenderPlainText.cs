@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using PluginICAOClientSDK.Request;
+using log4net;
 
 namespace ClientInspectionSystem.RenderToLayout {
     public class RenderPlainText {
+
         #region VARIABEL
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private GroupBox groupBoxContentList;
         private TextBlock textBlockContentList;
         //private TextBlock textBlockContentListDesc;
@@ -65,7 +68,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 });
             }
             catch (Exception ePlaintText) {
-                Logmanager.Instance.writeLog("RENDER PLAINT TEXT ERROR " + ePlaintText.ToString());
+                logger.Error(ePlaintText);
             }
         }
         #endregion

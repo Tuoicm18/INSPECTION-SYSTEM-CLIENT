@@ -10,10 +10,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using PluginICAOClientSDK.Request;
+using log4net;
 
 namespace ClientInspectionSystem.RenderToLayout {
     public class RenderNameValuePairs {
+
         #region VARIABLE
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private BrushConverter bc = new BrushConverter();
         private GroupBox groupBoxNameValuePair;
         private DataGrid dataGridNameValuePair;
@@ -113,7 +116,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 checkDuplicateKey(lbValidationKey, btnSubmitAdd, keyContent, dataGridList, groupBoxesNVP, headerGroup);
             }
             catch (Exception eNVP) {
-                Logmanager.Instance.writeLog("RENDER LAYOUT NVP ERROR " + eNVP.ToString());
+                logger.Error(eNVP);
             } finally {
                 //Add To List For Get Data
                 NVPModels.Add(new NameValuePairsModel {

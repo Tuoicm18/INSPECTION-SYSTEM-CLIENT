@@ -306,6 +306,8 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <!--Button Submit-->
             <Button
@@ -338,6 +340,18 @@
                 Content="IMPORT JSON"
                 Width="100"
                 Grid.Column="4"
+                VerticalAlignment="Bottom"
+                VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"
+                Margin="5,5,5,5">
+            </Button>
+            <!--Button Import String-->
+            <Button
+                x:Name="btnImportString"
+                Click="btnImportString_Click"
+                Content="IMPORT STRING"
+                Width="100"
+                Grid.Column="6"
                 VerticalAlignment="Bottom"
                 VerticalContentAlignment="Center"
                 HorizontalContentAlignment="Center"

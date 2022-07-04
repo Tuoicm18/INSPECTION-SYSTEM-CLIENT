@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls.Dialogs;
+﻿using log4net;
+using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.ConnectToDevice;
@@ -24,7 +25,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
     /// </summary>
     public partial class ConfigConnectToDeviceControl : UserControl {
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
-
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public ConfigConnectToDeviceControl() {
             InitializeComponent();
         }
@@ -50,7 +51,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                 BaseConnectToDeviceResp baseConnectToDeviceResp = mainWindow.connectionSocket.getConnectToDevice(comfirmEnable, comfirmCode,
                                                                                                                   clientName, configConnect,
                                                                                                                   timeOutResp, timeOutSocket);
-                Logmanager.Instance.writeLog("RESP CONNECT TO DEVICE " + JsonConvert.SerializeObject(baseConnectToDeviceResp, Formatting.Indented));
+                logger.Debug("RESP CONNECT TO DEVICE " + JsonConvert.SerializeObject(baseConnectToDeviceResp, Formatting.Indented));
 
                 if(null != baseConnectToDeviceResp) {
                     FormResultConfigDevice formResultConfigDevice = new FormResultConfigDevice();
@@ -81,7 +82,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                         await progressDialog.CloseAsync();
                     });
                 }
-                Logmanager.Instance.writeLog("ERROR CONNECT TO DEVICE " + eConfigConenct.ToString());
+                logger.Error(eConfigConenct);
             } finally {
                 this.Visibility = Visibility.Collapsed;
             }

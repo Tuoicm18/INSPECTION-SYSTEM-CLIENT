@@ -27,6 +27,8 @@ using PluginICAOClientSDK.Response.ConnectToDevice;
 using ClientInspectionSystem.UserControlsClientIS;
 using PluginICAOClientSDK.Util;
 using PluginICAOClientSDK.Response.CardDetectionEvent;
+using System.Timers;
+using log4net;
 
 /// <summary>
 /// Main Window Class.cs
@@ -41,13 +43,12 @@ namespace ClientInspectionSystem {
     public partial class MainWindow : MetroWindow {
 
         #region VARIABLE
-        private string logPath = Path.Combine(Environment.CurrentDirectory, @"Data\", "clientIS.log");
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         //private static readonly string endPointUrl = "ws://192.168.3.170:9505/ISPlugin";
-        public DeleagteConnect deleagteConnect;
         public DelegateAutoDocument delegateAutoGetDoc;
         public DelegateAutoBiometricResult delegateAutoBiometric;
-        public DelegateAutoReadNofity delegateAutoReadNofity;
         public DelegateCardDetectionEvent delegateCardDetectionEvent;
+        public DelegateConnect delegateConnectSDK;
         public Connection connectionSocket;
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
@@ -58,48 +59,46 @@ namespace ClientInspectionSystem {
         private ProgressDialogController dialogControllerAutoRead = null;
         //Update 2022.03.11 For Can Value Request Read Document
         private bool isReadByCanValue = false;
+        //Update 2022.05.20 set liveness
+        private bool liveness;
         #endregion
 
-        #region MAIN
+        #region CONSTRUCTOR
         public MainWindow() {
             InitializeComponent();
             //Version APP
-            lbVersion.Content = DateTime.Now.ToString("yyyy/MM/dd").Replace("/", "");
+            lbVersion.Content = "V" + ClientExtentions.getCurrentVersion();
+
+            ClientLogger.Instance.writeLogEnabled = true;
 
             string procName = Process.GetCurrentProcess().ProcessName;
-            Logmanager.Instance.writeLog(procName);
             Process[] pname = Process.GetProcessesByName(procName);
             if (pname.Length > 1) {
                 MessageBox.Show("CLIENT PLUGIN IS RUNNING", "WARING", MessageBoxButton.OK);
                 System.Windows.Application.Current.Shutdown();
             }
 
-            //Create Log File If Not Exists
-            if (!File.Exists(logPath)) {
-                using (FileStream fs = File.Create(logPath)) { };
-            }
-            //Enable Write Log
-            Logmanager.Instance.writeLogEnabled = true;
-
             // Set the window theme to Dark Mode
             ThemeManager.Current.ChangeTheme(this, "Dark.Blue");
 
             //Find Connection Socket Server
             try {
-                deleagteConnect = new DeleagteConnect(delegateFindConnect);
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
                 delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
-                delegateAutoReadNofity = new DelegateAutoReadNofity(autoReadNotify);
                 delegateCardDetectionEvent = new DelegateCardDetectionEvent(delegateCardDetection);
-                connectionSocket = new Connection(deleagteConnect);
-                //connectionSocket.findConnect(this);
+                delegateConnectSDK = new DelegateConnect(handleDlgConnect);
             }
             catch (Exception eConnection) {
-                Logmanager.Instance.writeLog("CONNECTION SOCET SERVER ERROR " + eConnection);
+                logger.Error(eConnection);
             }
 
             btnDisconnect.IsEnabled = false;
             btnConnectToDevice.IsEnabled = false;
+
+            //Test Biometric Auth With cardNo
+            btnRFID.IsEnabled = true;
+            btnLeftFinger.IsEnabled = true;
+            btnRightFinger.IsEnabled = true;
         }
         #endregion
 
@@ -111,22 +110,7 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        #region DELEGATE
-        private void delegateFindConnect(bool isConnect) {
-            try {
-                this.Dispatcher.Invoke(() => {
-                    if (!isConnect) {
-                        this.IsEnabled = false;
-                    }
-                    else {
-                        this.IsEnabled = true;
-                    }
-                });
-            }
-            catch (Exception e) {
-                Logmanager.Instance.writeLog("RE-CONNECT ERROR " + e.ToString());
-            }
-        }
+        #region DELEGATE AUTO
 
         //Auto Get Document Details
         public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
@@ -166,7 +150,7 @@ namespace ClientInspectionSystem {
                         //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
                         //await controllerReadChip.CloseAsync();
                         clearLayout(false);
-                        Logmanager.Instance.writeLog("AUTO READ CHIP EXCEPTION " + eReadChip.ToString());
+                        logger.Error(eReadChip);
                     } finally {
                         btnIDocument.IsEnabled = true;
                     }
@@ -179,7 +163,7 @@ namespace ClientInspectionSystem {
                 if (null != documentDetailsResp) {
                     //Logmanager.Instance.writeLog("<DEBUG> AUTO GET DOCUMENT RESPONSE " + JsonConvert.SerializeObject(documentDetailsResp));
                     //2022.05.11 Update get jwt PA from server
-                    Logmanager.Instance.writeLog("DEBUG (AUTO READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
+                    logger.Debug("DEBUG (AUTO READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
 
                     this.Dispatcher.Invoke(() => {
                         if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) {
@@ -223,7 +207,7 @@ namespace ClientInspectionSystem {
                     if (!documentDetailsResp.data.efCom.Equals(string.Empty)) { updateBackgroundBtnDG(btnEF, 2); }
                     if (!documentDetailsResp.data.efCardAccess.Equals(string.Empty)) { updateBackgroundBtnDG(btnCSC, 2); }
 
-                    Logmanager.Instance.writeLog("AUTO GET DOCUMENT DETAILS SUCCESS");
+                    logger.Info("AUTO GET DOCUMENT DETAILS SUCCESS");
                     //if (null != this.dialogControllerAutoRead) {
                     //    this.Dispatcher.Invoke(() => {
                     //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ (AUTO GET DOCUMENT SUCCESS)");
@@ -234,7 +218,7 @@ namespace ClientInspectionSystem {
                     return true;
                 }
                 else {
-                    Logmanager.Instance.writeLog("AUTO GET DOCUMENT DETAILS FAILURE <DATA IS NULL>");
+                    logger.Debug("AUTO GET DOCUMENT DETAILS FAILURE <DATA IS NULL>");
                     //if (null != this.dialogControllerAutoRead) {
                     //    this.Dispatcher.Invoke(() => {
                     //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ (AUTO GET DOCUMENT FALIURE)");
@@ -247,7 +231,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception eAutoDoc) {
-                Logmanager.Instance.writeLog("ERROR AUTO GET DOCUMENT " + eAutoDoc);
+                logger.Error("ERROR AUTO GET DOCUMENT " + eAutoDoc);
                 //if (null != this.dialogControllerAutoRead) {
                 //    this.Dispatcher.Invoke(() => {
                 //        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ EXCEPTION AUTO GET DOCUMENT " + eAutoDoc.ToString());
@@ -264,7 +248,7 @@ namespace ClientInspectionSystem {
         public void autoGetBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
             try {
                 if (null != baseBiometricAuthResp) {
-                    Logmanager.Instance.writeLog("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
+                    logger.Debug("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
                     if (baseBiometricAuthResp.data.biometricType.Equals(BiometricType.TYPE_FACE)) {
                         this.Dispatcher.Invoke(() => {
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
@@ -286,7 +270,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception eAutoBiometric) {
-                Logmanager.Instance.writeLog("AUTO BIOMETRIC AUTH ERROR " + eAutoBiometric.ToString());
+                logger.Error(eAutoBiometric);
             }
         }
 
@@ -308,7 +292,6 @@ namespace ClientInspectionSystem {
                 else if (json.Equals(NotifyAutoReadDocument.NOTIFY_AUTO_ERROR)) {
                     if (null != dialogControllerAutoRead) {
                         this.Dispatcher.Invoke(async () => {
-                            Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ");
                             clearLayout(true);
                             showMain();
                             this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
@@ -319,7 +302,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception e) {
-                if(e is ISPluginException) {
+                if (e is ISPluginException) {
                     ISPluginException pluginException = (ISPluginException)e;
                     if (null != dialogControllerAutoRead) {
                         clearLayout(true);
@@ -328,9 +311,10 @@ namespace ClientInspectionSystem {
                         Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_5S);
                         this.dialogControllerAutoRead.CloseAsync();
                     }
-                } else {
+                }
+                else {
                     if (null != dialogControllerAutoRead) {
-                        Logmanager.Instance.writeLog("<DEBUG> CLOSE DIALOG AUTO READ EXCEPTION " + e.ToString());
+                        logger.Debug("CLOSE DIALOG AUTO READ EXCEPTION " + e.ToString());
                         clearLayout(true);
                         showMain();
                         this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
@@ -338,7 +322,7 @@ namespace ClientInspectionSystem {
                         this.dialogControllerAutoRead.CloseAsync();
                     }
                 }
-                Logmanager.Instance.writeLog("DELEGATE NOTIFY AUTO READ ERROR " + e.ToString());
+                logger.Error(e);
             }
         }
 
@@ -358,10 +342,12 @@ namespace ClientInspectionSystem {
                         });
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw e;
             }
         }
+
         #endregion
 
         #region HYPER LINK QUEQUE TEXT
@@ -410,13 +396,22 @@ namespace ClientInspectionSystem {
                 //Show Form Choices Read Document
                 FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
                 string txtCanValue = string.Empty;
+                //Update 2022.05.20 TA, CA ENABLED
+                bool caEnableEd = false;
+                bool taEnabled = false;
                 if (formChoiceReadDocument.ShowDialog() == true) {
                     if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
                         isReadByCanValue = true;
                         txtCanValue = formChoiceReadDocument.getCanValue();
                     }
+                    caEnableEd = formChoiceReadDocument.getValueCheckBoxCA();
+                    taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
+                    this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
                 }
                 try {
+                    if (formChoiceReadDocument.isClose) {
+                        return;
+                    }
                     btnIDocument.IsEnabled = false;
                     clearLayout(true);
                     showMain();
@@ -442,7 +437,9 @@ namespace ClientInspectionSystem {
                     await Task.Factory.StartNew(() => {
                         try {
                             bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled, dataGroupEnabled,
-                                                                            optionalDetailsEnabled, timeOutForResp, txtCanValue);
+                                                                            optionalDetailsEnabled, timeOutForResp,
+                                                                            txtCanValue, "C# CLIENT",
+                                                                            caEnableEd, taEnabled);
                             if (getDocSuccess) {
                                 controllerReadChip.CloseAsync();
                             }
@@ -489,7 +486,7 @@ namespace ClientInspectionSystem {
                     }
 
                     clearLayout(false);
-                    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                    logger.Error(eReadChip);
                 } finally {
                     //Update 2022.02.28
                     manualReadDoc = false;
@@ -500,17 +497,21 @@ namespace ClientInspectionSystem {
 
         private bool getDocumentDetailsToLayout(bool mrzEnabled, bool imageEnabled,
                                                 bool dataGroupEnabled, bool optionalEnabled,
-                                                TimeSpan timeOutResp, string canValue) {
+                                                TimeSpan timeOutResp, string canValue,
+                                                string challenge, bool caEnabled,
+                                                bool taEnabled) {
             try {
+
                 BaseDocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
                                                                                                   dataGroupEnabled, optionalEnabled,
                                                                                                   timeOutResp, null,
                                                                                                   timeOutSocket, canValue,
-                                                                                                  "XXXXXXXXXXX");
-                Logmanager.Instance.writeLog(JsonConvert.SerializeObject(documentDetailsResp));
+                                                                                                  challenge, caEnabled,
+                                                                                                  taEnabled);
+                logger.Info(JsonConvert.SerializeObject(documentDetailsResp));
                 if (null != documentDetailsResp) {
                     //2022.05.11 Update get jwt PA from server
-                    Logmanager.Instance.writeLog("DEBUG (MANUAL READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
+                    logger.Debug("(MANUAL READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
                     this.Dispatcher.Invoke(() => {
                         if (mrzEnabled) {
                             if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) {
@@ -559,16 +560,16 @@ namespace ClientInspectionSystem {
                     if (!documentDetailsResp.data.efCom.Equals(string.Empty)) { updateBackgroundBtnDG(btnEF, 2); }
                     if (!documentDetailsResp.data.efCardAccess.Equals(string.Empty)) { updateBackgroundBtnDG(btnCSC, 2); }
 
-                    Logmanager.Instance.writeLog("MANUAL GET DOCUMENT DETAILS SUCCESS");
+                    logger.Info("MANUAL GET DOCUMENT DETAILS SUCCESS");
                     return true;
                 }
                 else {
-                    Logmanager.Instance.writeLog("MANUAL GET DOCUMENT DETAILS FAILURE <DATA IS NULL>");
+                    logger.Info("MANUAL GET DOCUMENT DETAILS FAILURE <DATA IS NULL>");
                     return false;
                 }
             }
             catch (Exception e) {
-                Logmanager.Instance.writeLog("GET DOCUMENT DETAILS IN MAIN WINDOW ERROR " + e.ToString());
+                logger.Error(e);
                 throw e;
             } finally {
                 isReadByCanValue = false;
@@ -594,17 +595,17 @@ namespace ClientInspectionSystem {
                     controllerWSClient.SetMessage("CONNECT SOCET SERVER ERROR");
                     await Task.Delay(4000);
                     await controllerWSClient.CloseAsync();
-                    Logmanager.Instance.writeLog(eMain.ToString());
+                    logger.Error(eMain);
                 }
             });
         }
         #endregion
 
         #region BUTTON OPTONS HANDLE
-        //private void btnOption_Click(object sender, RoutedEventArgs e) {
-        //    hideMain();
-        //    optionsControl.Visibility = Visibility.Visible;
-        //}
+        private void btnOption_Click(object sender, RoutedEventArgs e) {
+            hideMain();
+            optionsControl.Visibility = Visibility.Visible;
+        }
         #endregion
 
         #region HIDE MAIN WINDOW
@@ -648,7 +649,7 @@ namespace ClientInspectionSystem {
                 conncetSocketControl.Visibility = Visibility.Visible;
             }
             catch (Exception eWS) {
-                Logmanager.Instance.writeLog("CONNECT WS ERROR " + eWS.ToString());
+                logger.Error(eWS);
             }
         }
         //Conncet Secure Connect
@@ -661,7 +662,7 @@ namespace ClientInspectionSystem {
                 conncetSocketControl.Visibility = Visibility.Visible;
             }
             catch (Exception eWSS) {
-                Logmanager.Instance.writeLog("CONNECT WSS ERROR " + eWSS.ToString());
+                logger.Error(eWSS);
             }
         }
         #endregion
@@ -774,7 +775,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception e) {
-                Logmanager.Instance.writeLog("EXCEPTION UPDATE BACKGROUND BUTTON " + e.ToString());
+                logger.Error(e);
                 return;
             }
         }
@@ -796,7 +797,7 @@ namespace ClientInspectionSystem {
                         controllerFaceAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, "Client C# FACE AUTH"); // 2022.05.12 Update challenge
+                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, "079094012066"); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFaceAuth) {
                                 if (resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerFaceAuth.CloseAsync();
@@ -814,7 +815,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnFA, 2);
                                             //Button Pass All
@@ -835,7 +836,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnFA, -1);
                                             //Button Pass All
@@ -858,13 +859,14 @@ namespace ClientInspectionSystem {
                     }
                 }
                 catch (Exception ex) {
-                    Logmanager.Instance.writeLog("ERROR FACE AUTH " + ex.ToString());
-                    if(ex is ISPluginException) {
+                    logger.Error(ex);
+                    if (ex is ISPluginException) {
                         ISPluginException pluginException = (ISPluginException)ex;
                         controllerFaceAuth.SetMessage(pluginException.errMsg.ToUpper());
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
-                    } else {
+                    }
+                    else {
                         controllerFaceAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
@@ -874,31 +876,51 @@ namespace ClientInspectionSystem {
             });
         }
 
-        private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType, string challenge) {
+        private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType, string cardNo) {
             BaseBiometricAuthResp resultBiometricResp = null;
             try {
                 //Set Time Out
                 timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
                 TimeSpan timeOutResp = TimeSpan.FromSeconds(timeOutSocket);
 
-                AuthorizationData authorizationData = null;
+                BaseBiometricAuthResp resultBiometric = null;
+
+                ChallengeBiometricAuth challenge = new ChallengeBiometricAuth();
+                string challengeString = string.Empty;
+
+                challenge.challengeValue = "C# CLIENT TEST";
+                TransactionDataBiometricAuth transactionDataInput = null;
+                //bool livenessEnabled = optionsControl.toggleSwitchLivenessTest.IsOn;
+
                 this.Dispatcher.Invoke(() => {
-                    if (formAuthorizationData.CheckImportJson) {
-                        string jsonImport = formAuthorizationData.getImportJson();
-                        authorizationData = ISExtentions.deserializeJsonAuthorizationData(jsonImport);
+                    if (formAuthorizationData.CheckImportString) {
+                        challengeString = formAuthorizationData.getImportJson();
+                        resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challengeString,
+                                                                                   timeOutResp, timeOutSocket,
+                                                                                   ChallengeType.TYPE_STRING,
+                                                                                   this.liveness, cardNo);
                     }
                     else {
-                        authorizationData = new AuthorizationData();
-                        authorizationData.challenge = challenge;
-                        authorizationData.authorizationTitle = formAuthorizationData.Title;
-                        authorizationData.authContentList = formAuthorizationData.getDataContentList();
-                        authorizationData.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
-                        authorizationData.singleSelectList = formAuthorizationData.getDataSingleChoices();
-                        authorizationData.nameValuePairList = formAuthorizationData.getDataNVP();
+                        if (formAuthorizationData.CheckImportJson) {
+                            string jsonImport = formAuthorizationData.getImportJson();
+                            transactionDataInput = ISExtentions.deserializeJsonAuthorizationData(jsonImport);
+                            challenge.transactionData = transactionDataInput;
+                        }
+                        else {
+                            transactionDataInput = new TransactionDataBiometricAuth();
+                            transactionDataInput.transactionTitle = formAuthorizationData.Title;
+                            transactionDataInput.authContentList = formAuthorizationData.getDataContentList();
+                            transactionDataInput.multipleSelectList = formAuthorizationData.getDataMultipleChoices();
+                            transactionDataInput.singleSelectList = formAuthorizationData.getDataSingleChoices();
+                            transactionDataInput.nameValuePairList = formAuthorizationData.getDataNVP();
+                            challenge.transactionData = transactionDataInput;
+                        }
+                        resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
+                                                                                  timeOutResp, timeOutSocket, ChallengeType.TYPE_OBJECT,
+                                                                                  this.liveness, cardNo);
                     }
                 });
 
-                BaseBiometricAuthResp resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, authorizationData, timeOutResp, timeOutSocket, challenge);
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
                     resultBiometricResp = resultBiometric;
@@ -906,7 +928,7 @@ namespace ClientInspectionSystem {
                 return resultBiometricResp;
             }
             catch (Exception ex) {
-                Logmanager.Instance.writeLog("ERROR GET RESULT BIOMETRIC " + ex.ToString());
+                logger.Error(ex);
                 //resultAuthFace = false;
                 throw ex;
             }
@@ -928,8 +950,9 @@ namespace ClientInspectionSystem {
                         controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
                                                                                 InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         controllerLeftFingerAuth.SetIndeterminate();
+
                         await Task.Factory.StartNew(() => {
-                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, "Client C# LEFT FINGER AUTH"); // 2022.05.12 Update challenge
+                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, "079094012066"); // 2022.05.12 Update challenge 079094012066
                             if (null != resultLeftFingerAuth) {
                                 if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerLeftFingerAuth.CloseAsync();
@@ -947,7 +970,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, 2);
                                             //Button Pass All
@@ -968,7 +991,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, -1);
                                             //Button Pass All
@@ -991,11 +1014,20 @@ namespace ClientInspectionSystem {
                     }
                 }
                 catch (Exception eLeft) {
-                    Logmanager.Instance.writeLog("ERROR GET RESULT BIOMETRIC LEFT FIGNER " + eLeft.ToString());
-                    controllerLeftFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
-                    await controllerLeftFingerAuth.CloseAsync();
-                    btnLeftFinger.IsEnabled = true;
+                    logger.Error(eLeft);
+                    if (eLeft is ISPluginException) {
+                        ISPluginException pluginException = (ISPluginException)eLeft;
+                        controllerLeftFingerAuth.SetMessage(pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        await controllerLeftFingerAuth.CloseAsync();
+                        btnLeftFinger.IsEnabled = true;
+                    }
+                    else {
+                        controllerLeftFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        await controllerLeftFingerAuth.CloseAsync();
+                        btnLeftFinger.IsEnabled = true;
+                    }
                 }
             });
         }
@@ -1017,7 +1049,7 @@ namespace ClientInspectionSystem {
                         controllerRightFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, "Client C# RIGHT FINGER AUTH"); // 2022.05.12 Update challenge
+                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, "079094012066"); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFingerRightAuth) {
 
                                 if (resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
@@ -1036,7 +1068,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
                                                                          JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, 2);
@@ -1058,8 +1090,7 @@ namespace ClientInspectionSystem {
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
                                             initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
-                                            Logmanager.Instance.writeLog("<DEBUG> GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
-                                                                         JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, 1);
                                             //Button Pass All
@@ -1082,11 +1113,20 @@ namespace ClientInspectionSystem {
                     }
                 }
                 catch (Exception eLeft) {
-                    Logmanager.Instance.writeLog("ERROR GET RESULT BIOMETRIC LEFT FIGNER " + eLeft.ToString());
-                    controllerRightFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                    await controllerRightFingerAuth.CloseAsync();
-                    btnRightFinger.IsEnabled = true;
+                    logger.Error(eLeft);
+                    if (eLeft is ISPluginException) {
+                        ISPluginException pluginException = (ISPluginException)eLeft;
+                        controllerRightFingerAuth.SetMessage(pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        await controllerRightFingerAuth.CloseAsync();
+                        btnLeftFinger.IsEnabled = true;
+                    }
+                    else {
+                        controllerRightFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        await controllerRightFingerAuth.CloseAsync();
+                        btnLeftFinger.IsEnabled = true;
+                    }
                 }
             });
         }
@@ -1095,75 +1135,78 @@ namespace ClientInspectionSystem {
         #region INIT FORM RESULT BIOMETRIC AUTH
         public void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp, ProgressDialogController controllerLeftFingerAuth, string biometricType) {
             if (null != baseBiometricAuthResp) {
-                if (null != baseBiometricAuthResp.data.authorizationData) {
-                    AuthorizationData authorizedData = baseBiometricAuthResp.data.authorizationData;
-                    FormResultAuthorizationData formResultAuthorization = new FormResultAuthorizationData();
-                    formResultAuthorization.Topmost = true;
-                    if (checkNullReslutTransactionData(authorizedData) == false) {
-                        //Render Title Form Result Biometric Auth
-                        formResultAuthorization.renderTitleForm(baseBiometricAuthResp.data.authorizationData.authorizationTitle);
+                if (null != baseBiometricAuthResp.data.challenge) {
+                    ChallengeBiometricAuth challengeBiometricAuth = baseBiometricAuthResp.data.challenge;
+                    if (null != challengeBiometricAuth.transactionData) {
+                        TransactionDataBiometricAuth transactionDataResp = challengeBiometricAuth.transactionData;
+                        FormResultAuthorizationData formResultAuthorization = new FormResultAuthorizationData();
+                        formResultAuthorization.Topmost = true;
+                        if (checkNullReslutTransactionData(transactionDataResp) == false) {
+                            //Render Title Form Result Biometric Auth
+                            formResultAuthorization.renderTitleForm(transactionDataResp.transactionTitle);
 
-                        Dictionary<int, AuthorizationElement> dicRenderResult = new Dictionary<int, AuthorizationElement>();
-                        //Content List
-                        if (null != authorizedData.authContentList) {
-                            foreach (var v in authorizedData.authContentList) {
-                                v.type = AuthElementType.Content;
-                                dicRenderResult.Add(v.ordinary, v);
+                            Dictionary<int, AuthorizationElement> dicRenderResult = new Dictionary<int, AuthorizationElement>();
+                            //Content List
+                            if (null != transactionDataResp.authContentList) {
+                                foreach (var v in transactionDataResp.authContentList) {
+                                    v.type = AuthElementType.Content;
+                                    dicRenderResult.Add(v.ordinary, v);
+                                }
                             }
-                        }
-                        //Multiple
-                        if (null != authorizedData.multipleSelectList) {
-                            foreach (var v in authorizedData.multipleSelectList) {
-                                v.type = AuthElementType.Multiple;
-                                dicRenderResult.Add(v.ordinary, v);
+                            //Multiple
+                            if (null != transactionDataResp.multipleSelectList) {
+                                foreach (var v in transactionDataResp.multipleSelectList) {
+                                    v.type = AuthElementType.Multiple;
+                                    dicRenderResult.Add(v.ordinary, v);
+                                }
                             }
-                        }
-                        //Single
-                        if (null != authorizedData.singleSelectList) {
-                            foreach (var v in authorizedData.singleSelectList) {
-                                v.type = AuthElementType.Single;
-                                dicRenderResult.Add(v.ordinary, v);
+                            //Single
+                            if (null != transactionDataResp.singleSelectList) {
+                                foreach (var v in transactionDataResp.singleSelectList) {
+                                    v.type = AuthElementType.Single;
+                                    dicRenderResult.Add(v.ordinary, v);
+                                }
                             }
-                        }
-                        //NVP
-                        if (null != authorizedData.nameValuePairList) {
-                            foreach (var v in authorizedData.nameValuePairList) {
-                                v.type = AuthElementType.NVP;
-                                dicRenderResult.Add(v.ordinary, v);
+                            //NVP
+                            if (null != transactionDataResp.nameValuePairList) {
+                                foreach (var v in transactionDataResp.nameValuePairList) {
+                                    v.type = AuthElementType.NVP;
+                                    dicRenderResult.Add(v.ordinary, v);
+                                }
                             }
-                        }
 
-                        int maxLoop = 1000;
-                        int count = 0;
-                        for (int i = 0; i < maxLoop; i++) {
-                            if (dicRenderResult.ContainsKey(i)) {
-                                AuthorizationElement element = dicRenderResult[i];
-                                if (null == element) {
-                                    continue;
-                                }
-                                //Render Layout
-                                switch (element.type) {
-                                    case AuthElementType.Content:
-                                        formResultAuthorization.renderToLayoutResultContentList(element);
+                            int maxLoop = 1000;
+                            int count = 0;
+                            for (int i = 0; i < maxLoop; i++) {
+                                if (dicRenderResult.ContainsKey(i)) {
+                                    AuthorizationElement element = dicRenderResult[i];
+                                    if (null == element) {
+                                        continue;
+                                    }
+                                    //Render Layout
+                                    switch (element.type) {
+                                        case AuthElementType.Content:
+                                            formResultAuthorization.renderToLayoutResultContentList(element);
+                                            break;
+                                        case AuthElementType.Multiple:
+                                            formResultAuthorization.renderToLayoutReslutMultiple(element);
+                                            break;
+                                        case AuthElementType.Single:
+                                            formResultAuthorization.renderToLayoutResultSingle(element);
+                                            break;
+                                        case AuthElementType.NVP:
+                                            formResultAuthorization.renderToLayoutNVP(element);
+                                            break;
+                                    }
+                                    if (++count >= dicRenderResult.Count) {
                                         break;
-                                    case AuthElementType.Multiple:
-                                        formResultAuthorization.renderToLayoutReslutMultiple(element);
-                                        break;
-                                    case AuthElementType.Single:
-                                        formResultAuthorization.renderToLayoutResultSingle(element);
-                                        break;
-                                    case AuthElementType.NVP:
-                                        formResultAuthorization.renderToLayoutNVP(element);
-                                        break;
-                                }
-                                if (++count >= dicRenderResult.Count) {
-                                    break;
+                                    }
                                 }
                             }
+                            //Render Result Biometric Auth
+                            formResultAuthorization.renderResultBiometricAuht(baseBiometricAuthResp);
+                            if (formResultAuthorization.ShowDialog() == true) { }
                         }
-                        //Render Result Biometric Auth
-                        formResultAuthorization.renderResultBiometricAuht(baseBiometricAuthResp);
-                        if (formResultAuthorization.ShowDialog() == true) { }
                     }
                 }
                 else {
@@ -1204,11 +1247,11 @@ namespace ClientInspectionSystem {
         }
 
         //Check Null Transaction Data
-        private bool checkNullReslutTransactionData(AuthorizationData authorizedData) {
-            List<AuthorizationElement> elementContent = authorizedData.authContentList;
-            List<AuthorizationElement> elementMultiple = authorizedData.multipleSelectList;
-            List<AuthorizationElement> elementSingle = authorizedData.singleSelectList;
-            List<AuthorizationElement> elementNVP = authorizedData.nameValuePairList;
+        private bool checkNullReslutTransactionData(TransactionDataBiometricAuth transaction) {
+            List<AuthorizationElement> elementContent = transaction.authContentList;
+            List<AuthorizationElement> elementMultiple = transaction.multipleSelectList;
+            List<AuthorizationElement> elementSingle = transaction.singleSelectList;
+            List<AuthorizationElement> elementNVP = transaction.nameValuePairList;
             return elementContent.Count == 0 && elementMultiple.Count == 0
                 && elementSingle.Count == 0 && elementNVP.Count == 0;
 
@@ -1226,17 +1269,53 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region FOR TEST
-        private void btnOption_Click(object sender, RoutedEventArgs e) {
-            //this.Visibility = Visibility.Collapsed;
-            FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
+        //private void btnOption_Click(object sender, RoutedEventArgs e) {
+        //    //this.Visibility = Visibility.Collapsed;
+        //    FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
 
-            if (formChoiceReadDocument.ShowDialog() == true) {
-                //this.Visibility = Visibility.Visible;
+        //    if (formChoiceReadDocument.ShowDialog() == true) {
+        //        //this.Visibility = Visibility.Visible;
+        //    }
+        //}
+        private void btnDG1_Click(object sender, RoutedEventArgs e) {
+            try {
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
             }
         }
 
-        private void btnDG1_Click(object sender, RoutedEventArgs e) {
-            
+        private void handleDlgConnect(bool isConnect) {
+            try {
+                bool isConnected = isConnect;
+                logger.Debug("IS CONNECT => " + isConnected);
+                if (!isConnect) {
+                    logger.Debug("RE-CONNECT => " + isConnected);
+                    this.Dispatcher.Invoke(() => {
+                        mainWindow.loadingConnectSocket.Visibility = Visibility.Visible;
+                        mainWindow.lbSocketConnectionStatus.Content = "RE-CONNECT...";
+                        mainWindow.lbSocketConnectionStatus.Foreground = Brushes.White;
+                        mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                            mainWindow.imgSocketConnectionStatus);
+                        this.IsEnabled = false;
+                    });
+                }
+                else {
+                    mainWindow.Dispatcher.Invoke(() => {
+                        mainWindow.btnDisconnect.IsEnabled = true;
+                        mainWindow.btnConnectToDevice.IsEnabled = true;
+                        mainWindow.btnConnect.IsEnabled = false;
+                        mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                        mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
+                        mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
+                                                                                                            mainWindow.imgSocketConnectionStatus);
+                        this.IsEnabled = true;
+                    });
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
         }
         #endregion
 

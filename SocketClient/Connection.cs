@@ -1,8 +1,10 @@
 ﻿using ClientInspectionSystem.SocketClient.Response;
+using log4net;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using PluginICAOClientSDK;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Request;
 using PluginICAOClientSDK.Response;
 using PluginICAOClientSDK.Response.BiometricAuth;
@@ -16,7 +18,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientInspectionSystem.SocketClient {
-    public delegate void DeleagteConnect(bool isConnectWS);
     public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp documentDetailsResp);
     public delegate void DelegateAutoGetBiometric(BaseBiometricAuthResp baseBiometricAuthResp);
     public class Connection {
@@ -25,144 +26,69 @@ namespace ClientInspectionSystem.SocketClient {
         //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
         //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        private readonly int FIND_CONNECT_INTEVAL = 1000;
-        private readonly long MAX_PING = long.MaxValue;
-        private DeleagteConnect deleagteConnect;
+        //private readonly int FIND_CONNECT_INTEVAL = 1000;
+        //private readonly long MAX_PING = long.MaxValue;
+        private DelegateConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
         private DelegateAutoBiometricResult delegateAutoBiometric;
-        private DelegateAutoReadNofity delegateAutoReadNofity;
         private DelegateCardDetectionEvent delegateCardDetectionEvent;
-
-        private bool checkConnection;
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
-        private int timeOutSocket;
-
-        public bool CheckConnection {
-            get { return checkConnection; }
-        }
         private ISPluginClient wsClient;
-
-        public ISPluginClient WSClient {
-            get { return wsClient; }
-        }
-
-        private System.Timers.Timer timeFindConnectWs;
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion 
 
         #region CONSTRUCTOR
-        public Connection(DeleagteConnect dlgConnect) {
-            deleagteConnect = dlgConnect;
-        }
-        public Connection(DeleagteConnect dlgConnect, bool secureConnect,
-                          string ip, string port,
+        public Connection(bool secureConnect, string ip,
+                          string port,
                           DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
-                          DelegateAutoReadNofity dlgAutoReadNotify, DelegateCardDetectionEvent dlgCardEvent) {
-            this.deleagteConnect = dlgConnect;
+                          DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK) {
             this.delegateAutoGetDoc = dlgAutoGetDoc;
             this.delegateAutoBiometric = delegateAutoBiometricResult;
-            this.delegateAutoReadNofity = dlgAutoReadNotify;
             this.delegateCardDetectionEvent = dlgCardEvent;
+            this.deleagteConnect = delegateConnectSDK;
 
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
                 string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity, this.delegateCardDetectionEvent);
+                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect,
+                                              null,
+                                              this.delegateAutoGetDoc, this.delegateAutoBiometric,
+                                              this.delegateCardDetectionEvent, this.deleagteConnect);
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWS, secureConnect, this.delegateAutoGetDoc, null, this.delegateAutoBiometric, this.delegateAutoReadNofity, this.delegateCardDetectionEvent);
+                wsClient = new ISPluginClient(endPointUrlWS, secureConnect,
+                                              null,
+                                              this.delegateAutoGetDoc, this.delegateAutoBiometric,
+                                              this.delegateCardDetectionEvent, this.deleagteConnect);
             }
         }
         #endregion
 
         #region FIND CONNECTION AND CONNECT SOCKET
-        public void findConnect(MetroWindow metroWindow) {
+        public void connectSocketServer(MetroWindow metroWindow) {
             try {
                 MainWindow mainWindow = (MainWindow)metroWindow;
                 mainWindow.Dispatcher.Invoke(async () => {
                     ProgressDialogController controllerWSClient = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                                                     InspectionSystemContanst.CONTENT_CONNECTING_MESSAGE_BOX);
-                    controllerWSClient.SetIndeterminate();
-
-                    timeFindConnectWs = new System.Timers.Timer();
-
-                    bool isConnectWs = false;
-                    int countFailConnect = 0;
-
-                    timeFindConnectWs.Interval = FIND_CONNECT_INTEVAL;
-                    timeFindConnectWs.Elapsed += (sendFindConnect, eFindConnect) => {
-                        isConnectWs = wsClient.checkConnect();
-                        checkConnection = wsClient.checkConnect();
-                        //Logmanager.Instance.writeLog("AFTER FIND CONNECTION SOCKET [" + isConnectWs + "]");
-
-                        deleagteConnect(isConnectWs);
-                        if (isConnectWs) {
-                            mainWindow.Dispatcher.Invoke(async () => {
-                                mainWindow.btnDisconnect.IsEnabled = true;
-                                mainWindow.btnConnectToDevice.IsEnabled = true;
-                                mainWindow.btnConnect.IsEnabled = false;
-                                mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                                mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
-                                mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
-                                                                                                                    mainWindow.imgSocketConnectionStatus);
-                                if (controllerWSClient.IsOpen) {
-                                    controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_MESSAGE_BOX);
-                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                                    await controllerWSClient.CloseAsync();
-                                    mainWindow.btnIDocument.IsEnabled = true;
-                                }
-                            });
-                            //Logmanager.Instance.writeLog("STOP TIMER FIND CONNECTION");
-                            //timeFindConnectWs.Stop();
-                        }
-                        else {
-                            countFailConnect++;
-                            mainWindow.Dispatcher.Invoke(() => {
-                                mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Visible;
-                                mainWindow.lbSocketConnectionStatus.Content = "CONNECTING...";
-                                mainWindow.lbSocketConnectionStatus.FontWeight = System.Windows.FontWeights.Bold;
-                                mainWindow.lbSocketConnectionStatus.Foreground = System.Windows.Media.Brushes.White;
-                                mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
-                                                                                                                    mainWindow.imgSocketConnectionStatus);
-                                mainWindow.btnConnect.IsEnabled = true;
-
-                                connect();
-
-                                ////Logmanager.Instance.writeLog("COUNT FAIL >>> " + countFailConnect);
-                                //if (countFailConnect == MAX_PING) {
-                                //    mainWindow.IsEnabled = true;
-                                //    mainWindow.btnDisconnect.IsEnabled = false;
-                                //    mainWindow.btnConnectToDevice.IsEnabled = false;
-                                //    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                                //    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL XXX";
-                                //}
-                            });
-                        }
-
-                        //Logmanager.Instance.writeLog("COUNT FAIL <<< " + countFailConnect);
-                        //if (countFailConnect == MAX_PING) {
-                        //    mainWindow.Dispatcher.Invoke(async () => {
-                        //        await controllerWSClient.CloseAsync();
-                        //        ProgressDialogController controllerWSClientFail = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                        //                                                                                             InspectionSystemContanst.CONTENT_FALIL);
-                        //        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_4k);
-                        //        await controllerWSClientFail.CloseAsync();
-                        //        mainWindow.IsEnabled = true;
-                        //        mainWindow.btnDisconnect.IsEnabled = false;
-                        //        mainWindow.btnConnectToDevice.IsEnabled = false;
-                        //        mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                        //        mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECT FAIL YYYY";
-                        //    });
-                        //    timeFindConnectWs.Stop();
-                        //    countFailConnect = 0;
-                        //    wsClient.shutDown();
-                        //}
-                    };
-                    timeFindConnectWs.Start();
+                                                                                                    InspectionSystemContanst.CONTENT_CONNECTING_MESSAGE_BOX);
+                    mainWindow.btnDisconnect.IsEnabled = true;
+                    mainWindow.btnConnectToDevice.IsEnabled = true;
+                    mainWindow.btnConnect.IsEnabled = false;
+                    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
+                    mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
+                                                                                                        mainWindow.imgSocketConnectionStatus);
+                    if (controllerWSClient.IsOpen) {
+                        controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_MESSAGE_BOX);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerWSClient.CloseAsync();
+                        mainWindow.btnIDocument.IsEnabled = true;
+                    }
                 });
             }
             catch (Exception eFindConnect) {
-                Logmanager.Instance.writeLog("FIND CONNECT ERROR " + eFindConnect.ToString());
+                logger.Error(eFindConnect);
             }
         }
         #endregion
@@ -176,12 +102,10 @@ namespace ClientInspectionSystem.SocketClient {
         #region DISCONNCET SOCKET
         //Shuttdown
         public void shuttdown(MetroWindow metroWindow) {
-            checkConnection = wsClient.checkConnect();
             MainWindow mainWindow = (MainWindow)metroWindow;
             mainWindow.Dispatcher.Invoke(() => {
                 mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
                 mainWindow.lbSocketConnectionStatus.Content = "STATUS SOCKET";
-                mainWindow.lbSocketConnectionStatus.FontWeight = System.Windows.FontWeights.Bold;
                 mainWindow.lbSocketConnectionStatus.Foreground = System.Windows.Media.Brushes.White;
                 mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
                                                                                                     mainWindow.imgSocketConnectionStatus);
@@ -189,7 +113,6 @@ namespace ClientInspectionSystem.SocketClient {
                 mainWindow.btnConnectToDevice.IsEnabled = false;
                 mainWindow.btnConnect.IsEnabled = true;
             });
-            timeFindConnectWs.Stop();
             wsClient.shutDown();
         }
         #endregion
@@ -202,11 +125,11 @@ namespace ClientInspectionSystem.SocketClient {
             try {
                 GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
                 deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
-                Logmanager.Instance.writeLog("<DEBUG> GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
+                logger.Debug("GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
                 return deviceDetailsResp;
             }
             catch (Exception e) {
-                Logmanager.Instance.writeLog("GET DEVICE DETAILS ERROR " + e.ToString());
+                logger.Error(e);
                 //return null;
                 throw e;
             }
@@ -218,17 +141,19 @@ namespace ClientInspectionSystem.SocketClient {
                                                           bool dataGroupEnabled, bool optionalEnabled,
                                                           TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
                                                           int timeOutInterVal, string canValue,
-                                                          string challenge) {
+                                                          string challenge, bool caEnabled,
+                                                          bool taEnabled) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(wsClient, mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalEnabled, timeOutResp,
-                                                                               documentDetailsListener, timeOutInterVal, 
-                                                                               canValue, challenge);
+                                                                               documentDetailsListener, timeOutInterVal,
+                                                                               canValue, challenge,
+                                                                               caEnabled, taEnabled);
                 BaseDocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }
             catch (Exception eDoc) {
-                Logmanager.Instance.writeLog("GET DOCUMENT DETAILS ERROR " + eDoc.ToString());
+                logger.Error(eDoc);
                 //return null;
                 throw eDoc;
             }
@@ -236,18 +161,20 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region GET RESULT BIOMETRIC AUTH
-        public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, AuthorizationData authorizationData,
+        public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, object challenge,
                                                             TimeSpan timeOutResp, int timeOutInterVal,
-                                                            string challenge) {
+                                                            string challengeType, bool livenessEnabled,
+                                                            string cardNo) {
             try {
                 GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(wsClient, biometricType,
-                                                                                                       authorizationData, timeOutResp,
-                                                                                                       timeOutInterVal, challenge);
+                                                                                                       challenge, timeOutResp,
+                                                                                                       timeOutInterVal, challengeType,
+                                                                                                       livenessEnabled, cardNo);
                 BaseBiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }
             catch (Exception eBiometricAuth) {
-                Logmanager.Instance.writeLog("GET RESULT BIOMETRIC ERROR " + eBiometricAuth.ToString());
+                logger.Error(eBiometricAuth);
                 throw eBiometricAuth;
             }
         }
@@ -266,7 +193,7 @@ namespace ClientInspectionSystem.SocketClient {
                 return baseConnectToDeviceResp;
             }
             catch (Exception eConnectToDevice) {
-                Logmanager.Instance.writeLog("CONNECT TO DEVICE ERROR " + eConnectToDevice.ToString());
+                logger.Error(eConnectToDevice);
                 throw eConnectToDevice;
             }
         }

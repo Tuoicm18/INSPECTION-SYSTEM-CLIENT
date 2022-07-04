@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -6,6 +7,7 @@ using System.Windows.Media.Imaging;
 
 namespace ClientInspectionSystem {
     public class InspectionSystemPraser {
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public static System.Windows.Media.ImageSource setImageSource(string path, Image img) {
             return img.Source = new BitmapImage(new Uri(path, UriKind.Relative));
         }
@@ -28,7 +30,7 @@ namespace ClientInspectionSystem {
                     return bi;
                 }
             } catch(Exception e) {
-                Logmanager.Instance.writeLog("CONVERT B64 TO IMG ERROR " + e.ToString());
+                logger.Error(e);
                 return null;
             }
         }

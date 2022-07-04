@@ -9,10 +9,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using PluginICAOClientSDK.Request;
+using log4net;
 
 namespace ClientInspectionSystem.RenderToLayout {
     public class RenderSingleChoices {
+
         #region VARIABLE
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private RadioButton radioButtonSingle;
         private GroupBox groupBoxSingle;
         private TextBlock textBlockSingleDesc;
@@ -96,7 +99,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 checkDuplicateContent(lbValidationConetn, btnSubmitAdd, contentRadio, radioButtonList, groupBoxesSingle, headerGroup);
             }
             catch (Exception eSingle) {
-                Logmanager.Instance.writeLog("RENDER LAYOUT SINGLE CHOICE ERROR " + eSingle.ToString());
+                logger.Error(eSingle);
             } finally {
                 //Add To List For Get Data
                 singleSelectModels.Add(new SingleSelectModel {

@@ -15,13 +15,16 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private int timeOutInterVal;
         private string canValue;
         private string challenge;
+        private bool caEnabled;
+        private bool taEnabled;
 
         public GetDocumentDetails(ISPluginClient pluginClient, bool mrzEnabled,
                                   bool imageEnabled, bool dataGroupEnabled, 
                                   bool optionalDetailsEnabled, TimeSpan timeoutResp,
                                   ISPluginClient.DocumentDetailsListener documentDetailsListener,
                                   int timeOutInterVal, string canValue,
-                                  string challenge) {
+                                  string challenge, bool caEnabled,
+                                  bool taEnabled) {
             this.pluginClient = pluginClient;
             this.mrzEnabled = mrzEnabled;
             this.imageEnabled = imageEnabled;
@@ -32,6 +35,8 @@ namespace ClientInspectionSystem.SocketClient.Response {
             this.timeOutInterVal = timeOutInterVal;
             this.canValue = canValue;
             this.challenge = challenge;
+            this.caEnabled = caEnabled;
+            this.taEnabled = taEnabled;
         }
 
         public BaseDocumentDetailsResp getDocumentDetails() {
@@ -39,7 +44,8 @@ namespace ClientInspectionSystem.SocketClient.Response {
                                                    dataGroupEnabled, optionalDetailsEnabled, 
                                                    timeOutResp, documentDetailsListener,
                                                    timeOutInterVal, canValue,
-                                                   challenge);
+                                                   challenge, caEnabled,
+                                                   taEnabled);
         }
     }
 }

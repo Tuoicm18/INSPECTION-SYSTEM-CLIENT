@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using ControlzEx.Theming;
+using log4net;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using PluginICAOClientSDK.Models;
@@ -16,6 +17,8 @@ namespace ClientInspectionSystem {
     /// </summary>
     public partial class FormBiometricAuth : MetroWindow {
         private MainWindow mainWindow = new MainWindow();
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public FormBiometricAuth() {
             InitializeComponent();
             // Set the window theme to Dark Mode
@@ -204,7 +207,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception exBtnViewJWT) {
-                Logmanager.Instance.writeLog("VIEW JWT ERR " + exBtnViewJWT.ToString());
+                logger.Error(exBtnViewJWT);
             }
         }
 

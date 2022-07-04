@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +16,8 @@ namespace ClientInspectionSystem {
     public static class ClientExtentions {
         //Setting Jsons For KeyValuPair<string, object>
         public static JsonSerializerSettings settingsJsonDuplicateDic = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
+
+        #region OTHER
 
         /// <summary>
         /// Returns the right part of the string instance.
@@ -61,6 +64,13 @@ namespace ClientInspectionSystem {
                 writer.WriteEndObjectAsync();
             }
         }
+
+        //Read version of current app
+        public static string getCurrentVersion() {
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            return version;
+        }
+        #endregion
 
         #region REMOVE HOVER LISTVIEW
         public static void removeHoverListView(ListView lv, MetroWindow metroWindow) {

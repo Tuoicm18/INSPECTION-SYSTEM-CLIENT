@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using PluginICAOClientSDK;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Request;
 using PluginICAOClientSDK.Response.BiometricAuth;
 
@@ -7,24 +9,32 @@ namespace ClientInspectionSystem.SocketClient.Response {
     public class GetBiometricAuthentication {
         private ISPluginClient clientPlugin;
         private string biometricType;
-        private AuthorizationData authorizationData;
+        private object challenge;
         private int timeOutInterVal;
-        private string challenge;
+        private string challengeType;
+        private bool livenessEnabled;
+        private string cardNo;
         public TimeSpan timeOutResp;
 
         public GetBiometricAuthentication(ISPluginClient pluginClient, string biometricType,
-                                          AuthorizationData authorizationData, TimeSpan timeOutResp,
-                                          int timeOutInterVal, string challenge) {
+                                          object challenge, TimeSpan timeOutResp,
+                                          int timeOutInterVal, string challengeType,
+                                          bool livenessEnabled, string cardNo) {
             this.clientPlugin = pluginClient;
             this.biometricType = biometricType;
-            this.authorizationData = authorizationData;
+            this.challenge = challenge;
             this.timeOutResp = timeOutResp;
             this.timeOutInterVal = timeOutInterVal;
-            this.challenge = challenge;
+            this.challengeType = challengeType;
+            this.livenessEnabled = livenessEnabled;
+            this.cardNo = cardNo;
         }
 
         public BaseBiometricAuthResp getResultBiometricAuth() {
-            return clientPlugin.biometricAuthentication(biometricType, authorizationData, timeOutResp, timeOutInterVal, challenge);
+            return clientPlugin.biometricAuthentication(biometricType, challenge, 
+                                                        timeOutResp, timeOutInterVal, 
+                                                        challengeType, livenessEnabled,
+                                                        cardNo);
         }
     }
 }

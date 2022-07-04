@@ -10,10 +10,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using PluginICAOClientSDK.Request;
+using log4net;
 
 namespace ClientInspectionSystem.RenderToLayout {
     public class RenderMultipleChoices {
+
         #region VARIABEL
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private GroupBox groupBoxMultiple;
         private CheckBox checkBoxMultiple;
         private TextBlock textBlockMultipleDesc;
@@ -98,7 +101,7 @@ namespace ClientInspectionSystem.RenderToLayout {
                 checkDuplicateContent(lbValidationConetn, btnSubmitAdd, contentCheckBox, this.checkBoxes, groupBoxesMultiple, headerGroup);
             }
             catch (Exception eMulti) {
-                Logmanager.Instance.writeLog("RENDER MULTIPLE CHOICES ERROR " + eMulti.ToString());
+                logger.Error(eMulti);
             } finally {
                 //Add To List For Get Data
                 multipleSelectModels.Add(new MultipleSelectModel {

@@ -11,12 +11,14 @@ using ClientInspectionSystem.RenderToLayout.ResultAuthorizedData;
 using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using System.Windows.Media.Imaging;
+using log4net;
 
 namespace ClientInspectionSystem {
     /// <summary>
     /// Interaction logic for FormResultAuthorizationData.xaml
     /// </summary>
     public partial class FormResultAuthorizationData : MetroWindow {
+
         #region VARIABLE
         //Content List
         private RenderResultContentList renderResultContentList = new RenderResultContentList();
@@ -26,6 +28,7 @@ namespace ClientInspectionSystem {
         private RenderResultSingleChoices renderResultSingleChoices = new RenderResultSingleChoices();
         //NVP
         private RenderResultNameValuePairs renderResultNVP = new RenderResultNameValuePairs();
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
         #region MAIN
@@ -59,7 +62,7 @@ namespace ClientInspectionSystem {
                 }
             }
             catch (Exception exBtnViewJWT) {
-                Logmanager.Instance.writeLog("VIEW JWT ERR " + exBtnViewJWT.ToString());
+                logger.Error(exBtnViewJWT);
             }
         }
         #endregion
@@ -190,7 +193,7 @@ namespace ClientInspectionSystem {
                 renderResultContentList.renderResultContentList(elementContentList, lvAll, scvAll);
                 ClientExtentions.removeHoverListView(renderResultContentList.listViewContentList, this);
             } catch (Exception ex) {
-                Logmanager.Instance.writeLog("RENDER RESULT CONTENT LIST ERR " + ex.ToString());
+                logger.Error(ex);
             }
         }
         //Multiple Choices
@@ -199,7 +202,7 @@ namespace ClientInspectionSystem {
                 renderResultMultipleChoices.renderResultMultipleChoices(elementMultiple, lvAll, scvAll);
                 ClientExtentions.removeHoverListView(renderResultMultipleChoices.listViewMultiple, this);
             } catch(Exception ex) {
-                Logmanager.Instance.writeLog("RENDER RESULT MULTIPLE CHOICES ERR " + ex.ToString());
+                logger.Error(ex);
             }
         }
         //Single Choices
@@ -209,7 +212,7 @@ namespace ClientInspectionSystem {
                 ClientExtentions.removeHoverListView(renderResultSingleChoices.listViewSingle, this);
             }
             catch(Exception ex) {
-                Logmanager.Instance.writeLog("RENDER RESULT SINGLE CHOICES ERR " + ex.ToString());
+                logger.Error(ex);
             }
         }
         //NVP
@@ -219,7 +222,7 @@ namespace ClientInspectionSystem {
                 ClientExtentions.removeHoverListView(renderResultNVP.listViewNVP, this);
             }
             catch(Exception ex) {
-                Logmanager.Instance.writeLog("RENDER RESULT NVP ERR " + ex.ToString());
+                logger.Error(ex);
             }
         }
         #endregion
