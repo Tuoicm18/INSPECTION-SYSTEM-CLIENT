@@ -43,12 +43,17 @@ namespace ClientInspectionSystem {
     public partial class MainWindow : MetroWindow {
 
         #region VARIABLE
-        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        //private static readonly string endPointUrl = "ws://192.168.3.170:9505/ISPlugin";
+
+        #region DELEGATE
         public DelegateAutoDocument delegateAutoGetDoc;
         public DelegateAutoBiometricResult delegateAutoBiometric;
         public DelegateCardDetectionEvent delegateCardDetectionEvent;
         public DelegateConnect delegateConnectSDK;
+        public DelegateNotifyMessage delegateNotifyMessage;
+        #endregion
+
+        private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //private static readonly string endPointUrl = "ws://192.168.3.170:9505/ISPlugin";
         public Connection connectionSocket;
         public bool isWSS;
         public ClientListener clientListener = new ClientListener();
@@ -61,6 +66,9 @@ namespace ClientInspectionSystem {
         private bool isReadByCanValue = false;
         //Update 2022.05.20 set liveness
         private bool liveness;
+        public bool isConnectDenied;
+        public bool isConnectSocket;
+        public bool isDisConnectSocket = false;
         #endregion
 
         #region CONSTRUCTOR
@@ -86,6 +94,7 @@ namespace ClientInspectionSystem {
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
                 delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
                 delegateCardDetectionEvent = new DelegateCardDetectionEvent(delegateCardDetection);
+                delegateNotifyMessage = new DelegateNotifyMessage(autoReadNotify);
                 delegateConnectSDK = new DelegateConnect(handleDlgConnect);
             }
             catch (Exception eConnection) {
@@ -96,13 +105,15 @@ namespace ClientInspectionSystem {
             btnConnectToDevice.IsEnabled = false;
 
             //Test Biometric Auth With cardNo
-            btnRFID.IsEnabled = true;
-            btnLeftFinger.IsEnabled = true;
-            btnRightFinger.IsEnabled = true;
+            btnRFID.IsEnabled = false;
+            btnLeftFinger.IsEnabled = false;
+            btnRightFinger.IsEnabled = false;
+            btnRefresh.IsEnabled = false;
+            btnScanDocument.IsEnabled = false;
         }
         #endregion
 
-        #region DISABLE ENTER EVENT BUTTO
+        #region DISABLE ENTER EVENT BUTTON
         private void btnIDocument_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
             if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Space) {
                 e.Handled = true;
@@ -110,9 +121,9 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        #region DELEGATE AUTO
+        #region DELEGATE METHOD HANDLE
 
-        //Auto Get Document Details
+        #region AUTO GET DOCUMENT DETAILS
         public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
             //ProgressDialogController controllerReadChip = null;
             if (manualReadDoc == false) {
@@ -243,8 +254,9 @@ namespace ClientInspectionSystem {
                 throw eAutoDoc;
             }
         }
+        #endregion
 
-        //Auto Get Result Biometric Auth
+        #region AUTO GET RESULT BIOMETRIC AUTH
         public void autoGetBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
             try {
                 if (null != baseBiometricAuthResp) {
@@ -273,60 +285,28 @@ namespace ClientInspectionSystem {
                 logger.Error(eAutoBiometric);
             }
         }
+        #endregion
 
-        //Auto Read Notify 
+        #region AUTO READ NOTIFY MESSAGE
         public void autoReadNotify(string json) {
             try {
-                //Logmanager.Instance.writeLog("<TEST AUTO READ NOTIFY> " + json);
-
-                if (json.Equals(NotifyAutoReadDocument.NOTIFY_AUTO_START)) {
-                    if (!manualReadDoc) {
-                        this.Dispatcher.Invoke(async () => {
-                            clearLayout(true);
-                            showMain();
-                            this.dialogControllerAutoRead = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX + "AUTO");
-                            this.dialogControllerAutoRead.SetIndeterminate();
-                        });
-                    }
-                }
-                else if (json.Equals(NotifyAutoReadDocument.NOTIFY_AUTO_ERROR)) {
-                    if (null != dialogControllerAutoRead) {
-                        this.Dispatcher.Invoke(async () => {
-                            clearLayout(true);
-                            showMain();
-                            this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                            await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
-                            await this.dialogControllerAutoRead.CloseAsync();
-                        });
+                if (!string.IsNullOrEmpty(json)) {
+                    BaseResponse baseResponse = JsonConvert.DeserializeObject<BaseResponse>(json);
+                    if (null != baseResponse) {
+                        isConnectDenied = false;
+                        if (baseResponse.errorCode == PluginICAOClientSDK.Utils.ERR_FOR_DENIED_CONNECTION) {
+                            isConnectDenied = true;
+                        }
                     }
                 }
             }
             catch (Exception e) {
-                if (e is ISPluginException) {
-                    ISPluginException pluginException = (ISPluginException)e;
-                    if (null != dialogControllerAutoRead) {
-                        clearLayout(true);
-                        showMain();
-                        this.dialogControllerAutoRead.SetMessage(pluginException.errMsg.ToUpper());
-                        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_5S);
-                        this.dialogControllerAutoRead.CloseAsync();
-                    }
-                }
-                else {
-                    if (null != dialogControllerAutoRead) {
-                        logger.Debug("CLOSE DIALOG AUTO READ EXCEPTION " + e.ToString());
-                        clearLayout(true);
-                        showMain();
-                        this.dialogControllerAutoRead.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                        Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_2S);
-                        this.dialogControllerAutoRead.CloseAsync();
-                    }
-                }
                 logger.Error(e);
             }
         }
+        #endregion
 
-        //Update 2022.05.10 Test Card Detection Event
+        #region UPDATE 2022.05.10 TEST CARD DETECTION EVENT
         private void delegateCardDetection(BaseCardDetectionEventResp baseCardDetectionEventResp) {
             try {
                 if (null != baseCardDetectionEventResp) {
@@ -347,6 +327,56 @@ namespace ClientInspectionSystem {
                 throw e;
             }
         }
+        #endregion
+
+        #region AUTO CONNECT
+        private void handleDlgConnect(bool isConnect) {
+            try {
+                bool isConnected = isConnect;
+                isConnectSocket = isConnected;
+                logger.Debug("IS CONNECT => " + isConnected);
+                if (!isConnect) {
+                    //logger.Debug("RE-CONNECT => ");
+                    this.Dispatcher.Invoke(() => {
+                        if (!isConnectDenied && !isDisConnectSocket) {
+                            this.loadingConnectSocket.Visibility = Visibility.Visible;
+                            this.lbSocketConnectionStatus.Content = "RE-CONNECT...";
+                            this.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                                this.imgSocketConnectionStatus);
+                            this.IsEnabled = false;
+                        }
+                        else {
+                            this.lbSocketConnectionStatus.Content = "CONNECTION DENIED";
+                            this.btnDisconnect.IsEnabled = false;
+                            this.btnConnectToDevice.IsEnabled = false;
+                            this.btnConnect.IsEnabled = true;
+                            this.loadingConnectSocket.Visibility = Visibility.Collapsed;
+                            this.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                                this.imgSocketConnectionStatus);
+                            connectionSocket.shuttdown(this);
+                        }
+                    });
+                }
+                else {
+                    this.Dispatcher.Invoke(() => {
+                        this.btnDisconnect.IsEnabled = true;
+                        this.btnConnectToDevice.IsEnabled = true;
+                        this.btnConnect.IsEnabled = false;
+                        this.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+                        this.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
+                        this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
+                                                                                                            this.imgSocketConnectionStatus);
+                        this.IsEnabled = true;
+                    });
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
 
         #endregion
 
@@ -542,8 +572,8 @@ namespace ClientInspectionSystem {
 
                         if (null != deviceDetailsResp) {
                             LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
-                                                    deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
-                                                    deviceDetailsResp.data.totalPreceeded.ToString());
+                                                                                deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                deviceDetailsResp.data.totalPreceeded.ToString());
                         }
 
                         if (configConnectToDeviceControl.getMRZEnabled()) {
@@ -632,6 +662,7 @@ namespace ClientInspectionSystem {
 
         #region HANDLE BUTTON CONNECT WEBSOCKET SERVER
         private void btnConnect_Click(object sender, RoutedEventArgs e) {
+            isDisConnectSocket = false;
             var button = sender as Button;
             ContextMenu contextMenu = button.ContextMenu;
             contextMenu.PlacementTarget = button;
@@ -797,7 +828,7 @@ namespace ClientInspectionSystem {
                         controllerFaceAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, "079094012066"); // 2022.05.12 Update challenge 079094012066
+                            BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFaceAuth) {
                                 if (resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerFaceAuth.CloseAsync();
@@ -952,7 +983,7 @@ namespace ClientInspectionSystem {
                         controllerLeftFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, "079094012066"); // 2022.05.12 Update challenge 079094012066
+                            resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultLeftFingerAuth) {
                                 if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
                                     controllerLeftFingerAuth.CloseAsync();
@@ -1049,7 +1080,7 @@ namespace ClientInspectionSystem {
                         controllerRightFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
-                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, "079094012066"); // 2022.05.12 Update challenge 079094012066
+                            BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFingerRightAuth) {
 
                                 if (resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
@@ -1279,39 +1310,8 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-            }
-            catch (Exception ex) {
-                logger.Error(ex);
-            }
-        }
-
-        private void handleDlgConnect(bool isConnect) {
-            try {
-                bool isConnected = isConnect;
-                logger.Debug("IS CONNECT => " + isConnected);
-                if (!isConnect) {
-                    logger.Debug("RE-CONNECT => " + isConnected);
-                    this.Dispatcher.Invoke(() => {
-                        mainWindow.loadingConnectSocket.Visibility = Visibility.Visible;
-                        mainWindow.lbSocketConnectionStatus.Content = "RE-CONNECT...";
-                        mainWindow.lbSocketConnectionStatus.Foreground = Brushes.White;
-                        mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
-                                                                                                            mainWindow.imgSocketConnectionStatus);
-                        this.IsEnabled = false;
-                    });
-                }
-                else {
-                    mainWindow.Dispatcher.Invoke(() => {
-                        mainWindow.btnDisconnect.IsEnabled = true;
-                        mainWindow.btnConnectToDevice.IsEnabled = true;
-                        mainWindow.btnConnect.IsEnabled = false;
-                        mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                        mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
-                        mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
-                                                                                                            mainWindow.imgSocketConnectionStatus);
-                        this.IsEnabled = true;
-                    });
-                }
+                FormScanType formScanType = new FormScanType();
+                if (formScanType.ShowDialog() == true) { }
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -1360,6 +1360,124 @@ namespace ClientInspectionSystem {
         #region CONNECT TO DEVICE
         private void btnConnectToDevice_Click(object sender, RoutedEventArgs e) {
             configConnectToDeviceControl.Visibility = Visibility.Visible;
+        }
+        #endregion
+
+        #region BUTTON_CLICK REFRESH 2022.07.05
+        private void btnRefresh_Click(object sender, RoutedEventArgs e) {
+            Task.Factory.StartNew(() => {
+                try {
+                    //Update Device Details Then Refresh
+                    int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsRefresh = connectionSocket.refreshReader(true, true,
+                                                                                                                                           TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                           timeOutSocket);
+                    if (null != deviceDetailsRefresh) {
+                        mainWindow.Dispatcher.Invoke(async () => {
+                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsRefresh.data.deviceSN,
+                                                                                deviceDetailsRefresh.data.deviceName, deviceDetailsRefresh.data.lastScanTime,
+                                                                                deviceDetailsRefresh.data.totalPreceeded.ToString());
+                            ProgressDialogController controllerRefreshSuccess = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_REFRESH_SUCCESS_MESSAGE_BOX);
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerRefreshSuccess.CloseAsync();
+                        });
+                    }
+                    else {
+                        LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
+                                                                            string.Empty, string.Empty,
+                                                                            string.Empty);
+                        return;
+                    }
+                }
+                catch (Exception ex) {
+                    this.Dispatcher.Invoke(async () => {
+                        ProgressDialogController controllerErrRefresh = null;
+                        if (ex is ISPluginException) {
+                            ISPluginException pluginException = (ISPluginException)ex;
+                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerErrRefresh.CloseAsync();
+                        }
+                        else {
+                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerErrRefresh.CloseAsync();
+                        }
+                    });
+                    logger.Error(ex);
+                }
+            });
+        }
+        #endregion
+
+        #region BUTTON_CLICK SCAN DOCUMENT 2022.07.05
+        private void btnScanDocument_Click(object sender, RoutedEventArgs e) {
+            mainWindow.Dispatcher.Invoke(async () => {
+                try {
+                    FormScanType formScanType = new FormScanType();
+                    if (formScanType.ShowDialog() == true) {
+                        if (!formScanType.isCancelScanDoc) {
+                            string scanType = formScanType.getTextCmbScanType();
+                            bool saveEnable = formScanType.getCbSaveEnable();
+                            int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                            PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocumentResp = null;
+                            await Task.Factory.StartNew(async() => {
+                                try {
+                                    scanDocumentResp = connectionSocket.scanDocumentResp(scanType, saveEnable, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
+                                }
+                                catch (Exception ex) {
+                                    ProgressDialogController controllerErrScanDoc = null;
+                                    if (ex is ISPluginException) {
+                                        await this.Dispatcher.InvokeAsync(async () => {
+                                            logger.Debug("[1111]");
+                                            ISPluginException pluginException = (ISPluginException)ex;
+                                            controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                            await controllerErrScanDoc.CloseAsync();
+                                        });
+                                    }
+                                    else {
+                                        controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                        await controllerErrScanDoc.CloseAsync();
+                                        logger.Debug("[222]");
+                                    }
+                                    logger.Error(ex);
+                                }
+                            });
+
+                            if (null != scanDocumentResp) {
+                                ProgressDialogController controllerRefreshSuccess = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_SCAN_SUCCESS_MESSAGE_BOX);
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                await controllerRefreshSuccess.CloseAsync();
+                                //logger.Debug(JsonConvert.SerializeObject(scanDocumentResp));
+                            }
+                        }
+                        else {
+                            logger.Warn("CANCLE SCAN DOCUMENT");
+                            return;
+                        }
+
+                    }
+                }
+                catch (Exception ex) {
+                    ProgressDialogController controllerErrScanDoc = null;
+                    if (ex is ISPluginException) {
+                        ISPluginException pluginException = (ISPluginException)ex;
+                        controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerErrScanDoc.CloseAsync();
+                        logger.Debug("[333]");
+                    }
+                    else {
+                        controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                        await controllerErrScanDoc.CloseAsync();
+                        logger.Debug("[444]");
+                    }
+                    logger.Error(ex);
+                }
+            });
         }
         #endregion
     }

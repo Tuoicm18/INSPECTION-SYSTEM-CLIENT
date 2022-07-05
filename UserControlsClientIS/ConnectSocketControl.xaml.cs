@@ -65,35 +65,40 @@ namespace ClientInspectionSystem.UserControlsClientIS {
             mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.isWSS, txtIP.Text,
                                           txtPort.Text,
                                           mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
-                                          mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK);
+                                          mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK,
+                                          mainWindow.delegateNotifyMessage);
 
             //Find Connect
             mainWindow.connectionSocket.connectSocketServer(mainWindow);
 
-            mainWindow.Dispatcher.Invoke(async () => {
-                try {
-                    //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
-                    //Update 2022.02.28 TIME OUT INI FILE
-                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+            if(!mainWindow.isConnectDenied) {
+                mainWindow.Dispatcher.Invoke(async () => {
+                    try {
+                        //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
+                        //Update 2022.02.28 TIME OUT INI FILE
+                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
 
-                    await Task.Factory.StartNew(() => {
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
-                                                                                                                                                          TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                                          timeOutSocket);
+                        await Task.Factory.StartNew(() => {
+                            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
+                                                                                                                                                              TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                                              timeOutSocket);
 
-                        mainWindow.Dispatcher.Invoke(() => {
-                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
-                                                                                deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
-                                                                                deviceDetailsResp.data.totalPreceeded.ToString());
+                            mainWindow.Dispatcher.Invoke(() => {
+                                LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
+                                                                                    deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                    deviceDetailsResp.data.totalPreceeded.ToString());
+                            });
                         });
-                    });
-                }
-                catch (Exception eDeviceDetails) {
-                    logger.Error(eDeviceDetails);
-                    LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, string.Empty,
-                                                                         string.Empty, string.Empty, string.Empty);
-                }
-            });
+                    }
+                    catch (Exception eDeviceDetails) {
+                        logger.Error(eDeviceDetails);
+                        LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, string.Empty,
+                                                                             string.Empty, string.Empty, string.Empty);
+                    }
+                });
+            } else {
+                logger.Debug("=> XXXX");
+            }
         }
         #endregion
 

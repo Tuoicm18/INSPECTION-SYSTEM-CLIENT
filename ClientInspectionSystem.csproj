@@ -210,6 +210,9 @@
     <Compile Include="FormResultConfigDevice.xaml.cs">
       <DependentUpon>FormResultConfigDevice.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FormScanType.xaml.cs">
+      <DependentUpon>FormScanType.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IniFile.cs" />
     <Compile Include="InspectionSystemPraser.cs" />
     <Compile Include="Models\AuthDataKeyValue.cs" />
@@ -237,6 +240,8 @@
     <Compile Include="SocketClient\Response\GetConnectToDevice.cs" />
     <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />
     <Compile Include="SocketClient\Response\GetDocumentDetails.cs" />
+    <Compile Include="SocketClient\Response\Refresh.cs" />
+    <Compile Include="SocketClient\Response\GetScanDocument.cs" />
     <Compile Include="UserControlsClientIS\AddKeyValueControl.xaml.cs">
       <DependentUpon>AddKeyValueControl.xaml</DependentUpon>
     </Compile>
@@ -269,6 +274,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="FormResultConfigDevice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FormScanType.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

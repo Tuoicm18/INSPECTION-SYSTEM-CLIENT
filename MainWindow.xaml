@@ -155,6 +155,12 @@
                     Content="CONFIG DEVICE"
                     Visibility="Collapsed"
                     Click="btnConnectToDevice_Click"/>
+            <Button x:Name="btnRefresh"
+                    Click="btnRefresh_Click"
+                    Content="REFRESH"/>
+            <Button x:Name="btnScanDocument"
+                    Click="btnScanDocument_Click"
+                    Content="SCAN DOCUMENT"/>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 

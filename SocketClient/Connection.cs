@@ -23,15 +23,15 @@ namespace ClientInspectionSystem.SocketClient {
     public class Connection {
 
         #region VARIABLE
-        //private static readonly string endPointUrlWSS = "wss://192.168.3.170:9505/ISPlugin";
-        //private static readonly string endPointUrlWS = "ws://192.168.3.170:9505/ISPlugin";
-        //private static readonly string endPointUrl = "wss://192.168.1.8:9505/ISPlugin";
-        //private readonly int FIND_CONNECT_INTEVAL = 1000;
-        //private readonly long MAX_PING = long.MaxValue;
+
+        #region DELEGATE
         private DelegateConnect deleagteConnect;
         private DelegateAutoDocument delegateAutoGetDoc;
         private DelegateAutoBiometricResult delegateAutoBiometric;
         private DelegateCardDetectionEvent delegateCardDetectionEvent;
+        private DelegateNotifyMessage delegateNotifyMessage;
+        #endregion
+
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
         private ISPluginClient wsClient;
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -41,11 +41,13 @@ namespace ClientInspectionSystem.SocketClient {
         public Connection(bool secureConnect, string ip,
                           string port,
                           DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
-                          DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK) {
+                          DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK,
+                          DelegateNotifyMessage dlgNotifyMessage) {
             this.delegateAutoGetDoc = dlgAutoGetDoc;
             this.delegateAutoBiometric = delegateAutoBiometricResult;
             this.delegateCardDetectionEvent = dlgCardEvent;
             this.deleagteConnect = delegateConnectSDK;
+            this.delegateNotifyMessage = dlgNotifyMessage;
 
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
@@ -53,37 +55,64 @@ namespace ClientInspectionSystem.SocketClient {
                 wsClient = new ISPluginClient(endPointUrlWSS, secureConnect,
                                               null,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
-                                              this.delegateCardDetectionEvent, this.deleagteConnect);
+                                              this.delegateCardDetectionEvent, this.deleagteConnect,
+                                              this.delegateNotifyMessage);
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
                 wsClient = new ISPluginClient(endPointUrlWS, secureConnect,
                                               null,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
-                                              this.delegateCardDetectionEvent, this.deleagteConnect);
+                                              this.delegateCardDetectionEvent, this.deleagteConnect,
+                                              this.delegateNotifyMessage);
             }
         }
         #endregion
 
-        #region FIND CONNECTION AND CONNECT SOCKET
+        #region CONNECT SOCKET & LAYOUT
         public void connectSocketServer(MetroWindow metroWindow) {
             try {
                 MainWindow mainWindow = (MainWindow)metroWindow;
                 mainWindow.Dispatcher.Invoke(async () => {
                     ProgressDialogController controllerWSClient = await mainWindow.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
                                                                                                     InspectionSystemContanst.CONTENT_CONNECTING_MESSAGE_BOX);
-                    mainWindow.btnDisconnect.IsEnabled = true;
-                    mainWindow.btnConnectToDevice.IsEnabled = true;
-                    mainWindow.btnConnect.IsEnabled = false;
-                    mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
-                    mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
-                    mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
-                                                                                                        mainWindow.imgSocketConnectionStatus);
                     if (controllerWSClient.IsOpen) {
-                        controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_MESSAGE_BOX);
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                        await controllerWSClient.CloseAsync();
-                        mainWindow.btnIDocument.IsEnabled = true;
+                        if (mainWindow.isConnectDenied) {
+                            controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_DENIED_MESSAGE_BOX);
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerWSClient.CloseAsync();
+                            mainWindow.btnIDocument.IsEnabled = true;
+                        }
+                        else {
+                            if (mainWindow.isConnectSocket) {
+                                mainWindow.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
+                                mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
+                                                                                                                    mainWindow.imgSocketConnectionStatus);
+                                mainWindow.btnDisconnect.IsEnabled = true;
+                                mainWindow.btnConnectToDevice.IsEnabled = true;
+                                mainWindow.btnRefresh.IsEnabled = true;
+                                mainWindow.btnScanDocument.IsEnabled = true;
+                                mainWindow.btnConnect.IsEnabled = false;
+                                mainWindow.loadingConnectSocket.Visibility = System.Windows.Visibility.Collapsed;
+
+                                controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_MESSAGE_BOX);
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                await controllerWSClient.CloseAsync();
+                                mainWindow.btnIDocument.IsEnabled = true;
+                            }
+                            else {
+                                if(mainWindow.isConnectDenied) {
+                                    controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_DENIED_MESSAGE_BOX);
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await controllerWSClient.CloseAsync();
+                                } else {
+                                    controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await controllerWSClient.CloseAsync();
+                                    shuttdown(mainWindow);
+                                }
+                            }
+                        }
                     }
                 });
             }
@@ -93,13 +122,13 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
-        #region CONNECT SOCKET
+        #region CONNECT SOCKET FUNC
         public void connect() {
             wsClient.connectSocketServer();
         }
         #endregion
 
-        #region DISCONNCET SOCKET
+        #region DISCONNCET SOCKET FUNC
         //Shuttdown
         public void shuttdown(MetroWindow metroWindow) {
             MainWindow mainWindow = (MainWindow)metroWindow;
@@ -111,13 +140,18 @@ namespace ClientInspectionSystem.SocketClient {
                                                                                                     mainWindow.imgSocketConnectionStatus);
                 mainWindow.btnDisconnect.IsEnabled = false;
                 mainWindow.btnConnectToDevice.IsEnabled = false;
+                mainWindow.btnRefresh.IsEnabled = false;
+                mainWindow.btnScanDocument.IsEnabled = false;
                 mainWindow.btnConnect.IsEnabled = true;
+                mainWindow.IsEnabled = true;
+
+                mainWindow.isDisConnectSocket = true;
             });
             wsClient.shutDown();
         }
         #endregion
 
-        #region GET DEVICE DETAILS
+        #region GET DEVICE DETAILS FUNC
         //Get Device Details
         public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled,
                                                                                                  TimeSpan timeOutResp, int timeOutInterVal) {
@@ -136,7 +170,7 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
-        #region GET DOCUMENT DETAILS
+        #region GET DOCUMENT DETAILS FUNC
         public BaseDocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
                                                           bool dataGroupEnabled, bool optionalEnabled,
                                                           TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
@@ -160,7 +194,7 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
-        #region GET RESULT BIOMETRIC AUTH
+        #region GET RESULT BIOMETRIC AUTH FUNC
         public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, object challenge,
                                                             TimeSpan timeOutResp, int timeOutInterVal,
                                                             string challengeType, bool livenessEnabled,
@@ -180,7 +214,7 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
-        #region GET RESULT CONNECT TO DEVICE
+        #region GET RESULT CONNECT TO DEVICE FUNC
         public BaseConnectToDeviceResp getConnectToDevice(bool confirmEnabled, string confirmCode,
                                                           string clientName, PluginICAOClientSDK.Models.ConfigConnect configConnect,
                                                           TimeSpan timeOutResp, int timeOutInterVal) {
@@ -198,5 +232,38 @@ namespace ClientInspectionSystem.SocketClient {
             }
         }
         #endregion
+
+        #region REFRESH FUNC
+        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp refreshReader(bool deviceDetailsEnabled, bool presenceEnabled,
+                                                                                              TimeSpan timeOutResp, int timeOutInterVal) {
+            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp respRefresh = null;
+            try {
+                Refresh refresh = new Refresh(wsClient, deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+                respRefresh = refresh.refreshReader();
+                logger.Debug("REFRESH READER " + JsonConvert.SerializeObject(refresh));
+                return respRefresh;
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+        #endregion
+
+        #region SCAN DOCUMENT
+        public PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocumentResp(string scanType, bool saveEnabled,
+                                                                                               TimeSpan timeOutResp, int timeOutInterVal) {
+            PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocResp = null;
+            try {
+                GetScanDocument scanDocument = new GetScanDocument(wsClient, scanType, saveEnabled, timeOutResp, timeOutInterVal);
+                scanDocResp = scanDocument.scanDocumentResp();
+                return scanDocResp;
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+        #endregion 
     }
 }
