@@ -1367,26 +1367,45 @@ namespace ClientInspectionSystem {
         private void btnRefresh_Click(object sender, RoutedEventArgs e) {
             Task.Factory.StartNew(() => {
                 try {
-                    //Update Device Details Then Refresh
-                    int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsRefresh = connectionSocket.refreshReader(true, true,
-                                                                                                                                           TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                           timeOutSocket);
-                    if (null != deviceDetailsRefresh) {
-                        mainWindow.Dispatcher.Invoke(async () => {
-                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsRefresh.data.deviceSN,
-                                                                                deviceDetailsRefresh.data.deviceName, deviceDetailsRefresh.data.lastScanTime,
-                                                                                deviceDetailsRefresh.data.totalPreceeded.ToString());
-                            ProgressDialogController controllerRefreshSuccess = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_REFRESH_SUCCESS_MESSAGE_BOX);
-                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                            await controllerRefreshSuccess.CloseAsync();
-                        });
+                    try {
+                        //Update Device Details Then Refresh
+                        int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsRefresh = connectionSocket.refreshReader(true, true,
+                                                                                                                                               TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                               timeOutSocket);
+                        if (null != deviceDetailsRefresh) {
+                            mainWindow.Dispatcher.Invoke(async () => {
+                                LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsRefresh.data.deviceSN,
+                                                                                    deviceDetailsRefresh.data.deviceName, deviceDetailsRefresh.data.lastScanTime,
+                                                                                    deviceDetailsRefresh.data.totalPreceeded.ToString());
+                                ProgressDialogController controllerRefreshSuccess = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_REFRESH_SUCCESS_MESSAGE_BOX);
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                await controllerRefreshSuccess.CloseAsync();
+                            });
+                        }
+                        else {
+                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
+                                                                                string.Empty, string.Empty,
+                                                                                string.Empty);
+                            return;
+                        }
                     }
-                    else {
-                        LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
-                                                                            string.Empty, string.Empty,
-                                                                            string.Empty);
-                        return;
+                    catch (Exception ex) {
+                    this.Dispatcher.Invoke(async () => {
+                        ProgressDialogController controllerErrRefresh = null;
+                        if (ex is ISPluginException) {
+                            ISPluginException pluginException = (ISPluginException)ex;
+                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerErrRefresh.CloseAsync();
+                        }
+                        else {
+                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerErrRefresh.CloseAsync();
+                        }
+                    });
+                    logger.Error(ex);
                     }
                 }
                 catch (Exception ex) {
@@ -1421,7 +1440,7 @@ namespace ClientInspectionSystem {
                             bool saveEnable = formScanType.getCbSaveEnable();
                             int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
                             PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocumentResp = null;
-                            await Task.Factory.StartNew(async() => {
+                            await Task.Factory.StartNew(async () => {
                                 try {
                                     scanDocumentResp = connectionSocket.scanDocumentResp(scanType, saveEnable, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
                                 }
@@ -1429,7 +1448,6 @@ namespace ClientInspectionSystem {
                                     ProgressDialogController controllerErrScanDoc = null;
                                     if (ex is ISPluginException) {
                                         await this.Dispatcher.InvokeAsync(async () => {
-                                            logger.Debug("[1111]");
                                             ISPluginException pluginException = (ISPluginException)ex;
                                             controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
                                             await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
@@ -1437,10 +1455,11 @@ namespace ClientInspectionSystem {
                                         });
                                     }
                                     else {
-                                        controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
-                                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                                        await controllerErrScanDoc.CloseAsync();
-                                        logger.Debug("[222]");
+                                        await this.Dispatcher.InvokeAsync(async () => {
+                                            controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                            await controllerErrScanDoc.CloseAsync();
+                                        });
                                     }
                                     logger.Error(ex);
                                 }
@@ -1467,13 +1486,11 @@ namespace ClientInspectionSystem {
                         controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerErrScanDoc.CloseAsync();
-                        logger.Debug("[333]");
                     }
                     else {
                         controllerErrScanDoc = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerErrScanDoc.CloseAsync();
-                        logger.Debug("[444]");
                     }
                     logger.Error(ex);
                 }

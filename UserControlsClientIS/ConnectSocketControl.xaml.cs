@@ -71,7 +71,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
             //Find Connect
             mainWindow.connectionSocket.connectSocketServer(mainWindow);
 
-            if(!mainWindow.isConnectDenied) {
+            if (!mainWindow.isConnectDenied) {
                 mainWindow.Dispatcher.Invoke(async () => {
                     try {
                         //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
@@ -79,15 +79,24 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                         timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
 
                         await Task.Factory.StartNew(() => {
-                            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
-                                                                                                                                                              TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                                              timeOutSocket);
+                            try {
+                                PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
+                                                                                                                                  TimeSpan.FromSeconds(timeOutSocket),
+                                                                                                                                  timeOutSocket);
 
-                            mainWindow.Dispatcher.Invoke(() => {
-                                LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
-                                                                                    deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
-                                                                                    deviceDetailsResp.data.totalPreceeded.ToString());
-                            });
+                                 mainWindow.Dispatcher.Invoke(() => {
+                                    LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
+                                                                                        deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                        deviceDetailsResp.data.totalPreceeded.ToString());
+                                });
+                            }
+                            catch (Exception ex) {
+                                mainWindow.Dispatcher.Invoke(() => {
+                                    LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, string.Empty,
+                                                                                        string.Empty, string.Empty, string.Empty);
+                                });
+                                return;
+                            }
                         });
                     }
                     catch (Exception eDeviceDetails) {
@@ -96,7 +105,8 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                                                                              string.Empty, string.Empty, string.Empty);
                     }
                 });
-            } else {
+            }
+            else {
                 logger.Debug("=> XXXX");
             }
         }
