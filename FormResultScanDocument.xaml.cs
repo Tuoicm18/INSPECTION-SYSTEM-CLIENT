@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms.Integration;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ControlzEx.Theming;
@@ -49,6 +52,14 @@ namespace ClientInspectionSystem {
                 //byte[] pdfDecode = Convert.FromBase64String(base64Doc);
                 //File.WriteAllBytes("test.pdf", pdfDecode);
                 //pdfScan.CoreWebView2.Navigate("https://docs.microsoft.com/");
+                //WindowsFormsHost host = new WindowsFormsHost();
+                //AxAcroPDFLib.AxAcroPDF axAcroPDF = new AxAcroPDFLib.AxAcroPDF();
+                //axAcroPDF.src = @"D:\ICAO\Scanner.pdf";
+                //host.Child = axAcroPDF;
+                //gridMain.Children.Add(host);
+                //Grid.SetColumnSpan(host, 2);
+                Form1 form1 = new Form1();
+                form1.ShowDialog();
             }
             catch (Exception ex) {
                 logger.Error(ex);

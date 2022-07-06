@@ -6,6 +6,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientInspectionSystem" 
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         mc:Ignorable="d"
         Title="RESULT SCAN DOCUMENT"
         TitleAlignment="Center"
@@ -21,7 +22,7 @@
         Topmost="True"
         Height="450"
         Width="750">
-    <Grid>
+    <Grid x:Name="gridMain">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -42,7 +43,7 @@
         <!--#region PDF-->
         <WebBrowser
             x:Name="pdfScan"
-            Visibility="Visible"
+            Visibility="Collapsed"
             Grid.Row="0"
             Grid.ColumnSpan="2"
             Margin="5,5,5,5">
@@ -50,6 +51,7 @@
         <!--#endregion-->
         
         <!--#region PDF-->
+
         <!--#endregion-->
         
         <!--#region BUTTON-->
