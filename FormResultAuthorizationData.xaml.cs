@@ -8,10 +8,10 @@ using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using PluginICAOClientSDK.Request;
 using ClientInspectionSystem.RenderToLayout.ResultAuthorizedData;
-using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using System.Windows.Media.Imaging;
 using log4net;
+using PluginICAOClientSDK.Models;
 
 namespace ClientInspectionSystem {
     /// <summary>

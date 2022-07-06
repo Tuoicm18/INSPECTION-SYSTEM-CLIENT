@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -11,30 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace ClientInspectionSystem {
     public static class ClientExtentions {
-        //Setting Jsons For KeyValuPair<string, object>
-        public static JsonSerializerSettings settingsJsonDuplicateDic = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
 
-        #region OTHER
-
-        /// <summary>
-        /// Returns the right part of the string instance.
-        /// </summary>
-        /// <param name="count">Number of characters to return.</param>
-        public static string subStringRight(string input, int count) {
-            return input.Substring(Math.Max(input.Length - count, 0), Math.Min(count, input.Length));
-        }
-
-        /// <summary>
-        /// Returns the left part of this string instance.
-        /// </summary>
-        /// <param name="count">Number of characters to return.</param>
-        public static string subStringLeft(string input, int count) {
-            return input.Substring(0, Math.Min(input.Length, count));
-        }
-
+        #region INNER CLASS
         public class ListWithDuplicates : List<KeyValuePair<object, object>> {
             public void Add(object key, object value) {
                 var element = new KeyValuePair<object, object>(key, value);
@@ -64,11 +47,54 @@ namespace ClientInspectionSystem {
                 writer.WriteEndObjectAsync();
             }
         }
+        #endregion
+
+        //Setting Jsons For KeyValuPair<string, object>
+        public static JsonSerializerSettings settingsJsonDuplicateDic = new JsonSerializerSettings { Converters = new[] { new ClientExtentions.KeyValuePairConverter() } };
+
+        #region OTHER
+
+        /// <summary>
+        /// Returns the right part of the string instance.
+        /// </summary>
+        /// <param name="count">Number of characters to return.</param>
+        public static string subStringRight(string input, int count) {
+            return input.Substring(Math.Max(input.Length - count, 0), Math.Min(count, input.Length));
+        }
+
+        /// <summary>
+        /// Returns the left part of this string instance.
+        /// </summary>
+        /// <param name="count">Number of characters to return.</param>
+        public static string subStringLeft(string input, int count) {
+            return input.Substring(0, Math.Min(input.Length, count));
+        }
 
         //Read version of current app
         public static string getCurrentVersion() {
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             return version;
+        }
+
+        //Base64 to BitmapImage
+        public static BitmapImage base64ToBitmapImage(string base64Img) {
+            try {
+                byte[] imgByte = Convert.FromBase64String(base64Img);
+                BitmapImage bi = new BitmapImage();
+                bi.BeginInit();
+                bi.StreamSource = new MemoryStream(imgByte);
+                bi.CacheOption = BitmapCacheOption.OnLoad;
+                bi.EndInit();
+                return bi;
+            }
+            catch (Exception e) {
+                throw e;
+            }
+        }
+
+        //Create UUID
+        public static string generateUUID() {
+            return Guid.NewGuid().ToString();
         }
         #endregion
 

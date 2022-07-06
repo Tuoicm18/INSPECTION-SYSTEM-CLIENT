@@ -9,7 +9,7 @@ using System.Windows.Navigation;
 using System.IO;
 using ClientInspectionSystem.Models;
 using MahApps.Metro.Controls.Dialogs;
-using PluginICAOClientSDK;
+using ClientInspectionSystem;
 using System.Threading.Tasks;
 using ClientInspectionSystem.SocketClient;
 using System.Windows.Controls;
@@ -22,13 +22,14 @@ using PluginICAOClientSDK.Request;
 using Newtonsoft.Json;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
 using PluginICAOClientSDK.Response.BiometricAuth;
-using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using ClientInspectionSystem.UserControlsClientIS;
 using PluginICAOClientSDK.Util;
 using PluginICAOClientSDK.Response.CardDetectionEvent;
 using System.Timers;
 using log4net;
+using PluginICAOClientSDK.Models;
+using PluginICAOClientSDK;
 
 /// <summary>
 /// Main Window Class.cs
@@ -1310,8 +1311,9 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-                FormScanType formScanType = new FormScanType();
-                if (formScanType.ShowDialog() == true) { }
+                FormResultScanDocument formResultScanDocument = new FormResultScanDocument();
+                formResultScanDocument.setPdfScanDoc();
+                if(formResultScanDocument.ShowDialog() == true) { }
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -1383,12 +1385,6 @@ namespace ClientInspectionSystem {
                                 await controllerRefreshSuccess.CloseAsync();
                             });
                         }
-                        else {
-                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
-                                                                                string.Empty, string.Empty,
-                                                                                string.Empty);
-                            return;
-                        }
                     }
                     catch (Exception ex) {
                     this.Dispatcher.Invoke(async () => {
@@ -1404,6 +1400,9 @@ namespace ClientInspectionSystem {
                             await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                             await controllerErrRefresh.CloseAsync();
                         }
+                        LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
+                                                                            string.Empty, string.Empty,
+                                                                            string.Empty);
                     });
                     logger.Error(ex);
                     }
@@ -1470,6 +1469,17 @@ namespace ClientInspectionSystem {
                                 await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                                 await controllerRefreshSuccess.CloseAsync();
                                 //logger.Debug(JsonConvert.SerializeObject(scanDocumentResp));
+                                FormResultScanDocument formResultScanDocument = new FormResultScanDocument();
+                                formResultScanDocument.scanType = scanDocumentResp.data.scanType;
+                                switch (formResultScanDocument.scanType) {
+                                    case "JPG":
+                                        formResultScanDocument.setJpgScanDoc(scanDocumentResp.data.document);
+                                        break;
+                                    case "PDF":
+                                        //formResultScanDocument.setPdfScanDoc(scanDocumentResp.data.document);
+                                        break;
+                                }
+                                if (formResultScanDocument.ShowDialog() == true) { }
                             }
                         }
                         else {

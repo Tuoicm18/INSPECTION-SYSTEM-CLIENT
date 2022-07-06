@@ -17,7 +17,7 @@
         ShowMaxRestoreButton="False"
         ShowInTaskbar="False"
         BorderBrush="#0767b3"
-        BorderThickness="2"
+        BorderThickness="1"
         Topmost="True"
         Height="150" 
         Width="260">
@@ -36,6 +36,7 @@
             Height="30"
             Grid.Row="0"
             Grid.Column="0"
+            SelectedIndex="1"
             Margin="5,5,5,5">
             <ComboBoxItem Content="JPG"/>
             <ComboBoxItem Content="PDF"/>

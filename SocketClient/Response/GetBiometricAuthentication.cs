@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using PluginICAOClientSDK;
-using PluginICAOClientSDK.Models;
-using PluginICAOClientSDK.Request;
 using PluginICAOClientSDK.Response.BiometricAuth;
+using PluginICAOClientSDK;
 
 namespace ClientInspectionSystem.SocketClient.Response {
     public class GetBiometricAuthentication {

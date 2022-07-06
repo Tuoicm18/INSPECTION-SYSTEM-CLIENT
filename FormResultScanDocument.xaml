@@ -1,0 +1,74 @@
+﻿<mah:MetroWindow  
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        x:Class="ClientInspectionSystem.FormResultScanDocument"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClientInspectionSystem" 
+        mc:Ignorable="d"
+        Title="RESULT SCAN DOCUMENT"
+        TitleAlignment="Center"
+        WindowStartupLocation ="CenterScreen"
+        ResizeMode="CanResize"
+        SizeToContent="Manual"
+        ShowCloseButton="True"
+        ShowMinButton="False"
+        ShowMaxRestoreButton="True"
+        ShowInTaskbar="False"
+        BorderBrush="#0767b3"
+        BorderThickness="1"
+        Topmost="True"
+        Height="450"
+        Width="750">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!--#region IMAGE JPG-->
+        <Image
+            x:Name="imgScan"
+            Grid.Row="0"
+            Grid.ColumnSpan="2"
+            Margin="5,5,5,5"/>
+        <!--#endregion-->
+        
+        <!--#region PDF-->
+        <WebBrowser
+            x:Name="pdfScan"
+            Visibility="Visible"
+            Grid.Row="0"
+            Grid.ColumnSpan="2"
+            Margin="5,5,5,5">
+        </WebBrowser>
+        <!--#endregion-->
+        
+        <!--#region PDF-->
+        <!--#endregion-->
+        
+        <!--#region BUTTON-->
+        <Button
+            x:Name="btnOK"
+            Click="btnOK_Click"
+            Content="OK"
+            Width="100"
+            Grid.Row="1"
+            Margin="5,5,5,5"/>
+        <Button
+            x:Name="btnSave"
+            Click="btnSave_Click"
+            Content="SAVE"
+            Width="100"
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="5,5,5,5"/>
+        <!--#endregion-->
+        
+    </Grid>
+</mah:MetroWindow>
