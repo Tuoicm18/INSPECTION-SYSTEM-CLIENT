@@ -138,12 +138,12 @@ namespace ClientInspectionSystem {
                         //                                                  InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX);
                         //controllerReadChip.SetIndeterminate();
 
-                        await Task.Factory.StartNew(() => {
+                        await Task.Factory.StartNew(async () => {
                             bool getDocSuccess = autoGetDocumentToLayout(documentDetailsResp);
                             if (getDocSuccess) {
                                 //controllerReadChip.CloseAsync();
                                 if (null != dialogControllerAutoRead) {
-                                    this.dialogControllerAutoRead.CloseAsync();
+                                    await this.dialogControllerAutoRead.CloseAsync();
                                 }
                             }
                             else {
@@ -164,6 +164,20 @@ namespace ClientInspectionSystem {
                         clearLayout(false);
                         logger.Error(eReadChip);
                     } finally {
+                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                        await Task.Factory.StartNew(() => {
+                            TimeSpan timeOutGetDeviceDetails = TimeSpan.FromSeconds(timeOutSocket);
+                            //Update Device Details
+                            deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeOutGetDeviceDetails, timeOutSocket);
+                        });
+
+                        if (null != deviceDetailsResp) {
+                            this.Dispatcher.Invoke(() => {
+                                LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
+                                                                                    deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                    deviceDetailsResp.data.totalPreceeded.ToString());
+                            });
+                        }
                         btnIDocument.IsEnabled = true;
                     }
                 });
@@ -196,17 +210,8 @@ namespace ClientInspectionSystem {
                         LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
                         //Update 2022.02.28 TIME OUT INI FILE
                         timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                        TimeSpan timeOutGetDeviceDetails = TimeSpan.FromSeconds(timeOutSocket);
-
-                        //Update Device Details
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeOutGetDeviceDetails, timeOutSocket);
-
-                        if (null != deviceDetailsResp) {
-                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
-                                                    deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
-                                                    deviceDetailsResp.data.totalPreceeded.ToString());
-                        }
                     });
+
 
                     //Background Button
                     if (!documentDetailsResp.data.mrzString.Equals(string.Empty)) { updateBackgroundBtnDG(btnMRZ, 2); }
@@ -522,6 +527,22 @@ namespace ClientInspectionSystem {
                     //Update 2022.02.28
                     manualReadDoc = false;
                     btnIDocument.IsEnabled = true;
+
+                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                    await Task.Factory.StartNew(() => {
+                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+
+                        //Update Device Details
+                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
+                    });
+
+                    if (null != deviceDetailsResp) {
+                        this.Dispatcher.Invoke(() => {
+                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
+                                                                                deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                deviceDetailsResp.data.totalPreceeded.ToString());
+                        });
+                    }
                 }
             });
         }
@@ -562,19 +583,6 @@ namespace ClientInspectionSystem {
                         }
                         if (optionalEnabled) {
                             LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
-                        }
-
-                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-
-                        //Update Device Details
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = connectionSocket.getDeviceDetails(true, true,
-                                                                                                                                               TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                               timeOutSocket);
-
-                        if (null != deviceDetailsResp) {
-                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
-                                                                                deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
-                                                                                deviceDetailsResp.data.totalPreceeded.ToString());
                         }
 
                         if (configConnectToDeviceControl.getMRZEnabled()) {
@@ -824,15 +832,14 @@ namespace ClientInspectionSystem {
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
                         //Form Watting
-                        controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                          InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
-                        controllerFaceAuth.SetIndeterminate();
+                        //controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
+                        //controllerFaceAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFaceAuth) {
                                 if (resultFaceAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
-                                    controllerFaceAuth.CloseAsync();
+                                    //controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
                                         formBiometricAuth.Topmost = true;
@@ -843,10 +850,10 @@ namespace ClientInspectionSystem {
                                 }
                                 else {
                                     if (resultFaceAuth.data.result) {
-                                        controllerFaceAuth.CloseAsync();
+                                        //controllerFaceAuth.CloseAsync();
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
+                                            initFormResultBiometricAuth(resultFaceAuth, BiometricType.TYPE_FACE);
                                             logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnFA, 2);
@@ -864,10 +871,10 @@ namespace ClientInspectionSystem {
                                         });
                                     }
                                     else {
-                                        controllerFaceAuth.CloseAsync();
+                                        //controllerFaceAuth.CloseAsync();
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultFaceAuth, controllerFaceAuth, BiometricType.TYPE_FACE);
+                                            initFormResultBiometricAuth(resultFaceAuth, BiometricType.TYPE_FACE);
                                             logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnFA, -1);
@@ -894,12 +901,12 @@ namespace ClientInspectionSystem {
                     logger.Error(ex);
                     if (ex is ISPluginException) {
                         ISPluginException pluginException = (ISPluginException)ex;
-                        controllerFaceAuth.SetMessage(pluginException.errMsg.ToUpper());
+                        controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
                     }
                     else {
-                        controllerFaceAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                        controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
                     }
@@ -920,7 +927,7 @@ namespace ClientInspectionSystem {
                 ChallengeBiometricAuth challenge = new ChallengeBiometricAuth();
                 string challengeString = string.Empty;
 
-                challenge.challengeValue = "C# CLIENT TEST";
+                challenge.challengeValue = string.Empty;
                 TransactionDataBiometricAuth transactionDataInput = null;
                 //bool livenessEnabled = optionsControl.toggleSwitchLivenessTest.IsOn;
 
@@ -947,11 +954,12 @@ namespace ClientInspectionSystem {
                             transactionDataInput.nameValuePairList = formAuthorizationData.getDataNVP();
                             challenge.transactionData = transactionDataInput;
                         }
-                        resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
-                                                                                  timeOutResp, timeOutSocket, ChallengeType.TYPE_OBJECT,
-                                                                                  this.liveness, cardNo);
                     }
                 });
+
+                resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
+                                                          timeOutResp, timeOutSocket, ChallengeType.TYPE_OBJECT,
+                                                          this.liveness, cardNo);
 
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
@@ -979,16 +987,15 @@ namespace ClientInspectionSystem {
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
                         //Form Watting
-                        controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                                InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
-                        controllerLeftFingerAuth.SetIndeterminate();
+                        //controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
+                        //controllerLeftFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
                             resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultLeftFingerAuth) {
                                 if (resultLeftFingerAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
-                                    controllerLeftFingerAuth.CloseAsync();
-                                    this.Dispatcher.Invoke(() => {
+                                    //controllerLeftFingerAuth.CloseAsync();
+                                    this.Dispatcher.InvokeAsync(() => {
                                         formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
                                         formBiometricAuth.Topmost = true;
                                         formBiometricAuth.hideLabelForDeniedAuth();
@@ -998,11 +1005,11 @@ namespace ClientInspectionSystem {
                                 }
                                 else {
                                     if (resultLeftFingerAuth.data.result) {
-                                        controllerLeftFingerAuth.CloseAsync();
-                                        this.Dispatcher.Invoke(() => {
+                                        //controllerLeftFingerAuth.CloseAsync();
+                                        this.Dispatcher.InvokeAsync(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
-                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+                                            initFormResultBiometricAuth(resultLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                            logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER\n" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, 2);
                                             //Button Pass All
@@ -1019,10 +1026,10 @@ namespace ClientInspectionSystem {
                                         });
                                     }
                                     else {
-                                        controllerLeftFingerAuth.CloseAsync();
-                                        this.Dispatcher.Invoke(() => {
+                                        //controllerLeftFingerAuth.CloseAsync();
+                                        this.Dispatcher.InvokeAsync(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultLeftFingerAuth, controllerLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                            initFormResultBiometricAuth(resultLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
                                             logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, -1);
@@ -1041,6 +1048,9 @@ namespace ClientInspectionSystem {
                                     }
                                 }
                             }
+                            else {
+                                logger.Warn("RESPONSE NULL");
+                            }
                         });
                         btnLeftFinger.IsEnabled = true;
                     }
@@ -1049,16 +1059,14 @@ namespace ClientInspectionSystem {
                     logger.Error(eLeft);
                     if (eLeft is ISPluginException) {
                         ISPluginException pluginException = (ISPluginException)eLeft;
-                        controllerLeftFingerAuth.SetMessage(pluginException.errMsg.ToUpper());
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerLeftFingerAuth.CloseAsync();
-                        btnLeftFinger.IsEnabled = true;
                     }
                     else {
-                        controllerLeftFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerLeftFingerAuth.CloseAsync();
-                        btnLeftFinger.IsEnabled = true;
                     }
                 }
             });
@@ -1076,16 +1084,15 @@ namespace ClientInspectionSystem {
                     FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                     if (formAuthorizationData.ShowDialog() == true) {
                         //Show Form Watting
-                        controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
-                                                                           InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
-                        controllerRightFingerAuth.SetIndeterminate();
+                        //controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
+                        //controllerRightFingerAuth.SetIndeterminate();
 
                         await Task.Factory.StartNew(() => {
                             BaseBiometricAuthResp resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, string.Empty); // 2022.05.12 Update challenge 079094012066
                             if (null != resultFingerRightAuth) {
 
                                 if (resultFingerRightAuth.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) { // Cancel Auth
-                                    controllerRightFingerAuth.CloseAsync();
+                                    //controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
                                         formBiometricAuth.Topmost = true;
@@ -1096,10 +1103,10 @@ namespace ClientInspectionSystem {
                                 }
                                 else {
                                     if (resultFingerRightAuth.data.result) {
-                                        controllerRightFingerAuth.CloseAsync();
+                                        //controllerRightFingerAuth.CloseAsync();
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                            initFormResultBiometricAuth(resultFingerRightAuth, BiometricType.TYPE_FINGER_RIGHT);
                                             logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
                                                                          JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
@@ -1118,10 +1125,10 @@ namespace ClientInspectionSystem {
                                         });
                                     }
                                     else {
-                                        controllerRightFingerAuth.CloseAsync();
+                                        //controllerRightFingerAuth.CloseAsync();
                                         this.Dispatcher.Invoke(() => {
                                             //Init Form Result Biometric Auth
-                                            initFormResultBiometricAuth(resultFingerRightAuth, controllerRightFingerAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                            initFormResultBiometricAuth(resultFingerRightAuth, BiometricType.TYPE_FINGER_RIGHT);
                                             logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                             updateBackgroundBtnDG(btnSF, 1);
@@ -1148,16 +1155,14 @@ namespace ClientInspectionSystem {
                     logger.Error(eLeft);
                     if (eLeft is ISPluginException) {
                         ISPluginException pluginException = (ISPluginException)eLeft;
-                        controllerRightFingerAuth.SetMessage(pluginException.errMsg.ToUpper());
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerRightFingerAuth.CloseAsync();
-                        btnLeftFinger.IsEnabled = true;
                     }
                     else {
-                        controllerRightFingerAuth.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                        controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerRightFingerAuth.CloseAsync();
-                        btnLeftFinger.IsEnabled = true;
                     }
                 }
             });
@@ -1165,9 +1170,11 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region INIT FORM RESULT BIOMETRIC AUTH
-        public void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp, ProgressDialogController controllerLeftFingerAuth, string biometricType) {
+        public void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp, string biometricType) {
+            logger.Debug("INI FORM RESULT BIOMETRIC AUTH...");
             if (null != baseBiometricAuthResp) {
                 if (null != baseBiometricAuthResp.data.challenge) {
+                    logger.Debug("[1111]");
                     ChallengeBiometricAuth challengeBiometricAuth = baseBiometricAuthResp.data.challenge;
                     if (null != challengeBiometricAuth.transactionData) {
                         TransactionDataBiometricAuth transactionDataResp = challengeBiometricAuth.transactionData;
@@ -1242,19 +1249,26 @@ namespace ClientInspectionSystem {
                     }
                 }
                 else {
+                    logger.Debug("[2222]");
                     if (baseBiometricAuthResp.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_SUCCESS) {
                         if (BiometricType.TYPE_FINGER_LEFT.Equals(biometricType)) {
-                            controllerLeftFingerAuth.CloseAsync();
-                            FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
-                            this.Dispatcher.Invoke(() => {
-                                formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
-                                formBiometricAuth.renderResultBiometricAuht(baseBiometricAuthResp);
-                                formBiometricAuth.Topmost = true;
-                                if (formBiometricAuth.ShowDialog() == true) { }
-                            });
+                            try {
+                                //controllerLeftFingerAuth.CloseAsync();
+                                logger.Debug("[3333]");
+                                FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
+                                this.Dispatcher.Invoke(() => {
+                                    formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
+                                    formBiometricAuth.renderResultBiometricAuht(baseBiometricAuthResp);
+                                    formBiometricAuth.Topmost = true;
+                                    if (formBiometricAuth.ShowDialog() == true) { }
+                                });
+                            }
+                            catch (Exception eLeft) {
+                                logger.Error(eLeft);
+                            }
                         }
                         else if (BiometricType.TYPE_FINGER_RIGHT.Equals(biometricType)) {
-                            controllerLeftFingerAuth.CloseAsync();
+                            //controllerLeftFingerAuth.CloseAsync();
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             this.Dispatcher.Invoke(() => {
                                 formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FINGER);
@@ -1264,7 +1278,7 @@ namespace ClientInspectionSystem {
                             });
                         }
                         else {
-                            controllerLeftFingerAuth.CloseAsync();
+                            //controllerLeftFingerAuth.CloseAsync();
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             this.Dispatcher.Invoke(() => {
                                 formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
@@ -1385,24 +1399,24 @@ namespace ClientInspectionSystem {
                         }
                     }
                     catch (Exception ex) {
-                    this.Dispatcher.Invoke(async () => {
-                        ProgressDialogController controllerErrRefresh = null;
-                        if (ex is ISPluginException) {
-                            ISPluginException pluginException = (ISPluginException)ex;
-                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
-                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                            await controllerErrRefresh.CloseAsync();
-                        }
-                        else {
-                            controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
-                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
-                            await controllerErrRefresh.CloseAsync();
-                        }
-                        LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
-                                                                            string.Empty, string.Empty,
-                                                                            string.Empty);
-                    });
-                    logger.Error(ex);
+                        this.Dispatcher.Invoke(async () => {
+                            ProgressDialogController controllerErrRefresh = null;
+                            if (ex is ISPluginException) {
+                                ISPluginException pluginException = (ISPluginException)ex;
+                                controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                await controllerErrRefresh.CloseAsync();
+                            }
+                            else {
+                                controllerErrRefresh = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                await controllerErrRefresh.CloseAsync();
+                            }
+                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
+                                                                                string.Empty, string.Empty,
+                                                                                string.Empty);
+                        });
+                        logger.Error(ex);
                     }
                 }
                 catch (Exception ex) {
