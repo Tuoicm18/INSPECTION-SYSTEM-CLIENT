@@ -50,10 +50,6 @@
         </WebBrowser>
         <!--#endregion-->
         
-        <!--#region PDF-->
-
-        <!--#endregion-->
-        
         <!--#region BUTTON-->
         <Button
             x:Name="btnOK"

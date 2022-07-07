@@ -132,7 +132,8 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\Nuget\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PluginICAOClientSDK">
+    <Reference Include="PluginICAOClientSDK, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\PluginICAOClientSDK.dll</HintPath>
     </Reference>
     <Reference Include="SharpVectors.Converters.Wpf, Version=1.7.6.0, Culture=neutral, PublicKeyToken=b532964b8548be77, processorArchitecture=MSIL">
@@ -197,12 +198,6 @@
     <Compile Include="ClientContants.cs" />
     <Compile Include="ClientExtentions.cs" />
     <Compile Include="ClientLogger.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
     <Compile Include="FormAuthenticationDataNew.xaml.cs">
       <DependentUpon>FormAuthenticationDataNew.xaml</DependentUpon>
     </Compile>
@@ -223,6 +218,12 @@
     </Compile>
     <Compile Include="FormScanType.xaml.cs">
       <DependentUpon>FormScanType.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FormViewPDF.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormViewPDF.Designer.cs">
+      <DependentUpon>FormViewPDF.cs</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
     <Compile Include="InspectionSystemPraser.cs" />
@@ -367,8 +368,8 @@
     <Resource Include="Resource\01_left_hand_Failed.png" />
     <Resource Include="Resource\02_left_hand_1.png" />
     <Resource Include="Resource\01_right_hand_1.png" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="FormViewPDF.resx">
+      <DependentUpon>FormViewPDF.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

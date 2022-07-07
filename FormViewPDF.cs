@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ClientInspectionSystem {
-    public partial class Form1 : Form {
-
-
-        public Form1() {
+    public partial class FormViewPDF : Form {
+        public string fileNamePDF = string.Empty;
+        public FormViewPDF() {
             InitializeComponent();
-            axAcroPDF1.src = @"D:\ICAO\Scanner.pdf";
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
         }
 
@@ -33,6 +31,16 @@ namespace ClientInspectionSystem {
             }
 
             this.Text = tmp + this.Text.Trim();
+        }
+
+        private void FormViewPDF_FormClosed(object sender, FormClosedEventArgs e) {
+            if(File.Exists(fileNamePDF)) {
+                File.Delete(fileNamePDF);
+            }
+        }
+
+        public void loadPDF() {
+            axAcroPDF1.src = fileNamePDF;
         }
     }
 }

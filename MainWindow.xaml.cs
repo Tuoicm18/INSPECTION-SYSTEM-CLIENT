@@ -1311,9 +1311,7 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-                FormResultScanDocument formResultScanDocument = new FormResultScanDocument();
-                formResultScanDocument.setPdfScanDoc();
-                if(formResultScanDocument.ShowDialog() == true) { }
+
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -1474,12 +1472,12 @@ namespace ClientInspectionSystem {
                                 switch (formResultScanDocument.scanType) {
                                     case "JPG":
                                         formResultScanDocument.setJpgScanDoc(scanDocumentResp.data.document);
+                                        if (formResultScanDocument.ShowDialog() == true) { }
                                         break;
                                     case "PDF":
-                                        //formResultScanDocument.setPdfScanDoc(scanDocumentResp.data.document);
+                                        formResultScanDocument.setPdfScanDoc(scanDocumentResp.data.document);
                                         break;
                                 }
-                                if (formResultScanDocument.ShowDialog() == true) { }
                             }
                         }
                         else {

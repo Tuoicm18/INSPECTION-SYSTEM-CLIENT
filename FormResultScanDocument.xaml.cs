@@ -38,6 +38,7 @@ namespace ClientInspectionSystem {
         #region SHOW JPG SCAN DOCUMENT
         public void setJpgScanDoc(string base64Img) {
             try {
+                imgScan.Visibility = Visibility.Visible;
                 imgScan.Source = ClientExtentions.base64ToBitmapImage(base64Img);
             }
             catch (Exception ex) {
@@ -47,19 +48,18 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region SHOW PDF SCAN DOCUMENT
-        public void setPdfScanDoc() {
+        public void setPdfScanDoc(string base64Doc) {
             try {
-                //byte[] pdfDecode = Convert.FromBase64String(base64Doc);
-                //File.WriteAllBytes("test.pdf", pdfDecode);
-                //pdfScan.CoreWebView2.Navigate("https://docs.microsoft.com/");
-                //WindowsFormsHost host = new WindowsFormsHost();
-                //AxAcroPDFLib.AxAcroPDF axAcroPDF = new AxAcroPDFLib.AxAcroPDF();
-                //axAcroPDF.src = @"D:\ICAO\Scanner.pdf";
-                //host.Child = axAcroPDF;
-                //gridMain.Children.Add(host);
-                //Grid.SetColumnSpan(host, 2);
-                Form1 form1 = new Form1();
-                form1.ShowDialog();
+                imgScan.Visibility = Visibility.Collapsed;
+                byte[] pdfDecode = Convert.FromBase64String(base64Doc);
+                string fileNamePdf = ClientExtentions.generateUUID();
+                string fullPathPdf = System.IO.Path.GetTempPath() + fileNamePdf + ".pdf";
+                File.WriteAllBytes(fullPathPdf, pdfDecode);
+                FormViewPDF formViewPDF = new FormViewPDF();
+                formViewPDF.fileNamePDF = fullPathPdf;
+                formViewPDF.loadPDF();
+                formViewPDF.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+                formViewPDF.Show();
             }
             catch (Exception ex) {
                 logger.Error(ex);
