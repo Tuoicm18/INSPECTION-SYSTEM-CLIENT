@@ -43,22 +43,22 @@ namespace ClientInspectionSystem.SocketClient {
             this.delegateAutoGetDoc = dlgAutoGetDoc;
             this.delegateAutoBiometric = delegateAutoBiometricResult;
             this.delegateCardDetectionEvent = dlgCardEvent;
-            this.deleagteConnect = delegateConnectSDK;
             this.delegateNotifyMessage = dlgNotifyMessage;
+            this.deleagteConnect = delegateConnectSDK;
 
             if (secureConnect) {
                 //"wss://192.168.3.170:9505/ISPlugin";
                 string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
                 wsClient = new ISPluginClient(endPointUrlWSS, secureConnect,
-                                              null,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
                                               this.delegateCardDetectionEvent, this.deleagteConnect,
                                               this.delegateNotifyMessage);
+
+
             }
             else {
                 string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
                 wsClient = new ISPluginClient(endPointUrlWS, secureConnect,
-                                              null,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
                                               this.delegateCardDetectionEvent, this.deleagteConnect,
                                               this.delegateNotifyMessage);

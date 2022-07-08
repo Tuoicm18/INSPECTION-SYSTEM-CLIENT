@@ -45,6 +45,10 @@ namespace ClientInspectionSystem {
             lbResultResponseCode.Content = content;
         }
 
+        public void setContentLabelResponseMsg(string msg) {
+            lbResultResponseMsg.Content = Content;
+        }
+
         public void setTitleForm(string content) {
             this.Dispatcher.Invoke(() => this.Title = content);
         }
@@ -74,6 +78,7 @@ namespace ClientInspectionSystem {
             //Show
             lbResponseCode.Visibility = System.Windows.Visibility.Visible;
             lbResultResponseCode.Visibility = System.Windows.Visibility.Visible;
+            lbResultResponseMsg.Visibility = System.Windows.Visibility.Visible;
             //Hide
             lbType.Visibility = System.Windows.Visibility.Collapsed;
             lbTypeResult.Visibility = System.Windows.Visibility.Collapsed;
@@ -102,7 +107,8 @@ namespace ClientInspectionSystem {
             string responseMessage = baseBiometricAuthResp.errorMessage;
             string jwt = baseBiometricAuthResp.data.jwt;
 
-            lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
+            lbResultResponseCode.Content = responseCode.ToString();
+            lbResultResponseMsg.Content = responseMessage;
             lbResultIssueCode.Content = issueDetailCode.ToString();
             lbResultIssueMessage.Content = issueDetailMsg;
 
@@ -172,7 +178,8 @@ namespace ClientInspectionSystem {
             else {
                 if (responseCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) {
                     lbResponseCode.Visibility = System.Windows.Visibility.Visible;
-                    lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
+                    lbResultResponseCode.Content = responseCode.ToString();
+                    lbResultResponseMsg.Content = responseMessage;
                 }
                 lbType.Visibility = System.Windows.Visibility.Collapsed;
                 lbTitleResult.Visibility = System.Windows.Visibility.Collapsed;
@@ -219,6 +226,7 @@ namespace ClientInspectionSystem {
                 //Hide Label
                 lbResponseCode.Visibility = System.Windows.Visibility.Collapsed;
                 lbResultResponseCode.Visibility = System.Windows.Visibility.Collapsed;
+                lbResultResponseMsg.Visibility = System.Windows.Visibility.Collapsed;
                 lbType.Visibility = System.Windows.Visibility.Collapsed;
                 lbTypeResult.Visibility = System.Windows.Visibility.Collapsed;
                 lbTitleResult.Visibility = System.Windows.Visibility.Collapsed;
@@ -236,6 +244,7 @@ namespace ClientInspectionSystem {
                 //Show Label
                 lbResponseCode.Visibility = System.Windows.Visibility.Visible;
                 lbResultResponseCode.Visibility = System.Windows.Visibility.Visible;
+                lbResultResponseMsg.Visibility = System.Windows.Visibility.Visible;
                 lbType.Visibility = System.Windows.Visibility.Visible;
                 lbTypeResult.Visibility = System.Windows.Visibility.Visible;
                 lbTitleResult.Visibility = System.Windows.Visibility.Visible;

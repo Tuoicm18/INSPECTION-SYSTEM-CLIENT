@@ -106,7 +106,8 @@ namespace ClientInspectionSystem {
             string responseMessage = baseBiometricAuthResp.errorMessage;
             string jwt = baseBiometricAuthResp.data.jwt;
 
-            lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
+            lbResultResponseCode.Content = responseCode.ToString();
+            lbResultResponseMsg.Content = responseMessage;
             lbResultIssueCode.Content = issueDetailCode.ToString();
             lbResultIssueMessage.Content = issueDetailMsg;
 
@@ -176,7 +177,8 @@ namespace ClientInspectionSystem {
             else {
                 if (responseCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) {
                     lbResponseCode.Visibility = System.Windows.Visibility.Visible;
-                    lbResultResponseCode.Content = responseCode.ToString() + "-" + responseMessage;
+                    lbResultResponseCode.Content = responseCode.ToString();
+                    lbResultResponseMsg.Content = responseMessage;
                 }
                 lbType.Visibility = System.Windows.Visibility.Collapsed;
                 lbTitleResult.Visibility = System.Windows.Visibility.Collapsed;

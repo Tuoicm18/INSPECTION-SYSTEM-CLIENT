@@ -57,7 +57,7 @@
             x:Name="gridForViewJWT"
             Background="Transparent"
             Visibility="Collapsed"
-            Margin="5,5,5,350">
+            Margin="5,5,5,354">
             <TextBox
                 x:Name="txtViewJWT"
                 TextWrapping="Wrap"
@@ -118,6 +118,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!--Label Response Code-->
@@ -128,14 +129,32 @@
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
                 Grid.Row="0"
-                Margin="5,5,5,5"/>
+                Margin="0"/>
             <Label
                 x:Name="lbResultResponseCode"
                 Foreground="White"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
                 Grid.Row="0"
-                Margin="5,5,5,5"/>
+                Margin="0"/>
+
+            <!--Label Response Message-->
+            <Label
+                x:Name="lbResponseMsg"
+                Content="RESPONSE MESSAGE"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Grid.Column="0"
+                Grid.Row="1"
+                Margin="0"/>
+            <Label
+                x:Name="lbResultResponseMsg"
+                Foreground="White"
+                VerticalContentAlignment="Center"
+                Grid.Column="2"
+                Grid.Row="1"
+                Margin="0"/>
+
             <!--Label Type-->
             <Label 
                 x:Name="lbType"
@@ -143,15 +162,15 @@
                 Content="BIOMETRIC TYPE"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Grid.Row="1"
-                Margin="5,5,5,5"/>
+                Grid.Row="2"
+                Margin="0"/>
             <Label
                 x:Name="lbTypeResult"
                 Foreground="White"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                Grid.Row="1"
-                Margin="5,5,5,5"/>
+                Grid.Row="2"
+                Margin="0"/>
             <!--Label Result-->
             <Label 
                 x:Name="lbTitleResult"
@@ -159,15 +178,15 @@
                 Content="BIOMETRIC RESULT"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Grid.Row="2"
-                Margin="5,5,5,5"/>
+                Grid.Row="3"
+                Margin="0"/>
             <Label
                 Name="lbResult"
                 Foreground="White"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                Grid.Row="2"
-                Margin="5,5,5,5"/>
+                Grid.Row="3"
+                Margin="0"/>
             <!--Label Score-->
             <Label 
                 x:Name="lbScore"
@@ -175,23 +194,23 @@
                 Content="SCORE"
                 VerticalContentAlignment="Center"
                 Grid.Column="0"
-                Grid.Row="3"
-                Margin="5,5,5,5"/>
+                Grid.Row="4"
+                Margin="0"/>
             <Label
                 Name="lbScoreResult"
                 Foreground="White"
                 VerticalContentAlignment="Center"
                 Grid.Column="2"
-                Grid.Row="3"
-                Margin="5,5,5,5"/>
+                Grid.Row="4"
+                Margin="0"/>
             <!--Label JWT-->
             <Label
                 x:Name="lbJWT"
                 Foreground="White"
                 Grid.Column="0"
-                Grid.Row="6"
+                Grid.Row="7"
                 Content="JWT"
-                Margin="5,5,5,5"/>
+                Margin="0"/>
             <Button
                 x:Name="btnViewJWT"
                 Background="Transparent"
@@ -203,9 +222,9 @@
                 VerticalContentAlignment="Center"
                 Width="50"
                 Grid.Column="0"
-                Grid.Row="6"
+                Grid.Row="7"
                 Style="{StaticResource MyButtonStyle}"
-                Margin="5,5,5,5">
+                Margin="0">
                 <Image
                     Source="Resource/eye-24.ico"
                     x:Name="VIEW" 
@@ -218,8 +237,8 @@
                 Foreground="White"
                 VerticalAlignment="Center"
                 Grid.Column="2"
-                Grid.Row="6"
-                Margin="5,5,5,5"
+                Grid.Row="7"
+                Margin="0"
                 TextTrimming="WordEllipsis"/>
 
             <!--Label Issue Detail Code-->
@@ -230,15 +249,15 @@
                 VerticalContentAlignment="Center"
                 Content="ISSUE DETAIL CODE"
                 Grid.Column="0"
-                Grid.Row="4"
-                Margin="5,5,5,5"/>
+                Grid.Row="5"
+                Margin="0"/>
             <Label
                 x:Name="lbResultIssueCode"
                 VerticalContentAlignment="Center"
                 Foreground="White"
                 Grid.Column="2"
-                Grid.Row="4"
-                Margin="5,5,5,5"/>
+                Grid.Row="5"
+                Margin="0"/>
 
             <!--Label Issue Detail Message-->
             <Label
@@ -248,15 +267,15 @@
                 VerticalContentAlignment="Center"
                 Content="ISSUE DETAIL MESSAGE"
                 Grid.Column="0"
-                Grid.Row="5"
-                Margin="5,5,5,5"/>
+                Grid.Row="6"
+                Margin="0"/>
             <Label
                 x:Name="lbResultIssueMessage"
                 VerticalContentAlignment="Center"
                 Foreground="White"
                 Grid.Column="2"
-                Grid.Row="5"
-                Margin="5,5,5,5"/>
+                Grid.Row="6"
+                Margin="0"/>
 
         </Grid>
         <!--#endregion-->
