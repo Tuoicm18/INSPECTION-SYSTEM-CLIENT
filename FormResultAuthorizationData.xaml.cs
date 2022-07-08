@@ -177,6 +177,7 @@ namespace ClientInspectionSystem {
             else {
                 if (responseCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) {
                     lbResponseCode.Visibility = System.Windows.Visibility.Visible;
+                    lbResponseMsg.Visibility = System.Windows.Visibility.Visible;
                     lbResultResponseCode.Content = responseCode.ToString();
                     lbResultResponseMsg.Content = responseMessage;
                 }

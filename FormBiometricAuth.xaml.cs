@@ -77,6 +77,7 @@ namespace ClientInspectionSystem {
         public void hideLabelForDeniedAuth() {
             //Show
             lbResponseCode.Visibility = System.Windows.Visibility.Visible;
+            lbResponseMsg.Visibility = System.Windows.Visibility.Visible;
             lbResultResponseCode.Visibility = System.Windows.Visibility.Visible;
             lbResultResponseMsg.Visibility = System.Windows.Visibility.Visible;
             //Hide
@@ -178,6 +179,7 @@ namespace ClientInspectionSystem {
             else {
                 if (responseCode == ClientContants.SOCKET_RESP_CODE_BIO_AUTH_DENIED) {
                     lbResponseCode.Visibility = System.Windows.Visibility.Visible;
+                    lbResponseMsg.Visibility = System.Windows.Visibility.Visible;
                     lbResultResponseCode.Content = responseCode.ToString();
                     lbResultResponseMsg.Content = responseMessage;
                 }
@@ -225,6 +227,7 @@ namespace ClientInspectionSystem {
                 txtViewJWT.Text = textBlockJWT.Text;
                 //Hide Label
                 lbResponseCode.Visibility = System.Windows.Visibility.Collapsed;
+                lbResponseMsg.Visibility = System.Windows.Visibility.Collapsed;
                 lbResultResponseCode.Visibility = System.Windows.Visibility.Collapsed;
                 lbResultResponseMsg.Visibility = System.Windows.Visibility.Collapsed;
                 lbType.Visibility = System.Windows.Visibility.Collapsed;
@@ -243,6 +246,7 @@ namespace ClientInspectionSystem {
                 txtViewJWT.Text = string.Empty;
                 //Show Label
                 lbResponseCode.Visibility = System.Windows.Visibility.Visible;
+                lbResponseMsg.Visibility = System.Windows.Visibility.Visible;
                 lbResultResponseCode.Visibility = System.Windows.Visibility.Visible;
                 lbResultResponseMsg.Visibility = System.Windows.Visibility.Visible;
                 lbType.Visibility = System.Windows.Visibility.Visible;

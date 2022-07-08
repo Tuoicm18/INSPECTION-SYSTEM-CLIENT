@@ -319,7 +319,126 @@ namespace ClientInspectionSystem {
                     if (baseCardDetectionEventResp.errorCode == 0) {
                         this.Dispatcher.Invoke(async () => {
                             if (baseCardDetectionEventResp.data.cardDetected) {
-                                await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_CARD_DETECTION_EVENT);
+                                //await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_CARD_DETECTION_EVENT);
+                                //Update 2022.02.28
+                                manualReadDoc = true;
+
+                                ProgressDialogController controllerReadChip = null;
+                                //Show Form Choices Read Document
+                                FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
+                                string txtCanValue = string.Empty;
+                                //Update 2022.05.20 TA, CA ENABLED
+                                bool caEnableEd = false;
+                                bool taEnabled = false;
+                                if (formChoiceReadDocument.ShowDialog() == true) {
+                                    if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
+                                        isReadByCanValue = true;
+                                        txtCanValue = formChoiceReadDocument.getCanValue();
+                                    }
+                                    caEnableEd = formChoiceReadDocument.getValueCheckBoxCA();
+                                    taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
+                                    this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
+                                }
+                                try {
+                                    if (formChoiceReadDocument.isClose) {
+                                        return;
+                                    }
+                                    btnIDocument.IsEnabled = false;
+                                    clearLayout(true);
+                                    showMain();
+                                    optionsControl.Visibility = Visibility.Collapsed;
+                                    controllerReadChip = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,
+                                                                                      InspectionSystemContanst.CONTENT_READING_CHIP_MESSAGE_BOX);
+                                    controllerReadChip.SetIndeterminate();
+                                    //Call socket server
+                                    //bool mrzEnabled = true;
+                                    //bool imageEnabled = true;
+                                    //bool dataGroupEnabled = false;
+                                    //bool optionalDetailsEnabled = true;
+
+                                    bool mrzEnabled = configConnectToDeviceControl.getMRZEnabled();
+                                    bool imageEnabled = configConnectToDeviceControl.getImgaeEnabled();
+                                    bool dataGroupEnabled = configConnectToDeviceControl.getDataGroupEnabled();
+                                    bool optionalDetailsEnabled = configConnectToDeviceControl.getOptionalDetailsEnabled();
+
+                                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+                                    TimeSpan timeOutForResp = TimeSpan.FromSeconds(timeOutSocket);
+
+                                    //await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
+                                    await Task.Factory.StartNew(() => {
+                                        try {
+                                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled, dataGroupEnabled,
+                                                                                            optionalDetailsEnabled, timeOutForResp,
+                                                                                            txtCanValue, "C# CLIENT",
+                                                                                            caEnableEd, taEnabled);
+                                            if (getDocSuccess) {
+                                                controllerReadChip.CloseAsync();
+                                            }
+                                            else {
+                                                controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                                Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                                                controllerReadChip.CloseAsync();
+                                            }
+                                        }
+                                        catch (Exception exx) {
+                                            //controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                            //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                                            //controllerReadChip.CloseAsync();
+                                            throw exx;
+                                        }
+                                    });
+                                    btnRFID.IsEnabled = true;
+                                    btnLeftFinger.IsEnabled = true;
+                                    btnRightFinger.IsEnabled = true;
+                                }
+                                catch (Exception eReadChip) {
+                                    //Check if auto reviced data.
+                                    //if (null == lbMRZ.Content) {
+                                    //    controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                    //    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_5k);
+                                    //    await controllerReadChip.CloseAsync();
+                                    //    clearLayout(false);
+                                    //    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                                    //}
+                                    //else {
+                                    //    Logmanager.Instance.writeLog("BUTTON READ CHIP EXCEPTION " + eReadChip.ToString());
+                                    //}
+
+                                    if (eReadChip is ISPluginException) {
+                                        ISPluginException pluginException = (ISPluginException)eReadChip;
+                                        controllerReadChip.SetMessage(pluginException.errMsg.ToUpper());
+                                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                        await controllerReadChip.CloseAsync();
+                                    }
+                                    else {
+                                        controllerReadChip.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                        await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                                        await controllerReadChip.CloseAsync();
+                                    }
+
+                                    clearLayout(false);
+                                    logger.Error(eReadChip);
+                                } finally {
+                                    //Update 2022.02.28
+                                    manualReadDoc = false;
+                                    btnIDocument.IsEnabled = true;
+
+                                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                                    await Task.Factory.StartNew(() => {
+                                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
+
+                                        //Update Device Details
+                                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
+                                    });
+
+                                    if (null != deviceDetailsResp) {
+                                        this.Dispatcher.Invoke(() => {
+                                            LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsResp.data.deviceSN,
+                                                                                                deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
+                                                                                                deviceDetailsResp.data.totalPreceeded.ToString());
+                                        });
+                                    }
+                                }
                             }
                             else {
                                 //await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_CARD_NOT_DETECTED_EVENT);
@@ -1156,7 +1275,8 @@ namespace ClientInspectionSystem {
                         await Task.Factory.StartNew(() => {
                             try {
                                 resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, string.Empty); // 2022.05.12 Update challenge 079094012066
-                            } catch(Exception ex) {
+                            }
+                            catch (Exception ex) {
                                 ProgressDialogController controllerRightFingerAuthErr = null;
                                 if (ex is ISPluginException) {
                                     this.Dispatcher.InvokeAsync(async () => {
