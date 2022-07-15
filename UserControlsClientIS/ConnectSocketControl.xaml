@@ -43,7 +43,7 @@
         <TextBox
             x:Name="txtIP"
             Grid.Row="1"
-            Text="192.168.3.170"
+            Text="127.0.0.1"
             KeyDown="txtIP_KeyDown"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"

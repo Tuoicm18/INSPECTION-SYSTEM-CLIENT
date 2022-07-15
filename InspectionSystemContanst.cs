@@ -30,8 +30,8 @@ namespace ClientInspectionSystem {
         public static string CONTENT_CONNECTING_MESSAGE_BOX = "CONNECTING SOCKET SERVER";
         public static string CONTENT_RE_CONNECT_MESSAGE_BOX = "RE-CONNECT SOCKET SERVER";
         public static string CONTENT_CONNECTED_MESSAGE_BOX = "SOCKET SERVER CONNECTION SUCCESSFUL";
-        public static string CONTENT_CONNECTED_DENIED_MESSAGE_BOX = "CONNECTION DENIED";
-        public static string CONTENT_CONNECTED_FAIL_MESSAGE_BOX = "CONNECTION FAIL";
+        public static string CONTENT_CONNECTED_DENIED_MESSAGE_BOX = "CONNECTION SOCKET DENIED";
+        public static string CONTENT_CONNECTED_FAIL_MESSAGE_BOX = "CONNECTION SOCKET FAIL";
         public static string CONTENT_FALIL = "ISSUE FOUND. PLEASE CHECK AGAIN";
         public static string CONTENT_SUCCESS = "SUCCESSFULY";
         public static string CONTENT_READING_CHIP_MESSAGE_BOX = "READING CHIP...";

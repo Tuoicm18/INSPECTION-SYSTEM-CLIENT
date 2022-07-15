@@ -98,11 +98,12 @@ namespace ClientInspectionSystem.SocketClient {
                                 mainWindow.btnIDocument.IsEnabled = true;
                             }
                             else {
-                                if(mainWindow.isConnectDenied) {
+                                if (mainWindow.isConnectDenied) {
                                     controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_DENIED_MESSAGE_BOX);
                                     await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
                                     await controllerWSClient.CloseAsync();
-                                } else {
+                                }
+                                else {
                                     controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
                                     await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
                                     await controllerWSClient.CloseAsync();
@@ -262,5 +263,16 @@ namespace ClientInspectionSystem.SocketClient {
             }
         }
         #endregion 
+
+        public void reConnect(int interval, int totalOfTimes) {
+            try {
+                wsClient.reConnectSocket(interval, totalOfTimes);
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
     }
 }

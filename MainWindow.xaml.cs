@@ -70,6 +70,14 @@ namespace ClientInspectionSystem {
         public bool isConnectDenied;
         public bool isConnectSocket;
         public bool isDisConnectSocket = false;
+        //Timer Connect
+        //private int countReConnect = 0;
+        //private Timer timerConnect = new Timer();
+        //private object locker = new object();
+        //private System.Threading.ManualResetEvent timerDead = new System.Threading.ManualResetEvent(false);
+        private const int INTERVAL_RECONNECT_SOCKET = 5000;
+        private const int TOTAL_OF_TIMES_RECONNECT_SOCKET = 5;
+        private int countTotalTimesReconnect = 5;
         #endregion
 
         #region CONSTRUCTOR
@@ -459,19 +467,36 @@ namespace ClientInspectionSystem {
             try {
                 bool isConnected = isConnect;
                 isConnectSocket = isConnected;
-                logger.Debug("IS CONNECT => " + isConnected);
+                //logger.Debug("IS CONNECT => " + isConnected);
                 if (!isConnect) {
-                    //logger.Debug("RE-CONNECT => ");
-                    this.Dispatcher.Invoke(() => {
-                        if (!isConnectDenied && !isDisConnectSocket) {
+                    if (!isConnectDenied && !isDisConnectSocket) {
+                        this.Dispatcher.Invoke(() => {
                             this.loadingConnectSocket.Visibility = Visibility.Visible;
                             this.lbSocketConnectionStatus.Content = "RE-CONNECT...";
                             this.lbSocketConnectionStatus.Foreground = Brushes.White;
                             this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
-                                                                                                                this.imgSocketConnectionStatus);
+                                                                                                               this.imgSocketConnectionStatus);
                             this.IsEnabled = false;
+                        });
+
+                        //timerDead.Reset();
+                        //timerConnect.Interval = 2000;
+                        //timerConnect.Elapsed += Timer_Elapsed;
+                        //timerConnect.Start();
+
+                        //if(countReConnect == 5) {
+                        //    StopTimer(); 
+                        //}
+
+                        connectionSocket.reConnect(INTERVAL_RECONNECT_SOCKET, 5);
+                        this.countTotalTimesReconnect--;
+                        logger.Warn("RE-CONNECT TIEMS => " + TOTAL_OF_TIMES_RECONNECT_SOCKET);
+                        if(this.countTotalTimesReconnect == 0) {
+                            connectionSocket.shuttdown(this);
                         }
-                        else {
+                    }
+                    else {
+                        this.Dispatcher.Invoke(() => {
                             this.lbSocketConnectionStatus.Content = "CONNECTION DENIED";
                             this.btnDisconnect.IsEnabled = false;
                             this.btnConnectToDevice.IsEnabled = false;
@@ -480,9 +505,9 @@ namespace ClientInspectionSystem {
                             this.lbSocketConnectionStatus.Foreground = Brushes.White;
                             this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
                                                                                                                 this.imgSocketConnectionStatus);
-                            connectionSocket.shuttdown(this);
-                        }
-                    });
+                        });
+                        connectionSocket.shuttdown(this);
+                    }
                 }
                 else {
                     this.Dispatcher.Invoke(() => {
@@ -494,6 +519,10 @@ namespace ClientInspectionSystem {
                         this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
                                                                                                             this.imgSocketConnectionStatus);
                         this.IsEnabled = true;
+
+                        //countReConnect = 0;
+                        //timerDead.Set();
+                        this.countTotalTimesReconnect = 5;
                     });
                 }
             }
@@ -501,6 +530,28 @@ namespace ClientInspectionSystem {
                 logger.Error(ex);
             }
         }
+
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
+            //lock (locker) {
+            //    if (timerDead.WaitOne(0)) return;
+            //    // etc...
+            //    countReConnect++;
+            //    connectionSocket.connect();
+            //    logger.Warn(countReConnect);
+            //}
+        }
+
+        private void StopTimer() {
+            //lock (locker) {
+            //    timerDead.Set();
+            //    timerConnect.Stop();
+            //    countReConnect = 0;
+            //    logger.Debug("STOP TIMER");
+            //    connectionSocket.shuttdown(this);
+            //}
+        }
+
         #endregion
 
         #endregion

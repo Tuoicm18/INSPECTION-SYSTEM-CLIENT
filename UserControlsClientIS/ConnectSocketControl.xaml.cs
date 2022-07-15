@@ -31,7 +31,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
 
             this.Dispatcher.Invoke(() => {
                 //txtIP.Text = ClientExtentions.GetLocalIPAddress();
-                txtIP.Text = "192.168.6.170";
+                txtIP.Text = "127.0.0.1";
                 if (txtIP.Text.Equals(string.Empty) || txtPort.Text.Equals(string.Empty)) {
                     if (btnOkConnect != null) {
                         btnOkConnect.IsEnabled = false;

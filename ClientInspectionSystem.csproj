@@ -227,6 +227,7 @@
     </Compile>
     <Compile Include="IniFile.cs" />
     <Compile Include="InspectionSystemPraser.cs" />
+    <Compile Include="ManualResetEvent.cs" />
     <Compile Include="Models\AuthDataKeyValue.cs" />
     <Compile Include="Models\AuthDataListValue.cs" />
     <Compile Include="Models\BindingPlainText.cs" />
