@@ -35,33 +35,34 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion 
 
         #region CONSTRUCTOR
-        public Connection(bool secureConnect, string ip,
-                          string port,
+        public Connection(string ip, int port, bool secureConnect,
                           DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
                           DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK,
                           DelegateNotifyMessage dlgNotifyMessage) {
-            this.delegateAutoGetDoc = dlgAutoGetDoc;
-            this.delegateAutoBiometric = delegateAutoBiometricResult;
-            this.delegateCardDetectionEvent = dlgCardEvent;
-            this.delegateNotifyMessage = dlgNotifyMessage;
-            this.deleagteConnect = delegateConnectSDK;
 
-            if (secureConnect) {
-                //"wss://192.168.3.170:9505/ISPlugin";
-                string endPointUrlWSS = "wss://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWSS, secureConnect,
+            try {
+                this.delegateAutoGetDoc = dlgAutoGetDoc;
+                this.delegateAutoBiometric = delegateAutoBiometricResult;
+                this.delegateCardDetectionEvent = dlgCardEvent;
+                this.delegateNotifyMessage = dlgNotifyMessage;
+                this.deleagteConnect = delegateConnectSDK;
+
+                wsClient = new ISPluginClient(ip, port, secureConnect,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
                                               this.delegateCardDetectionEvent, this.deleagteConnect,
                                               this.delegateNotifyMessage);
-
-
             }
-            else {
-                string endPointUrlWS = "ws://" + ip + ":" + port + InspectionSystemContanst.SUB_URL;
-                wsClient = new ISPluginClient(endPointUrlWS, secureConnect,
-                                              this.delegateAutoGetDoc, this.delegateAutoBiometric,
-                                              this.delegateCardDetectionEvent, this.deleagteConnect,
-                                              this.delegateNotifyMessage);
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+
+        public Connection(string ip, int port, bool secureConnect) {
+            try {
+                wsClient = new ISPluginClient(ip, port, secureConnect, new TestListenner());
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
             }
         }
         #endregion
@@ -262,8 +263,9 @@ namespace ClientInspectionSystem.SocketClient {
                 throw ex;
             }
         }
-        #endregion 
+        #endregion
 
+        #region RE-CONNECT SOCKET
         public void reConnect(int interval, int totalOfTimes) {
             try {
                 wsClient.reConnectSocket(interval, totalOfTimes);
@@ -273,6 +275,6 @@ namespace ClientInspectionSystem.SocketClient {
                 throw ex;
             }
         }
-
+        #endregion
     }
 }

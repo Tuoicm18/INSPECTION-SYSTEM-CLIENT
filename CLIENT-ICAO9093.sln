@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientInspectionSystem", "ClientInspectionSystem.csproj", "{6D59FAFA-BA12-4D75-8C47-6FD20580ACA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginICAOClientSDK", "..\PluginICAOClientSDK\PluginICAOClientSDK.csproj", "{E150FDED-1B46-42F5-928B-E0EB5CF70436}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{6D59FAFA-BA12-4D75-8C47-6FD20580ACA3}.Release|x64.Build.0 = Release|x64
 		{6D59FAFA-BA12-4D75-8C47-6FD20580ACA3}.Release|x86.ActiveCfg = Release|x86
 		{6D59FAFA-BA12-4D75-8C47-6FD20580ACA3}.Release|x86.Build.0 = Release|x86
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|x64.Build.0 = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Debug|x86.Build.0 = Debug|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|x64.ActiveCfg = Release|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|x64.Build.0 = Release|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|x86.ActiveCfg = Release|Any CPU
+		{E150FDED-1B46-42F5-928B-E0EB5CF70436}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

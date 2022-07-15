@@ -490,7 +490,7 @@ namespace ClientInspectionSystem {
 
                         connectionSocket.reConnect(INTERVAL_RECONNECT_SOCKET, 5);
                         this.countTotalTimesReconnect--;
-                        logger.Warn("RE-CONNECT TIEMS => " + TOTAL_OF_TIMES_RECONNECT_SOCKET);
+                        logger.Warn("RE-CONNECT TIEMS => " + countTotalTimesReconnect);
                         if(this.countTotalTimesReconnect == 0) {
                             connectionSocket.shuttdown(this);
                         }
@@ -1592,7 +1592,8 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-
+                connectionSocket = new Connection("127.0.0.1", 9505, true);
+                logger.Debug("DG1 CLICKED!!!");
             }
             catch (Exception ex) {
                 logger.Error(ex);

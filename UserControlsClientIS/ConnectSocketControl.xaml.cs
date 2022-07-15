@@ -62,11 +62,11 @@ namespace ClientInspectionSystem.UserControlsClientIS {
         }
 
         private void needForConnectSocket(MainWindow mainWindow) {
-            mainWindow.connectionSocket = new SocketClient.Connection(mainWindow.isWSS, txtIP.Text,
-                                          txtPort.Text,
-                                          mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
-                                          mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK,
-                                          mainWindow.delegateNotifyMessage);
+            mainWindow.connectionSocket = new SocketClient.Connection(txtIP.Text, int.Parse(txtPort.Text),
+                                                                      mainWindow.isWSS,
+                                                                      mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
+                                                                      mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK,
+                                                                      mainWindow.delegateNotifyMessage);
 
             //Find Connect
             mainWindow.connectionSocket.connectSocketServer(mainWindow);
@@ -84,7 +84,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                                                                                                                                   TimeSpan.FromSeconds(timeOutSocket),
                                                                                                                                   timeOutSocket);
 
-                                 mainWindow.Dispatcher.Invoke(() => {
+                                mainWindow.Dispatcher.Invoke(() => {
                                     LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
                                                                                         deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
                                                                                         deviceDetailsResp.data.totalPreceeded.ToString());
