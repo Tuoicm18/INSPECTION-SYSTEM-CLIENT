@@ -96,7 +96,7 @@ namespace ClientInspectionSystem {
         }
 
         //Render Result Biometric Auth
-        public void renderResultBiometricAuht(BaseBiometricAuthResp baseBiometricAuthResp) {
+        public void renderResultBiometricAuht(BiometricAuthResp baseBiometricAuthResp) {
             string biometricType = baseBiometricAuthResp.data.biometricType;
             bool biometricResult = baseBiometricAuthResp.data.result;
             int biometricScore = baseBiometricAuthResp.data.score;

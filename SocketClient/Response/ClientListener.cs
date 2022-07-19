@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ClientInspectionSystem;
-using ClientInspectionSystem;
 using PluginICAOClientSDK;
-using PluginICAOClientSDK.Response;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Response.CardDetectionEvent;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
@@ -33,15 +30,15 @@ namespace ClientInspectionSystem.SocketClient.Response {
             throw new NotImplementedException();
         }
 
-        public bool onReceivedBiometricResult(BaseBiometricAuthResp baseBiometricAuth) {
+        public bool onReceivedBiometricResult(BiometricAuthResp baseBiometricAuth) {
             throw new NotImplementedException();
         }
 
-        public bool onReceivedDocument(BaseDocumentDetailsResp document) {
+        public bool onReceivedDocument(DocumentDetailsResp document) {
             throw new NotImplementedException();
         }
 
-        public bool onReceviedCardDetectionEvent(BaseCardDetectionEventResp baseCardDetectionEvent) {
+        public bool onReceviedCardDetectionEvent(CardDetectionEventResp baseCardDetectionEvent) {
             throw new NotImplementedException();
         }
     }

@@ -7,21 +7,21 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private ISPluginClient pluginClient;
         private bool deviceDetailsEnabled;
         private bool presenceEnabled;
-        private TimeSpan timeOutResp;
-        private int timeOutInterVal;
+        private long timeoutMilisec;
+        private int timeoutInterval;
 
-        public GetDeviceDetails(ISPluginClient pluginClient, bool deviceDetailsEnabled, 
-                                bool presenceEnabled, TimeSpan timeOutResp,
-                                int timeOutInterVal) {
-            this.pluginClient = pluginClient;
+        public GetDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled, 
+                                long timeoutMilisec, int timeoutInterval, 
+                                ISPluginClient pluginClient) {
             this.deviceDetailsEnabled = deviceDetailsEnabled;
             this.presenceEnabled = presenceEnabled;
-            this.timeOutResp = timeOutResp;
-            this.timeOutInterVal = timeOutInterVal;
+            this.timeoutMilisec = timeoutMilisec;
+            this.timeoutInterval = timeoutInterval;
+            this.pluginClient = pluginClient;
         }
 
-        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails() {
-            return pluginClient.getDeviceDetails(deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+        public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp getDeviceDetails() {
+            return pluginClient.getDeviceDetails(deviceDetailsEnabled, presenceEnabled, timeoutMilisec, timeoutInterval);
         }
     }
 }

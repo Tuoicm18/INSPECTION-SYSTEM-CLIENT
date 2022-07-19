@@ -57,10 +57,10 @@ namespace ClientInspectionSystem.LoadData {
                                                            string lastScanTiem,
                                                            string totalPreceeded) {
             List<DeviceDetails> deviceDetails = new List<DeviceDetails>();
-            deviceDetails.Add(new DeviceDetails { TITLE = "DEVICE SERIAL NUMBER ", CONTENT = serialNum.Equals(string.Empty) ? "DEVICE NOT CONNECTED" : serialNum, SHOWBUTTON = serialNum.Equals(string.Empty) ? "False" : "True" });
-            deviceDetails.Add(new DeviceDetails { TITLE = "DEVICE NAME ", CONTENT = deviceName.Equals(string.Empty) ? "DEVICE NOT CONNECTED" : deviceName, SHOWBUTTON = "False" });
-            deviceDetails.Add(new DeviceDetails { TITLE = "LAST SCAN TIME ", CONTENT = lastScanTiem.Equals(string.Empty) ? "N/A" : lastScanTiem, SHOWBUTTON = "False" });
-            deviceDetails.Add(new DeviceDetails { TITLE = "TOTAL PRECEEDED ", CONTENT = totalPreceeded.Equals(string.Empty) ? "N/A" : totalPreceeded, SHOWBUTTON = "False" });
+            deviceDetails.Add(new DeviceDetails { TITLE = "DEVICE SERIAL NUMBER ", CONTENT = string.IsNullOrEmpty(serialNum) ? "DEVICE NOT CONNECTED" : serialNum, SHOWBUTTON = serialNum.Equals(string.Empty) ? "False" : "True" });
+            deviceDetails.Add(new DeviceDetails { TITLE = "DEVICE NAME ", CONTENT = string.IsNullOrEmpty(deviceName) ? "DEVICE NOT CONNECTED" : deviceName, SHOWBUTTON = "False" });
+            deviceDetails.Add(new DeviceDetails { TITLE = "LAST SCAN TIME ", CONTENT = string.IsNullOrEmpty(lastScanTiem) ? "N/A" : lastScanTiem, SHOWBUTTON = "False" });
+            deviceDetails.Add(new DeviceDetails { TITLE = "TOTAL PRECEEDED ", CONTENT = string.IsNullOrEmpty(totalPreceeded) ? "N/A" : totalPreceeded, SHOWBUTTON = "False" });
             dataGridDetails.ItemsSource = deviceDetails;
         }
         #endregion

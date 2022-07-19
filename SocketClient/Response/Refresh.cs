@@ -6,22 +6,22 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private ISPluginClient pluginClient;
         private bool deviceDetailsEnabled;
         private bool presenceEnabled;
-        private TimeSpan timeOutResp;
-        private int timeOutInterVal;
+        private long timeoutMilisec;
+        private int timeOutInterval;
 
-        public Refresh(ISPluginClient pluginClient, bool deviceDetailsEnabled,
-                       bool presenceEnabled, TimeSpan timeOutResp,
-                       int timeOutInterVal) {
-            this.pluginClient = pluginClient;
+        public Refresh(bool deviceDetailsEnabled, bool presenceEnabled,
+                       long timeoutMilisec, int timeOutInterval, 
+                       ISPluginClient pluginClient) {
             this.deviceDetailsEnabled = deviceDetailsEnabled;
             this.presenceEnabled = presenceEnabled;
-            this.timeOutResp = timeOutResp;
-            this.timeOutInterVal = timeOutInterVal;
+            this.timeoutMilisec = timeoutMilisec;
+            this.timeOutInterval = timeOutInterval;
+            this.pluginClient = pluginClient;
         }
 
-        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp refreshReader() {
+        public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp refreshReader() {
             try {
-                return pluginClient.refresh(deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+                return pluginClient.refreshReader(deviceDetailsEnabled, presenceEnabled, timeoutMilisec, timeOutInterval);
             }
             catch (Exception ex) {
                 throw ex;

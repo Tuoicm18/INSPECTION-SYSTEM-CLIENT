@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using Newtonsoft.Json;
 using PluginICAOClientSDK;
@@ -41,7 +37,7 @@ namespace ClientInspectionSystem {
             //throw new NotImplementedException();
         }
 
-        public bool onReceivedBiometricResult(BaseBiometricAuthResp baseBiometricAuth) {
+        public bool onReceivedBiometricResult(BiometricAuthResp baseBiometricAuth) {
             try {
                 logger.Debug(JsonConvert.SerializeObject(baseBiometricAuth));
                 return true;
@@ -53,11 +49,11 @@ namespace ClientInspectionSystem {
             //throw new NotImplementedException();
         }
 
-        public bool onReceivedDocument(BaseDocumentDetailsResp document) {
+        public bool onReceivedDocument(DocumentDetailsResp document) {
             throw new NotImplementedException();
         }
 
-        public bool onReceviedCardDetectionEvent(BaseCardDetectionEventResp baseCardDetectionEvent) {
+        public bool onReceviedCardDetectionEvent(CardDetectionEventResp baseCardDetectionEvent) {
             try {
                 logger.Debug(JsonConvert.SerializeObject(baseCardDetectionEvent));
                 return true;

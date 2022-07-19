@@ -76,19 +76,17 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                     try {
                         //Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_1k);
                         //Update 2022.02.28 TIME OUT INI FILE
-                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-
                         await Task.Factory.StartNew(() => {
                             try {
-                                PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
-                                                                                                                                  TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                  timeOutSocket);
+                                PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
+                                                                                                                                                              mainWindow.timeoutSocket, mainWindow.timeoutInterval);
 
                                 mainWindow.Dispatcher.Invoke(() => {
                                     LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,
                                                                                         deviceDetailsResp.data.deviceName, deviceDetailsResp.data.lastScanTime,
                                                                                         deviceDetailsResp.data.totalPreceeded.ToString());
                                 });
+                                logger.Warn("[GET DEVICE DETAILS]");
                             }
                             catch (Exception ex) {
                                 mainWindow.Dispatcher.Invoke(() => {

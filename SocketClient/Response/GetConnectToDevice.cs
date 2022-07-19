@@ -13,26 +13,26 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private string confirmCode;
         private string clientName;
         private ConfigConnect configConnect;
-        private int timeOutInterVal;
-        public TimeSpan timeOutResp;
+        private int timeoutInterval;
+        public long timeoutMilisec;
 
-        public GetConnectToDevice(ISPluginClient pluginClient, bool confirmEnabled,
-                                  string confirmCode, string clientName,
-                                  ConfigConnect configConnect, int timeOutInterVal,
-                                  TimeSpan timeOutResp) {
-            this.clientPlugin = pluginClient;
+        public GetConnectToDevice(bool confirmEnabled, string confirmCode, 
+                                  string clientName, ConfigConnect configConnect,
+                                  long timeoutMilisec, int timeoutInterval,
+                                  ISPluginClient pluginClient) {
             this.confirmEnabled = confirmEnabled;
             this.confirmCode = confirmCode;
             this.clientName = clientName;
             this.configConnect = configConnect;
-            this.timeOutInterVal = timeOutInterVal;
-            this.timeOutResp = timeOutResp;
+            this.timeoutMilisec = timeoutMilisec;
+            this.timeoutInterval = timeoutInterval;
+            this.clientPlugin = pluginClient;
         }
 
-        public PluginICAOClientSDK.Response.ConnectToDevice.BaseConnectToDeviceResp getConnectToDevice() {
-            return clientPlugin.connectToDevice(this.confirmEnabled, this.confirmCode,
-                                                this.clientName, this.configConnect,
-                                                this.timeOutResp, this.timeOutInterVal);
+        public PluginICAOClientSDK.Response.ConnectToDevice.ConnectToDeviceResp getConnectToDevice() {
+            return clientPlugin.connectToDevice(confirmEnabled, confirmCode,
+                                                clientName, configConnect,
+                                                timeoutMilisec, timeoutInterval);
         }
     }
 }

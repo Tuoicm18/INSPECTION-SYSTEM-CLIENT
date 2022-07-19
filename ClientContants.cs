@@ -39,6 +39,7 @@ namespace ClientInspectionSystem {
 
         //READ INI FILE
         public static string SECTION_OPTIONS_SOCKET = "OPTIONS SOCKET";
-        public static string KEY_OPTIONS_SOCKET_TIME_OUT = "TIME-OUT-SECOND";
+        public static string KEY_OPTIONS_SOCKET_TIME_OUT_RESP = "TIME-OUT-RESP";
+        public static string KEY_OPTIONS_SOCKET_TIME_OUT_INTERVAL = "TIME-OUT-INTERVAL";
     }
 }

@@ -61,7 +61,8 @@ namespace ClientInspectionSystem {
         private BrushConverter brushConverter = new BrushConverter();
         private bool manualReadDoc = false;
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
-        private int timeOutSocket;
+        public long timeoutSocket { get; set; }
+        public int timeoutInterval { get; set; }
         private ProgressDialogController dialogControllerAutoRead = null;
         //Update 2022.03.11 For Can Value Request Read Document
         private bool isReadByCanValue = false;
@@ -83,6 +84,7 @@ namespace ClientInspectionSystem {
         #region CONSTRUCTOR
         public MainWindow() {
             InitializeComponent();
+
             //Version APP
             lbVersion.Content = "V" + ClientExtentions.getCurrentVersion();
 
@@ -100,6 +102,10 @@ namespace ClientInspectionSystem {
 
             //Find Connection Socket Server
             try {
+                //this.timeoutSocket = long.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_RESP));
+                this.timeoutSocket = Convert.ToInt64(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_RESP));
+                //this.timeoutInterval = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_INTERVAL));
+                this.timeoutInterval = Convert.ToInt32(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_INTERVAL));
                 delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
                 delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
                 delegateCardDetectionEvent = new DelegateCardDetectionEvent(delegateCardDetection);
@@ -114,7 +120,7 @@ namespace ClientInspectionSystem {
             btnConnectToDevice.IsEnabled = false;
 
             //Test Biometric Auth With cardNo
-            btnRFID.IsEnabled = false;
+            btnRFID.IsEnabled = true;
             btnLeftFinger.IsEnabled = false;
             btnRightFinger.IsEnabled = false;
             btnRefresh.IsEnabled = false;
@@ -133,7 +139,7 @@ namespace ClientInspectionSystem {
         #region DELEGATE METHOD HANDLE
 
         #region AUTO GET DOCUMENT DETAILS
-        public void autoGetDocumentDetails(BaseDocumentDetailsResp documentDetailsResp) {
+        public void autoGetDocumentDetails(DocumentDetailsResp documentDetailsResp) {
             //ProgressDialogController controllerReadChip = null;
             if (manualReadDoc == false) {
                 this.Dispatcher.Invoke(async () => {
@@ -172,11 +178,11 @@ namespace ClientInspectionSystem {
                         clearLayout(false);
                         logger.Error(eReadChip);
                     } finally {
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                        PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = null;
                         await Task.Factory.StartNew(() => {
-                            TimeSpan timeOutGetDeviceDetails = TimeSpan.FromSeconds(timeOutSocket);
                             //Update Device Details
-                            deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeOutGetDeviceDetails, timeOutSocket);
+                            deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeoutSocket, timeoutInterval);
+                            logger.Debug("[UPDATE DEVICE DETAILS 1]");
                         });
 
                         if (null != deviceDetailsResp) {
@@ -192,7 +198,7 @@ namespace ClientInspectionSystem {
             }
         }
 
-        private bool autoGetDocumentToLayout(BaseDocumentDetailsResp documentDetailsResp) {
+        private bool autoGetDocumentToLayout(DocumentDetailsResp documentDetailsResp) {
             try {
                 if (null != documentDetailsResp) {
                     //Logmanager.Instance.writeLog("<DEBUG> AUTO GET DOCUMENT RESPONSE " + JsonConvert.SerializeObject(documentDetailsResp));
@@ -217,7 +223,6 @@ namespace ClientInspectionSystem {
 
                         LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
                         //Update 2022.02.28 TIME OUT INI FILE
-                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
                     });
 
 
@@ -271,7 +276,7 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region AUTO GET RESULT BIOMETRIC AUTH
-        public void autoGetBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp) {
+        public void autoGetBiometricAuth(BiometricAuthResp baseBiometricAuthResp) {
             try {
                 if (null != baseBiometricAuthResp) {
                     logger.Debug("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
@@ -321,7 +326,7 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region UPDATE 2022.05.10 TEST CARD DETECTION EVENT
-        private void delegateCardDetection(BaseCardDetectionEventResp baseCardDetectionEventResp) {
+        private void delegateCardDetection(CardDetectionEventResp baseCardDetectionEventResp) {
             try {
                 if (null != baseCardDetectionEventResp) {
                     if (baseCardDetectionEventResp.errorCode == 0) {
@@ -369,16 +374,14 @@ namespace ClientInspectionSystem {
                                     bool dataGroupEnabled = configConnectToDeviceControl.getDataGroupEnabled();
                                     bool optionalDetailsEnabled = configConnectToDeviceControl.getOptionalDetailsEnabled();
 
-                                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                                    TimeSpan timeOutForResp = TimeSpan.FromSeconds(timeOutSocket);
-
                                     //await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
                                     await Task.Factory.StartNew(() => {
                                         try {
-                                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled, dataGroupEnabled,
-                                                                                            optionalDetailsEnabled, timeOutForResp,
+                                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
+                                                                                            dataGroupEnabled, optionalDetailsEnabled,
                                                                                             txtCanValue, "C# CLIENT",
-                                                                                            caEnableEd, taEnabled);
+                                                                                            caEnableEd, taEnabled,
+                                                                                            timeoutSocket, timeoutInterval);
                                             if (getDocSuccess) {
                                                 controllerReadChip.CloseAsync();
                                             }
@@ -431,12 +434,11 @@ namespace ClientInspectionSystem {
                                     manualReadDoc = false;
                                     btnIDocument.IsEnabled = true;
 
-                                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                                    PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = null;
                                     await Task.Factory.StartNew(() => {
-                                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-
                                         //Update Device Details
-                                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
+                                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true,  timeoutSocket, timeoutInterval);
+                                        logger.Debug("[UPDATE DEVICE DETAILS 2]");
                                     });
 
                                     if (null != deviceDetailsResp) {
@@ -636,16 +638,14 @@ namespace ClientInspectionSystem {
                     bool dataGroupEnabled = configConnectToDeviceControl.getDataGroupEnabled();
                     bool optionalDetailsEnabled = configConnectToDeviceControl.getOptionalDetailsEnabled();
 
-                    timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                    TimeSpan timeOutForResp = TimeSpan.FromSeconds(timeOutSocket);
-
                     //await Task.Delay(InspectionSystemContanst.TIME_OUT_RESP_SOCKET_10S);
                     await Task.Factory.StartNew(() => {
                         try {
-                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled, dataGroupEnabled,
-                                                                            optionalDetailsEnabled, timeOutForResp,
+                            bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
+                                                                            dataGroupEnabled, optionalDetailsEnabled,
                                                                             txtCanValue, "C# CLIENT",
-                                                                            caEnableEd, taEnabled);
+                                                                            caEnableEd, taEnabled,
+                                                                            timeoutSocket, timeoutInterval);
                             if (getDocSuccess) {
                                 controllerReadChip.CloseAsync();
                             }
@@ -698,12 +698,11 @@ namespace ClientInspectionSystem {
                     manualReadDoc = false;
                     btnIDocument.IsEnabled = true;
 
-                    PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+                    PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = null;
                     await Task.Factory.StartNew(() => {
-                        timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-
                         //Update Device Details
-                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
+                        deviceDetailsResp = connectionSocket.getDeviceDetails(true, true, timeoutSocket, timeoutInterval);
+                        logger.Debug("[UPDATE DEVICE DETAILS 3]");
                     });
 
                     if (null != deviceDetailsResp) {
@@ -718,18 +717,17 @@ namespace ClientInspectionSystem {
         }
 
         private bool getDocumentDetailsToLayout(bool mrzEnabled, bool imageEnabled,
-                                                bool dataGroupEnabled, bool optionalEnabled,
-                                                TimeSpan timeOutResp, string canValue,
-                                                string challenge, bool caEnabled,
-                                                bool taEnabled) {
+                                                bool dataGroupEnabled, bool optionalDetailsEnabled,
+                                                string canValue, string challenge,
+                                                bool caEnabled, bool taEnabled,
+                                                long timeoutMilisec, int timeoutInterval) {
             try {
 
-                BaseDocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
-                                                                                                  dataGroupEnabled, optionalEnabled,
-                                                                                                  timeOutResp, null,
-                                                                                                  timeOutSocket, canValue,
-                                                                                                  challenge, caEnabled,
-                                                                                                  taEnabled);
+                DocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
+                                                                                              dataGroupEnabled, optionalDetailsEnabled,
+                                                                                              canValue, challenge,
+                                                                                              caEnabled, taEnabled,
+                                                                                              timeoutMilisec, timeoutInterval);
                 logger.Info(JsonConvert.SerializeObject(documentDetailsResp));
                 if (null != documentDetailsResp) {
                     //2022.05.11 Update get jwt PA from server
@@ -751,7 +749,7 @@ namespace ClientInspectionSystem {
                                 imgAvatar.Source = imgSource;
                             }
                         }
-                        if (optionalEnabled) {
+                        if (optionalDetailsEnabled) {
                             LoadDataForDataGrid.loadDataGridMain(dataGridInputDevice, documentDetailsResp.data.optionalDetails);
                         }
 
@@ -1004,7 +1002,7 @@ namespace ClientInspectionSystem {
                         //Form Watting
                         //controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         //controllerFaceAuth.SetIndeterminate();
-                        BaseBiometricAuthResp resultFaceAuth = null;
+                        BiometricAuthResp resultFaceAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
                                 resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, string.Empty); // 2022.05.12 Update challenge 079094012066
@@ -1046,7 +1044,7 @@ namespace ClientInspectionSystem {
                                     //controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFaceAuth, BiometricType.TYPE_FACE);
+                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FACE));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, 2);
@@ -1067,7 +1065,7 @@ namespace ClientInspectionSystem {
                                     //controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFaceAuth, BiometricType.TYPE_FACE);
+                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FACE));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, -1);
@@ -1118,14 +1116,10 @@ namespace ClientInspectionSystem {
             });
         }
 
-        private BaseBiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, string biometricType, string cardNo) {
-            BaseBiometricAuthResp resultBiometricResp = null;
+        private BiometricAuthResp resultBiometricAuth(FormAuthenticationDataNew formAuthorizationData, BiometricType biometricType, string cardNo) {
+            BiometricAuthResp resultBiometricResp = null;
             try {
-                //Set Time Out
-                timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                TimeSpan timeOutResp = TimeSpan.FromSeconds(timeOutSocket);
-
-                BaseBiometricAuthResp resultBiometric = null;
+                BiometricAuthResp resultBiometric = null;
 
                 ChallengeBiometricAuth challenge = new ChallengeBiometricAuth();
                 string challengeString = string.Empty;
@@ -1138,9 +1132,9 @@ namespace ClientInspectionSystem {
                     if (formAuthorizationData.CheckImportString) {
                         challengeString = formAuthorizationData.getImportJson();
                         resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challengeString,
-                                                                                   timeOutResp, timeOutSocket,
-                                                                                   ChallengeType.TYPE_STRING,
-                                                                                   this.liveness, cardNo);
+                                                                                  ChallengeType.TYPE_STRING, this.liveness,
+                                                                                  cardNo, this.timeoutSocket,
+                                                                                  this.timeoutInterval);
                     }
                     else {
                         if (formAuthorizationData.CheckImportJson) {
@@ -1161,8 +1155,9 @@ namespace ClientInspectionSystem {
                 });
 
                 resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
-                                                          timeOutResp, timeOutSocket, ChallengeType.TYPE_OBJECT,
-                                                          this.liveness, cardNo);
+                                                                          ChallengeType.TYPE_OBJECT, this.liveness,
+                                                                          cardNo, this.timeoutSocket,
+                                                                          this.timeoutInterval);
 
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
@@ -1192,7 +1187,7 @@ namespace ClientInspectionSystem {
                         //Form Watting
                         //controllerLeftFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         //controllerLeftFingerAuth.SetIndeterminate();
-                        BaseBiometricAuthResp resultLeftFingerAuth = null;
+                        BiometricAuthResp resultLeftFingerAuth = null;
 
                         await Task.Factory.StartNew(async () => {
                             try {
@@ -1237,7 +1232,7 @@ namespace ClientInspectionSystem {
                                     //controllerLeftFingerAuth.CloseAsync();
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_LEFT));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER\n" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 2);
@@ -1258,7 +1253,7 @@ namespace ClientInspectionSystem {
                                     //controllerLeftFingerAuth.CloseAsync();
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultLeftFingerAuth, BiometricType.TYPE_FINGER_LEFT);
+                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_LEFT));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, -1);
@@ -1322,7 +1317,7 @@ namespace ClientInspectionSystem {
                         //Show Form Watting
                         //controllerRightFingerAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX,InspectionSystemContanst.CONTENT_WATTING_BIOMETRIC_RESULT_MESSAGE_BOX);
                         //controllerRightFingerAuth.SetIndeterminate();
-                        BaseBiometricAuthResp resultFingerRightAuth = null;
+                        BiometricAuthResp resultFingerRightAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
                                 resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, string.Empty); // 2022.05.12 Update challenge 079094012066
@@ -1365,7 +1360,7 @@ namespace ClientInspectionSystem {
                                     //controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFingerRightAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_RIGHT));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
                                                                      JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
@@ -1387,7 +1382,7 @@ namespace ClientInspectionSystem {
                                     //controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFingerRightAuth, BiometricType.TYPE_FINGER_RIGHT);
+                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_RIGHT));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 1);
@@ -1440,7 +1435,7 @@ namespace ClientInspectionSystem {
         #endregion
 
         #region INIT FORM RESULT BIOMETRIC AUTH
-        public void initFormResultBiometricAuth(BaseBiometricAuthResp baseBiometricAuthResp, string biometricType) {
+        public void initFormResultBiometricAuth(BiometricAuthResp baseBiometricAuthResp, string biometricType) {
             logger.Debug("INI FORM RESULT BIOMETRIC AUTH...");
             if (null != baseBiometricAuthResp) {
                 if (null != baseBiometricAuthResp.data.challenge) {
@@ -1592,8 +1587,9 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-                connectionSocket = new Connection("127.0.0.1", 9505, true);
-                logger.Debug("DG1 CLICKED!!!");
+                //connectionSocket = new Connection("127.0.0.1", 9505, true);
+                //logger.Debug("DG1 CLICKED!!!");
+                logger.Debug(this.timeoutSocket + " / " + this.timeoutInterval);
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -1651,10 +1647,8 @@ namespace ClientInspectionSystem {
                 try {
                     try {
                         //Update Device Details Then Refresh
-                        int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                        PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsRefresh = connectionSocket.refreshReader(true, true,
-                                                                                                                                               TimeSpan.FromSeconds(timeOutSocket),
-                                                                                                                                               timeOutSocket);
+                        PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsRefresh = connectionSocket.refreshReader(true, true,
+                                                                                                                                           timeoutSocket, timeoutInterval);
                         if (null != deviceDetailsRefresh) {
                             mainWindow.Dispatcher.Invoke(async () => {
                                 LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, deviceDetailsRefresh.data.deviceSN,
@@ -1715,14 +1709,20 @@ namespace ClientInspectionSystem {
                     FormScanType formScanType = new FormScanType();
                     if (formScanType.ShowDialog() == true) {
                         if (!formScanType.isCancelScanDoc) {
-                            string scanType = formScanType.getTextCmbScanType();
+                            string scanTypeInput = formScanType.getTextCmbScanType();
                             bool saveEnable = formScanType.getCbSaveEnable();
-                            int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                            PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocumentResp = null;
+                            PluginICAOClientSDK.Response.ScanDocument.ScanDocumentResp scanDocumentResp = null;
                             await Task.Factory.StartNew(async () => {
                                 try {
-                                    scanDocumentResp = connectionSocket.scanDocumentResp(scanType, saveEnable, TimeSpan.FromSeconds(timeOutSocket), timeOutSocket);
-                                }
+                                    switch (scanTypeInput) {
+                                        case "JPG":
+                                            scanDocumentResp = connectionSocket.scanDocumentResp(ScanType.JPG, saveEnable, timeoutSocket, timeoutInterval);
+                                            break;
+                                        case "PDF":
+                                            scanDocumentResp = connectionSocket.scanDocumentResp(ScanType.PDF, saveEnable, timeoutSocket, timeoutInterval);
+                                            break;
+                                    }                                   
+                               }
                                 catch (Exception ex) {
                                     ProgressDialogController controllerErrScanDoc = null;
                                     if (ex is ISPluginException) {

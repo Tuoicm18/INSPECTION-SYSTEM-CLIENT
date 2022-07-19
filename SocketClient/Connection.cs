@@ -4,6 +4,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using PluginICAOClientSDK;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
@@ -15,8 +16,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientInspectionSystem.SocketClient {
-    public delegate void DelegateAutoGetDoc(BaseDocumentDetailsResp documentDetailsResp);
-    public delegate void DelegateAutoGetBiometric(BaseBiometricAuthResp baseBiometricAuthResp);
+    public delegate void DelegateAutoGetDoc(DocumentDetailsResp documentDetailsResp);
+    public delegate void DelegateAutoGetBiometric(BiometricAuthResp baseBiometricAuthResp);
     public class Connection {
 
         #region VARIABLE
@@ -152,11 +153,11 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region GET DEVICE DETAILS FUNC
         //Get Device Details
-        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled,
-                                                                                                 TimeSpan timeOutResp, int timeOutInterVal) {
-            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp deviceDetailsResp = null;
+        public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled,
+                                                                                             long timeoutMiliSec, int timeoutInterval) {
+            PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = null;
             try {
-                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(wsClient, deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(deviceDetailsEnabled, presenceEnabled, timeoutMiliSec, timeoutInterval, wsClient);
                 deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
                 logger.Debug("GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
                 return deviceDetailsResp;
@@ -170,19 +171,19 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region GET DOCUMENT DETAILS FUNC
-        public BaseDocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
-                                                          bool dataGroupEnabled, bool optionalEnabled,
-                                                          TimeSpan timeOutResp, ISPluginClient.DocumentDetailsListener documentDetailsListener,
-                                                          int timeOutInterVal, string canValue,
-                                                          string challenge, bool caEnabled,
-                                                          bool taEnabled) {
+        public DocumentDetailsResp getDocumentDetails(bool mrzEnabled, bool imageEnabled,
+                                                      bool dataGroupEnabled, bool optionalDetailsEnabled,
+                                                      string canValue, string challenge,
+                                                      bool caEnabled, bool taEnabled,
+                                                      long timeoutMilisec, int timeoutInterval) {
             try {
-                GetDocumentDetails getDocumentDetails = new GetDocumentDetails(wsClient, mrzEnabled, imageEnabled,
-                                                                               dataGroupEnabled, optionalEnabled, timeOutResp,
-                                                                               documentDetailsListener, timeOutInterVal,
+                GetDocumentDetails getDocumentDetails = new GetDocumentDetails(mrzEnabled, imageEnabled,
+                                                                               dataGroupEnabled, optionalDetailsEnabled,
                                                                                canValue, challenge,
-                                                                               caEnabled, taEnabled);
-                BaseDocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
+                                                                               caEnabled, taEnabled,
+                                                                               timeoutMilisec, timeoutInterval,
+                                                                               wsClient);
+                DocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }
             catch (Exception eDoc) {
@@ -194,16 +195,16 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region GET RESULT BIOMETRIC AUTH FUNC
-        public BaseBiometricAuthResp getResultBiometricAuth(string biometricType, object challenge,
-                                                            TimeSpan timeOutResp, int timeOutInterVal,
-                                                            string challengeType, bool livenessEnabled,
-                                                            string cardNo) {
+        public BiometricAuthResp getResultBiometricAuth(BiometricType biometricType, object challenge,
+                                                       ChallengeType challengeType, bool livenessEnabled,
+                                                       string cardNo, long timeoutMiliesc,
+                                                       int timeoutInterval) {
             try {
-                GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(wsClient, biometricType,
-                                                                                                       challenge, timeOutResp,
-                                                                                                       timeOutInterVal, challengeType,
-                                                                                                       livenessEnabled, cardNo);
-                BaseBiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
+                GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(biometricType, challenge,
+                                                                                                       challengeType, livenessEnabled,
+                                                                                                       cardNo, timeoutMiliesc,
+                                                                                                       timeoutInterval, wsClient);
+                BiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }
             catch (Exception eBiometricAuth) {
@@ -214,15 +215,15 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region GET RESULT CONNECT TO DEVICE FUNC
-        public BaseConnectToDeviceResp getConnectToDevice(bool confirmEnabled, string confirmCode,
-                                                          string clientName, PluginICAOClientSDK.Models.ConfigConnect configConnect,
-                                                          TimeSpan timeOutResp, int timeOutInterVal) {
+        public ConnectToDeviceResp getConnectToDevice(bool confirmEnabled, string confirmCode,
+                                                      string clientName, ConfigConnect configConnect,
+                                                      long timeoutMilisec, int timeoutInterval) {
             try {
-                GetConnectToDevice getConnectToDevice = new GetConnectToDevice(wsClient, confirmEnabled,
-                                                                               confirmCode, clientName,
-                                                                               configConnect, timeOutInterVal,
-                                                                               timeOutResp);
-                BaseConnectToDeviceResp baseConnectToDeviceResp = getConnectToDevice.getConnectToDevice();
+                GetConnectToDevice getConnectToDevice = new GetConnectToDevice(confirmEnabled, confirmCode,
+                                                                               clientName, configConnect,
+                                                                               timeoutMilisec, timeoutInterval,
+                                                                               wsClient);
+                ConnectToDeviceResp baseConnectToDeviceResp = getConnectToDevice.getConnectToDevice();
                 return baseConnectToDeviceResp;
             }
             catch (Exception eConnectToDevice) {
@@ -233,11 +234,11 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region REFRESH FUNC
-        public PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp refreshReader(bool deviceDetailsEnabled, bool presenceEnabled,
-                                                                                              TimeSpan timeOutResp, int timeOutInterVal) {
-            PluginICAOClientSDK.Response.DeviceDetails.BaseDeviceDetailsResp respRefresh = null;
+        public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp refreshReader(bool deviceDetailsEnabled, bool presenceEnabled,
+                                                                                          long timeoutMilisec, int timeOutInterval) {
+            PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp respRefresh = null;
             try {
-                Refresh refresh = new Refresh(wsClient, deviceDetailsEnabled, presenceEnabled, timeOutResp, timeOutInterVal);
+                Refresh refresh = new Refresh(deviceDetailsEnabled, presenceEnabled, timeoutMilisec, timeOutInterval, wsClient);
                 respRefresh = refresh.refreshReader();
                 logger.Debug("REFRESH READER " + JsonConvert.SerializeObject(refresh));
                 return respRefresh;
@@ -250,11 +251,11 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region SCAN DOCUMENT
-        public PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocumentResp(string scanType, bool saveEnabled,
-                                                                                               TimeSpan timeOutResp, int timeOutInterVal) {
-            PluginICAOClientSDK.Response.ScanDocument.BaseScanDocumentResp scanDocResp = null;
+        public PluginICAOClientSDK.Response.ScanDocument.ScanDocumentResp scanDocumentResp(ScanType scanType, bool saveEnabled,
+                                                                                           long timeoutMilisec, int timeoutInterval) {
+            PluginICAOClientSDK.Response.ScanDocument.ScanDocumentResp scanDocResp = null;
             try {
-                GetScanDocument scanDocument = new GetScanDocument(wsClient, scanType, saveEnabled, timeOutResp, timeOutInterVal);
+                GetScanDocument scanDocument = new GetScanDocument(scanType, saveEnabled, timeoutMilisec, timeoutInterval, wsClient);
                 scanDocResp = scanDocument.scanDocumentResp();
                 return scanDocResp;
             }

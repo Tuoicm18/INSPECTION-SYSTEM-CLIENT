@@ -2,37 +2,38 @@
 using System.Collections.Generic;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK;
+using PluginICAOClientSDK.Models;
 
 namespace ClientInspectionSystem.SocketClient.Response {
     public class GetBiometricAuthentication {
         private ISPluginClient clientPlugin;
-        private string biometricType;
+        private BiometricType biometricType;
         private object challenge;
-        private int timeOutInterVal;
-        private string challengeType;
+        private int timeoutInterval;
+        private ChallengeType challengeType;
         private bool livenessEnabled;
         private string cardNo;
-        public TimeSpan timeOutResp;
+        public long timeoutMiliesc;
 
-        public GetBiometricAuthentication(ISPluginClient pluginClient, string biometricType,
-                                          object challenge, TimeSpan timeOutResp,
-                                          int timeOutInterVal, string challengeType,
-                                          bool livenessEnabled, string cardNo) {
-            this.clientPlugin = pluginClient;
+        public GetBiometricAuthentication(BiometricType biometricType, object challenge,
+                                          ChallengeType challengeType, bool livenessEnabled,
+                                          string cardNo, long timeoutMiliesc,
+                                          int timeoutInterval, ISPluginClient clientPlugin) {
             this.biometricType = biometricType;
             this.challenge = challenge;
-            this.timeOutResp = timeOutResp;
-            this.timeOutInterVal = timeOutInterVal;
             this.challengeType = challengeType;
             this.livenessEnabled = livenessEnabled;
             this.cardNo = cardNo;
+            this.timeoutMiliesc = timeoutMiliesc;
+            this.timeoutInterval = timeoutInterval;
+            this.clientPlugin = clientPlugin;
         }
 
-        public BaseBiometricAuthResp getResultBiometricAuth() {
+        public BiometricAuthResp getResultBiometricAuth() {
             return clientPlugin.biometricAuthentication(biometricType, challenge, 
-                                                        timeOutResp, timeOutInterVal, 
                                                         challengeType, livenessEnabled,
-                                                        cardNo);
+                                                        cardNo, timeoutMiliesc,
+                                                        timeoutInterval);
         }
     }
 }

@@ -37,13 +37,10 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                 configConnect.imageEnabled = getImgaeEnabled();
                 configConnect.dataGroupEnabled = getDataGroupEnabled();
                 configConnect.optionalDetailsEnabled = getOptionalDetailsEnabled();
-                //Set Time Out
-                int timeOutSocket = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT));
-                TimeSpan timeOutResp = TimeSpan.FromSeconds(timeOutSocket);
 
-                BaseConnectToDeviceResp baseConnectToDeviceResp = mainWindow.connectionSocket.getConnectToDevice(comfirmEnable, comfirmCode,
-                                                                                                                  clientName, configConnect,
-                                                                                                                  timeOutResp, timeOutSocket);
+                ConnectToDeviceResp baseConnectToDeviceResp = mainWindow.connectionSocket.getConnectToDevice(comfirmEnable, comfirmCode,
+                                                                                                             clientName, configConnect,
+                                                                                                             mainWindow.timeoutSocket, mainWindow.timeoutInterval);
                 logger.Debug("RESP CONNECT TO DEVICE " + JsonConvert.SerializeObject(baseConnectToDeviceResp, Formatting.Indented));
 
                 if(null != baseConnectToDeviceResp) {
