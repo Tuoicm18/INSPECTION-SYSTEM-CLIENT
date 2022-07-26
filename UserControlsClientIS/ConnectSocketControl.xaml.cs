@@ -1,19 +1,10 @@
 ﻿using ClientInspectionSystem.LoadData;
-using ClientInspectionSystem.SocketClient.Response;
 using log4net;
-using MahApps.Metro.Controls.Dialogs;
-using Newtonsoft.Json;
-using PluginICAOClientSDK.Response;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace ClientInspectionSystem.UserControlsClientIS {
@@ -24,7 +15,6 @@ namespace ClientInspectionSystem.UserControlsClientIS {
 
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private int timeOutSocket;
 
         public ConnectSocketControl() {
             InitializeComponent();
@@ -66,7 +56,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                                                                       mainWindow.isWSS,
                                                                       mainWindow.delegateAutoGetDoc, mainWindow.delegateAutoBiometric,
                                                                       mainWindow.delegateCardDetectionEvent, mainWindow.delegateConnectSDK,
-                                                                      mainWindow.delegateNotifyMessage);
+                                                                      mainWindow.delegateReceive);
 
             //Find Connect
             mainWindow.connectionSocket.connectSocketServer(mainWindow);
@@ -79,7 +69,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
                         await Task.Factory.StartNew(() => {
                             try {
                                 PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = mainWindow.connectionSocket.getDeviceDetails(true, true,
-                                                                                                                                                              mainWindow.timeoutSocket, mainWindow.timeoutInterval);
+                                                                                                                                                              mainWindow.timeoutInterval);
 
                                 mainWindow.Dispatcher.Invoke(() => {
                                     LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(mainWindow.dataGridDetails, deviceDetailsResp.data.deviceSN,

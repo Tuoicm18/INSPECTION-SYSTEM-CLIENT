@@ -14,25 +14,21 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private string clientName;
         private ConfigConnect configConnect;
         private int timeoutInterval;
-        public long timeoutMilisec;
 
         public GetConnectToDevice(bool confirmEnabled, string confirmCode, 
                                   string clientName, ConfigConnect configConnect,
-                                  long timeoutMilisec, int timeoutInterval,
-                                  ISPluginClient pluginClient) {
+                                  int timeoutInterval, ISPluginClient pluginClient) {
             this.confirmEnabled = confirmEnabled;
             this.confirmCode = confirmCode;
             this.clientName = clientName;
             this.configConnect = configConnect;
-            this.timeoutMilisec = timeoutMilisec;
             this.timeoutInterval = timeoutInterval;
             this.clientPlugin = pluginClient;
         }
 
         public PluginICAOClientSDK.Response.ConnectToDevice.ConnectToDeviceResp getConnectToDevice() {
             return clientPlugin.connectToDevice(confirmEnabled, confirmCode,
-                                                clientName, configConnect,
-                                                timeoutMilisec, timeoutInterval);
+                                                clientName, configConnect, timeoutInterval);
         }
     }
 }

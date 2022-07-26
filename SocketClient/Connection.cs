@@ -8,11 +8,7 @@ using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Response.BiometricAuth;
 using PluginICAOClientSDK.Response.ConnectToDevice;
 using PluginICAOClientSDK.Response.GetDocumentDetails;
-using PluginICAOClientSDK.Util;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientInspectionSystem.SocketClient {
@@ -27,7 +23,7 @@ namespace ClientInspectionSystem.SocketClient {
         private DelegateAutoDocument delegateAutoGetDoc;
         private DelegateAutoBiometricResult delegateAutoBiometric;
         private DelegateCardDetectionEvent delegateCardDetectionEvent;
-        private DelegateNotifyMessage delegateNotifyMessage;
+        private DelegateReceive delegateReceive;
         #endregion
 
         private IniFile iniFile = new IniFile("Data\\clientIS.ini");
@@ -39,19 +35,19 @@ namespace ClientInspectionSystem.SocketClient {
         public Connection(string ip, int port, bool secureConnect,
                           DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
                           DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK,
-                          DelegateNotifyMessage dlgNotifyMessage) {
+                          DelegateReceive delegateReceive) {
 
             try {
                 this.delegateAutoGetDoc = dlgAutoGetDoc;
                 this.delegateAutoBiometric = delegateAutoBiometricResult;
                 this.delegateCardDetectionEvent = dlgCardEvent;
-                this.delegateNotifyMessage = dlgNotifyMessage;
+                this.delegateReceive = delegateReceive;
                 this.deleagteConnect = delegateConnectSDK;
 
                 wsClient = new ISPluginClient(ip, port, secureConnect,
                                               this.delegateAutoGetDoc, this.delegateAutoBiometric,
                                               this.delegateCardDetectionEvent, this.deleagteConnect,
-                                              this.delegateNotifyMessage);
+                                              this.delegateReceive);
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -124,7 +120,7 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region CONNECT SOCKET FUNC
         public void connect() {
-            wsClient.connectSocketServer();
+            wsClient.connect();
         }
         #endregion
 
@@ -147,17 +143,17 @@ namespace ClientInspectionSystem.SocketClient {
 
                 mainWindow.isDisConnectSocket = true;
             });
-            wsClient.shutDown();
+            wsClient.shutdown();
         }
         #endregion
 
         #region GET DEVICE DETAILS FUNC
         //Get Device Details
         public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp getDeviceDetails(bool deviceDetailsEnabled, bool presenceEnabled,
-                                                                                             long timeoutMiliSec, int timeoutInterval) {
+                                                                                             int timeoutInterval) {
             PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp deviceDetailsResp = null;
             try {
-                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(deviceDetailsEnabled, presenceEnabled, timeoutMiliSec, timeoutInterval, wsClient);
+                GetDeviceDetails getDeviceDetailsResp = new GetDeviceDetails(deviceDetailsEnabled, presenceEnabled, timeoutInterval, wsClient);
                 deviceDetailsResp = getDeviceDetailsResp.getDeviceDetails();
                 logger.Debug("GET DEVICE DETAILS " + JsonConvert.SerializeObject(deviceDetailsResp));
                 return deviceDetailsResp;
@@ -175,14 +171,13 @@ namespace ClientInspectionSystem.SocketClient {
                                                       bool dataGroupEnabled, bool optionalDetailsEnabled,
                                                       string canValue, string challenge,
                                                       bool caEnabled, bool taEnabled,
-                                                      long timeoutMilisec, int timeoutInterval) {
+                                                      int timeoutInterval) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalDetailsEnabled,
                                                                                canValue, challenge,
                                                                                caEnabled, taEnabled,
-                                                                               timeoutMilisec, timeoutInterval,
-                                                                               wsClient);
+                                                                               timeoutInterval, wsClient);
                 DocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }
@@ -197,13 +192,12 @@ namespace ClientInspectionSystem.SocketClient {
         #region GET RESULT BIOMETRIC AUTH FUNC
         public BiometricAuthResp getResultBiometricAuth(BiometricType biometricType, object challenge,
                                                        ChallengeType challengeType, bool livenessEnabled,
-                                                       string cardNo, long timeoutMiliesc,
-                                                       int timeoutInterval) {
+                                                       string cardNo, int timeoutInterval) {
             try {
                 GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(biometricType, challenge,
                                                                                                        challengeType, livenessEnabled,
-                                                                                                       cardNo, timeoutMiliesc,
-                                                                                                       timeoutInterval, wsClient);
+                                                                                                       cardNo, timeoutInterval,
+                                                                                                       wsClient);
                 BiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }
@@ -217,12 +211,11 @@ namespace ClientInspectionSystem.SocketClient {
         #region GET RESULT CONNECT TO DEVICE FUNC
         public ConnectToDeviceResp getConnectToDevice(bool confirmEnabled, string confirmCode,
                                                       string clientName, ConfigConnect configConnect,
-                                                      long timeoutMilisec, int timeoutInterval) {
+                                                      int timeoutInterval) {
             try {
                 GetConnectToDevice getConnectToDevice = new GetConnectToDevice(confirmEnabled, confirmCode,
                                                                                clientName, configConnect,
-                                                                               timeoutMilisec, timeoutInterval,
-                                                                               wsClient);
+                                                                               timeoutInterval, wsClient);
                 ConnectToDeviceResp baseConnectToDeviceResp = getConnectToDevice.getConnectToDevice();
                 return baseConnectToDeviceResp;
             }
@@ -235,10 +228,10 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region REFRESH FUNC
         public PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp refreshReader(bool deviceDetailsEnabled, bool presenceEnabled,
-                                                                                          long timeoutMilisec, int timeOutInterval) {
+                                                                                          int timeOutInterval) {
             PluginICAOClientSDK.Response.DeviceDetails.DeviceDetailsResp respRefresh = null;
             try {
-                Refresh refresh = new Refresh(deviceDetailsEnabled, presenceEnabled, timeoutMilisec, timeOutInterval, wsClient);
+                Refresh refresh = new Refresh(deviceDetailsEnabled, presenceEnabled, timeOutInterval, wsClient);
                 respRefresh = refresh.refreshReader();
                 logger.Debug("REFRESH READER " + JsonConvert.SerializeObject(refresh));
                 return respRefresh;
@@ -252,10 +245,10 @@ namespace ClientInspectionSystem.SocketClient {
 
         #region SCAN DOCUMENT
         public PluginICAOClientSDK.Response.ScanDocument.ScanDocumentResp scanDocumentResp(ScanType scanType, bool saveEnabled,
-                                                                                           long timeoutMilisec, int timeoutInterval) {
+                                                                                           int timeoutInterval) {
             PluginICAOClientSDK.Response.ScanDocument.ScanDocumentResp scanDocResp = null;
             try {
-                GetScanDocument scanDocument = new GetScanDocument(scanType, saveEnabled, timeoutMilisec, timeoutInterval, wsClient);
+                GetScanDocument scanDocument = new GetScanDocument(scanType, saveEnabled, timeoutInterval, wsClient);
                 scanDocResp = scanDocument.scanDocumentResp();
                 return scanDocResp;
             }

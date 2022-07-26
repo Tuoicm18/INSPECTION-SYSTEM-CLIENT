@@ -153,7 +153,7 @@
                     Content="DISCONNECT"/>
             <Button x:Name="btnConnectToDevice"
                     Content="CONFIG DEVICE"
-                    Visibility="Collapsed"
+                    Visibility="Visible"
                     Click="btnConnectToDevice_Click"/>
             <Button x:Name="btnRefresh"
                     Click="btnRefresh_Click"

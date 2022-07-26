@@ -9,7 +9,6 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private bool imageEnabled;
         private bool dataGroupEnabled;
         private bool optionalDetailsEnabled;
-        private long timeoutMilisec;
         private int timeoutInterval;
         private string canValue;
         private string challenge;
@@ -20,8 +19,7 @@ namespace ClientInspectionSystem.SocketClient.Response {
                                   bool dataGroupEnabled, bool optionalDetailsEnabled,
                                   string canValue, string challenge,
                                   bool caEnabled,bool taEnabled,
-                                  long timeoutMilisec, int timeoutInterval,
-                                  ISPluginClient pluginClient) {
+                                  int timeoutInterval, ISPluginClient pluginClient) {
             this.mrzEnabled = mrzEnabled;
             this.imageEnabled = imageEnabled;
             this.dataGroupEnabled = dataGroupEnabled;
@@ -30,7 +28,6 @@ namespace ClientInspectionSystem.SocketClient.Response {
             this.challenge = challenge;
             this.caEnabled = caEnabled;
             this.taEnabled = taEnabled;
-            this.timeoutMilisec = timeoutMilisec;
             this.timeoutInterval = timeoutInterval;
             this.pluginClient = pluginClient;
         }
@@ -40,7 +37,7 @@ namespace ClientInspectionSystem.SocketClient.Response {
                                                    dataGroupEnabled, optionalDetailsEnabled,
                                                    canValue, challenge,
                                                    caEnabled, taEnabled,
-                                                   timeoutMilisec, timeoutInterval);
+                                                   timeoutInterval);
         }
     }
 }

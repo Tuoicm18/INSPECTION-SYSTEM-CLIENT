@@ -40,7 +40,7 @@ namespace ClientInspectionSystem.UserControlsClientIS {
 
                 ConnectToDeviceResp baseConnectToDeviceResp = mainWindow.connectionSocket.getConnectToDevice(comfirmEnable, comfirmCode,
                                                                                                              clientName, configConnect,
-                                                                                                             mainWindow.timeoutSocket, mainWindow.timeoutInterval);
+                                                                                                             mainWindow.timeoutInterval);
                 logger.Debug("RESP CONNECT TO DEVICE " + JsonConvert.SerializeObject(baseConnectToDeviceResp, Formatting.Indented));
 
                 if(null != baseConnectToDeviceResp) {
