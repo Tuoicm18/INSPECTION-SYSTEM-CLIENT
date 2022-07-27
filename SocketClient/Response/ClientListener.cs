@@ -14,6 +14,10 @@ namespace ClientInspectionSystem.SocketClient.Response {
             throw new NotImplementedException();
         }
 
+        public void onConnectDenied() {
+            throw new NotImplementedException();
+        }
+
         public void onConnected() {
             throw new NotImplementedException();
         }

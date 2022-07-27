@@ -1583,8 +1583,8 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-                //connectionSocket = new Connection("127.0.0.1", 9505, true);
-                //logger.Debug("DG1 CLICKED!!!");
+                connectionSocket = new Connection("127.0.0.1", 9505, true);
+                logger.Debug("DG1 CLICKED!!!");
             }
             catch (Exception ex) {
                 logger.Error(ex);

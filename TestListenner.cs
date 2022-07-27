@@ -14,6 +14,10 @@ namespace ClientInspectionSystem {
             throw new NotImplementedException();
         }
 
+        public void onConnectDenied() {
+            logger.Warn("CONNECTION DENIED");
+        }
+
         public void onConnected() {
             logger.Debug("CONNECTED SOCKET");
             //throw new NotImplementedException();
