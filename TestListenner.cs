@@ -9,6 +9,7 @@ using PluginICAOClientSDK.Response.GetDocumentDetails;
 namespace ClientInspectionSystem {
     public class TestListenner : ISPluginClient.ISListener, ISPluginClient.DetailsListener {
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static MainWindow mainWindow;
 
         public void doSend(string cmd, string id, ISMessage<object> data) {
             throw new NotImplementedException();

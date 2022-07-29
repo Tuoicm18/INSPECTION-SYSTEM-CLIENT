@@ -46,11 +46,7 @@ namespace ClientInspectionSystem {
         #region VARIABLE
 
         #region DELEGATE
-        public DelegateAutoDocument delegateAutoGetDoc;
-        public DelegateAutoBiometricResult delegateAutoBiometric;
-        public DelegateCardDetectionEvent delegateCardDetectionEvent;
-        public DelegateConnect delegateConnectSDK;
-        public DelegateReceive delegateReceive;
+        public ISPluginClientDelegate pluginClientDelegate = new ISPluginClientDelegate();
         #endregion
 
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -68,16 +64,14 @@ namespace ClientInspectionSystem {
         //Update 2022.05.20 set liveness
         private bool liveness;
         public bool isConnectDenied;
-        public bool isConnectSocket;
+        public bool isConnectSocket { get; set; }
         public bool isDisConnectSocket = false;
-        //Timer Connect
-        //private int countReConnect = 0;
-        //private Timer timerConnect = new Timer();
-        //private object locker = new object();
-        //private System.Threading.ManualResetEvent timerDead = new System.Threading.ManualResetEvent(false);
-        private const int INTERVAL_RECONNECT_SOCKET = 5000;
-        private const int TOTAL_OF_TIMES_RECONNECT_SOCKET = 5;
         private int countTotalTimesReconnect = 5;
+
+
+        //Update 2022.07.28
+        private Task<ProgressDialogController> dialogControllerReConnect = null;
+        private bool isDenied = false;
         #endregion
 
         #region CONSTRUCTOR
@@ -104,11 +98,19 @@ namespace ClientInspectionSystem {
                 //this.timeoutSocket = long.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_RESP));
                 //this.timeoutInterval = int.Parse(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_INTERVAL));
                 this.timeoutInterval = Convert.ToInt32(iniFile.IniReadValue(ClientContants.SECTION_OPTIONS_SOCKET, ClientContants.KEY_OPTIONS_SOCKET_TIME_OUT_INTERVAL));
-                delegateAutoGetDoc = new DelegateAutoDocument(autoGetDocumentDetails);
-                delegateAutoBiometric = new DelegateAutoBiometricResult(autoGetBiometricAuth);
-                delegateCardDetectionEvent = new DelegateCardDetectionEvent(delegateCardDetection);
-                delegateReceive = new DelegateReceive(autoReadNotify);
-                delegateConnectSDK = new DelegateConnect(handleDlgConnect);
+
+                //this.timeoutInterval = 60000;
+
+                //Update 2022.07.28
+                pluginClientDelegate.dlgConnected = new DelegateDefault<bool>(handleConnect);
+                pluginClientDelegate.dlgDisConnected = new DelegateDefault<bool>(handleDisconnected);
+                pluginClientDelegate.dlgConnectDenied = new DelegateDefault<bool>(handleConnectDenied);
+                pluginClientDelegate.dlgReConnect = new DelegateDefault<bool>(handleReConnect);
+                pluginClientDelegate.dlgReceivedDocument = new DelegateDefault<DocumentDetailsResp>(autoGetDocumentDetails);
+                pluginClientDelegate.dlgReceivedBiometricResult = new DelegateDefault<BiometricAuthResp>(autoGetBiometricAuth);
+                pluginClientDelegate.dlgReceviedCardDetectionEvent = new DelegateDefault<CardDetectionEventResp>(delegateCardDetection);
+                pluginClientDelegate.dlgSend = new DelegateDefaultSend<object>(handleDoSend);
+                pluginClientDelegate.dlgReceive = new DelegateDefaultReceive<object>(handleReceive);
             }
             catch (Exception eConnection) {
                 logger.Error(eConnection);
@@ -134,7 +136,7 @@ namespace ClientInspectionSystem {
         }
         #endregion
 
-        #region DELEGATE METHOD HANDLE
+        #region <FOR TEST> HANDLE DELEGATE SDK TEST OLD
 
         #region AUTO GET DOCUMENT DETAILS
         public void autoGetDocumentDetails(DocumentDetailsResp documentDetailsResp) {
@@ -278,7 +280,7 @@ namespace ClientInspectionSystem {
             try {
                 if (null != baseBiometricAuthResp) {
                     logger.Debug("<AUTO> BIOMETRIC AUTH RESP " + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
-                    if (baseBiometricAuthResp.data.biometricType.Equals(BiometricType.TYPE_FACE)) {
+                    if (baseBiometricAuthResp.data.biometricType.Equals(BiometricType.faceID)) {
                         this.Dispatcher.Invoke(() => {
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             formBiometricAuth.setTitleForm(InspectionSystemContanst.TITLE_FORM_BIOMETRIC_AUTH_FACE);
@@ -488,10 +490,10 @@ namespace ClientInspectionSystem {
                         //    StopTimer(); 
                         //}
 
-                        connectionSocket.reConnect(INTERVAL_RECONNECT_SOCKET, 5);
+                        //connectionSocket.reConnect(INTERVAL_RECONNECT_SOCKET, 5);
                         this.countTotalTimesReconnect--;
                         logger.Warn("RE-CONNECT TIEMS => " + countTotalTimesReconnect);
-                        if(this.countTotalTimesReconnect == 0) {
+                        if (this.countTotalTimesReconnect == 0) {
                             connectionSocket.shuttdown(this);
                         }
                     }
@@ -552,6 +554,187 @@ namespace ClientInspectionSystem {
             //}
         }
 
+        #endregion
+
+        #endregion
+
+        #region HANDLE DELEGATE SDK NEW
+
+        #region CONNECT
+        private void handleConnect(bool isConnected) {
+            try {
+                logger.Debug("[CONNECTED SOCKET] " + this.isConnectDenied);
+                if (isConnected) {
+                    this.Dispatcher.Invoke(async () => {
+                        try {
+                            //ProgressDialogController controllerConnectOK = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, "CONNECT SUCCESSFULLY");
+                            //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            //await controllerConnectOK.CloseAsync();
+
+                            this.loadingConnectSocket.Visibility = Visibility.Collapsed;
+                            this.lbSocketConnectionStatus.Content = "SOCKET CONNECTED";
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/success-icon.png",
+                                                                                                                this.imgSocketConnectionStatus);
+
+                            btnDisconnect.IsEnabled = true;
+                            btnConnectToDevice.IsEnabled = true;
+                            btnRefresh.IsEnabled = true;
+                            btnScanDocument.IsEnabled = true;
+                            btnConnect.IsEnabled = false;
+                            btnIDocument.IsEnabled = true;
+
+                            this.IsEnabled = true;
+
+                            this.isConnectDenied = false;
+                        }
+                        catch (Exception ex) {
+                            logger.Error(ex);
+                        }
+                    });
+                }
+                else {
+                    logger.Warn("[CONNECTED SOCKET => FALSE] " + this.isConnectDenied);
+                    if (this.isConnectDenied) {
+                        mainWindow.Dispatcher.Invoke(() => {
+                            this.lbSocketConnectionStatus.Content = "CONNECTION DENIED";
+                            this.btnDisconnect.IsEnabled = false;
+                            this.btnConnectToDevice.IsEnabled = false;
+                            this.btnScanDocument.IsEnabled = false;
+                            this.btnRefresh.IsEnabled = false;
+                            this.btnConnect.IsEnabled = true;
+                            this.loadingConnectSocket.Visibility = Visibility.Collapsed;
+                            this.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                                this.imgSocketConnectionStatus);
+                        });
+                    }
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
+
+        #region DISCONNECTED
+        public void handleDisconnected(bool isDisconnect) {
+            try {
+                if (isDisconnect) {
+                    logger.Debug("[DISCONNECTED SOCKET]");
+
+                    mainWindow.Dispatcher.Invoke(async () => {
+                        if (!this.isDisConnectSocket) {
+                            ProgressDialogController controllerConnectFail = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, "CONNECTION FAIL");
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerConnectFail.CloseAsync();
+
+                            this.loadingConnectSocket.Visibility = Visibility.Collapsed;
+                            this.lbSocketConnectionStatus.Content = "STATUS SOCKET";
+                            mainWindow.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            mainWindow.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                                mainWindow.imgSocketConnectionStatus);
+                            this.btnDisconnect.IsEnabled = false;
+                            this.btnConnectToDevice.IsEnabled = false;
+                            this.btnRefresh.IsEnabled = false;
+                            this.btnScanDocument.IsEnabled = false;
+                            this.btnConnect.IsEnabled = true;
+                            this.IsEnabled = true;
+
+                            this.isDisConnectSocket = true;
+                        }
+                    });
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
+
+        #region CONNECTION DENIED
+        private void handleConnectDenied(bool isDenied) {
+            try {
+                this.isConnectDenied = isDenied;
+                if (isDenied) {
+                    logger.Warn("[CONNECTION SOCKET DENIED]");
+
+                    this.Dispatcher.Invoke(async () => {
+                        try {
+                            ProgressDialogController controllerDenied = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, "CONNECTION DENIED");
+                            await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            await controllerDenied.CloseAsync();
+
+                            this.lbSocketConnectionStatus.Content = "CONNECTION DENIED";
+                            this.btnDisconnect.IsEnabled = false;
+                            this.btnConnectToDevice.IsEnabled = false;
+                            this.btnScanDocument.IsEnabled = false;
+                            this.btnRefresh.IsEnabled = false;
+                            this.btnConnect.IsEnabled = true;
+                            this.loadingConnectSocket.Visibility = Visibility.Collapsed;
+                            this.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                                this.imgSocketConnectionStatus);
+                        }
+                        catch (Exception ex) {
+                            logger.Error(ex);
+                        }
+                    });
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
+
+        #region RE-CONNECT
+        private void handleReConnect(bool isReConncet) {
+            try {
+                if (isReConncet) {
+                    logger.Info("[RE-CONNECT SOCKET...]");
+                    if (!this.isDisConnectSocket) {
+                        this.Dispatcher.Invoke(async () => {
+                            //ProgressDialogController controllerReConnect = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, "RE-CONNECT...");
+                            //await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
+                            //await controllerReConnect.CloseAsync();
+
+                            this.loadingConnectSocket.Visibility = Visibility.Visible;
+                            this.lbSocketConnectionStatus.Content = "RE-CONNECT...";
+                            this.lbSocketConnectionStatus.Foreground = Brushes.White;
+                            this.imgSocketConnectionStatus.Source = InspectionSystemPraser.setImageSource("/Resource/Button-warning-icon.png",
+                                                                                                               this.imgSocketConnectionStatus);
+
+                            this.IsEnabled = false;
+                        });
+                    }
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
+
+        #region DO SEND
+        public void handleDoSend(object cmd, object id, object data) {
+            try {
+                logger.Debug("DO SEND " + cmd as string);
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+        #endregion
+
+        #region RECEIVE
+        public void handleReceive(object cmd, object id, object error, object data) {
+            try {
+                logger.Debug("ON RECEIVE " + cmd as string + "/" + error as string);
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
         #endregion
 
         #endregion
@@ -849,10 +1032,12 @@ namespace ClientInspectionSystem {
         private void MenuItemWS_Click(object sender, RoutedEventArgs e) {
             //connectionSocket.findConnect(this, false);
             try {
-                btnConnect.IsEnabled = false;
-                isWSS = false;
-                conncetSocketControl.lbTitleConnectSocket.Content = "NORMAL SOCKET CONNECTION";
-                conncetSocketControl.Visibility = Visibility.Visible;
+                this.Dispatcher.Invoke(() => {
+                    btnConnect.IsEnabled = false;
+                    isWSS = false;
+                    conncetSocketControl.lbTitleConnectSocket.Content = "NORMAL SOCKET CONNECTION";
+                    conncetSocketControl.Visibility = Visibility.Visible;
+                });
             }
             catch (Exception eWS) {
                 logger.Error(eWS);
@@ -862,10 +1047,12 @@ namespace ClientInspectionSystem {
         private void MenuItemWSS_Click(object sender, RoutedEventArgs e) {
             try {
                 //connectionSocket.findConnect(this, true);
-                btnConnect.IsEnabled = false;
-                isWSS = true;
-                conncetSocketControl.lbTitleConnectSocket.Content = "SECURE SOCKET CONNECTION";
-                conncetSocketControl.Visibility = Visibility.Visible;
+                this.Dispatcher.Invoke(() => {
+                    btnConnect.IsEnabled = false;
+                    isWSS = true;
+                    conncetSocketControl.lbTitleConnectSocket.Content = "SECURE SOCKET CONNECTION";
+                    conncetSocketControl.Visibility = Visibility.Visible;
+                });
             }
             catch (Exception eWSS) {
                 logger.Error(eWSS);
@@ -1003,7 +1190,7 @@ namespace ClientInspectionSystem {
                         BiometricAuthResp resultFaceAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
-                                resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FACE, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.faceID, string.Empty); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 ProgressDialogController controllerFaceAuthErr = null;
@@ -1042,7 +1229,7 @@ namespace ClientInspectionSystem {
                                     //controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FACE));
+                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.faceID));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, 2);
@@ -1063,7 +1250,7 @@ namespace ClientInspectionSystem {
                                     //controllerFaceAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FACE));
+                                        initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.faceID));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, -1);
@@ -1187,7 +1374,7 @@ namespace ClientInspectionSystem {
 
                         await Task.Factory.StartNew(async () => {
                             try {
-                                resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_LEFT, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.fingerLeftIndex, string.Empty); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 logger.Warn("CHECK " + ex);
@@ -1228,7 +1415,7 @@ namespace ClientInspectionSystem {
                                     //controllerLeftFingerAuth.CloseAsync();
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_LEFT));
+                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.fingerLeftIndex));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER\n" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 2);
@@ -1249,7 +1436,7 @@ namespace ClientInspectionSystem {
                                     //controllerLeftFingerAuth.CloseAsync();
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_LEFT));
+                                        initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.fingerLeftIndex));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, -1);
@@ -1316,7 +1503,7 @@ namespace ClientInspectionSystem {
                         BiometricAuthResp resultFingerRightAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
-                                resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.TYPE_FINGER_RIGHT, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.fingerRightIndex, string.Empty); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 ProgressDialogController controllerRightFingerAuthErr = null;
@@ -1356,7 +1543,7 @@ namespace ClientInspectionSystem {
                                     //controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_RIGHT));
+                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.fingerRightIndex));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
                                                                      JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
@@ -1378,7 +1565,7 @@ namespace ClientInspectionSystem {
                                     //controllerRightFingerAuth.CloseAsync();
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
-                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.TYPE_FINGER_RIGHT));
+                                        initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.fingerRightIndex));
                                         logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 1);
@@ -1510,7 +1697,7 @@ namespace ClientInspectionSystem {
                 }
                 else {
                     if (baseBiometricAuthResp.errorCode == ClientContants.SOCKET_RESP_CODE_BIO_SUCCESS) {
-                        if (BiometricType.TYPE_FINGER_LEFT.Equals(biometricType)) {
+                        if (BiometricType.fingerLeftIndex.Equals(biometricType)) {
                             try {
                                 //controllerLeftFingerAuth.CloseAsync();
                                 FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
@@ -1525,7 +1712,7 @@ namespace ClientInspectionSystem {
                                 logger.Error(eLeft);
                             }
                         }
-                        else if (BiometricType.TYPE_FINGER_RIGHT.Equals(biometricType)) {
+                        else if (BiometricType.fingerRightIndex.Equals(biometricType)) {
                             //controllerLeftFingerAuth.CloseAsync();
                             FormBiometricAuth formBiometricAuth = new FormBiometricAuth();
                             this.Dispatcher.Invoke(() => {
@@ -1583,7 +1770,7 @@ namespace ClientInspectionSystem {
         //}
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
-                connectionSocket = new Connection("127.0.0.1", 9505, true);
+                //connectionSocket = new Connection("127.0.0.1", 9505, true);
                 logger.Debug("DG1 CLICKED!!!");
             }
             catch (Exception ex) {
@@ -1715,8 +1902,8 @@ namespace ClientInspectionSystem {
                                         case "PDF":
                                             scanDocumentResp = connectionSocket.scanDocumentResp(ScanType.PDF, saveEnable, timeoutInterval);
                                             break;
-                                    }                                   
-                               }
+                                    }
+                                }
                                 catch (Exception ex) {
                                     ProgressDialogController controllerErrScanDoc = null;
                                     if (ex is ISPluginException) {

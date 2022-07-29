@@ -132,10 +132,6 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\Nuget\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PluginICAOClientSDK, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\PluginICAOClientSDK.dll</HintPath>
-    </Reference>
     <Reference Include="SharpVectors.Converters.Wpf, Version=1.7.6.0, Culture=neutral, PublicKeyToken=b532964b8548be77, processorArchitecture=MSIL">
       <HintPath>..\..\Nuget\SharpVectors.1.7.6\lib\net47\SharpVectors.Converters.Wpf.dll</HintPath>
     </Reference>
@@ -660,6 +656,12 @@
       <WrapperTool>aximp</WrapperTool>
       <Isolated>False</Isolated>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PluginICAOClientSDK\PluginICAOClientSDK.csproj">
+      <Project>{e150fded-1b46-42f5-928b-e0eb5cf70436}</Project>
+      <Name>PluginICAOClientSDK</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

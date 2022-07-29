@@ -17,46 +17,24 @@ namespace ClientInspectionSystem.SocketClient {
     public class Connection {
 
         #region VARIABLE
-
-        #region DELEGATE
-        private DelegateConnect deleagteConnect;
-        private DelegateAutoDocument delegateAutoGetDoc;
-        private DelegateAutoBiometricResult delegateAutoBiometric;
-        private DelegateCardDetectionEvent delegateCardDetectionEvent;
-        private DelegateReceive delegateReceive;
-        #endregion
-
-        private IniFile iniFile = new IniFile("Data\\clientIS.ini");
         private ISPluginClient wsClient;
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion 
 
-        #region CONSTRUCTOR
-        public Connection(string ip, int port, bool secureConnect,
-                          DelegateAutoDocument dlgAutoGetDoc, DelegateAutoBiometricResult delegateAutoBiometricResult,
-                          DelegateCardDetectionEvent dlgCardEvent, DelegateConnect delegateConnectSDK,
-                          DelegateReceive delegateReceive) {
-
+        #region CONSTRUCTOR     
+        public Connection(string ip, int port, bool secureConnect) {
             try {
-                this.delegateAutoGetDoc = dlgAutoGetDoc;
-                this.delegateAutoBiometric = delegateAutoBiometricResult;
-                this.delegateCardDetectionEvent = dlgCardEvent;
-                this.delegateReceive = delegateReceive;
-                this.deleagteConnect = delegateConnectSDK;
-
-                wsClient = new ISPluginClient(ip, port, secureConnect,
-                                              this.delegateAutoGetDoc, this.delegateAutoBiometric,
-                                              this.delegateCardDetectionEvent, this.deleagteConnect,
-                                              this.delegateReceive);
+                wsClient = new ISPluginClient(ip, port, secureConnect, new TestListenner());
             }
             catch (Exception ex) {
                 logger.Error(ex);
             }
         }
 
-        public Connection(string ip, int port, bool secureConnect) {
+        public Connection(string ip, int port, bool secureConnect, ISPluginClientDelegate pluginClientDelegate) {
             try {
-                wsClient = new ISPluginClient(ip, port, secureConnect, new TestListenner());
+                wsClient = new ISPluginClient(ip, port, secureConnect, pluginClientDelegate);
+                wsClient.setTotalOfTimesReConnect(5);
             }
             catch (Exception ex) {
                 logger.Error(ex);
@@ -96,17 +74,10 @@ namespace ClientInspectionSystem.SocketClient {
                                 mainWindow.btnIDocument.IsEnabled = true;
                             }
                             else {
-                                if (mainWindow.isConnectDenied) {
-                                    controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_CONNECTED_DENIED_MESSAGE_BOX);
-                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                                    await controllerWSClient.CloseAsync();
-                                }
-                                else {
-                                    controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
-                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
-                                    await controllerWSClient.CloseAsync();
-                                    shuttdown(mainWindow);
-                                }
+                                controllerWSClient.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                await controllerWSClient.CloseAsync();
+                                shuttdown(mainWindow);
                             }
                         }
                     }
@@ -260,9 +231,9 @@ namespace ClientInspectionSystem.SocketClient {
         #endregion
 
         #region RE-CONNECT SOCKET
-        public void reConnect(int interval, int totalOfTimes) {
+        public void reConnect() {
             try {
-                wsClient.reConnectSocket(interval, totalOfTimes);
+                wsClient.reConnectSocket();
             }
             catch (Exception ex) {
                 logger.Error(ex);
