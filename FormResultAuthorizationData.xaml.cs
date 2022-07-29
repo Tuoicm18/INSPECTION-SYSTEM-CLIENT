@@ -112,7 +112,7 @@ namespace ClientInspectionSystem {
             lbResultIssueMessage.Content = issueDetailMsg;
 
             if (responseCode == 0) {
-                if (biometricType.Equals(BiometricType.fingerRightIndex) || biometricType.Equals(BiometricType.fingerRightIndex)) {
+                if (biometricType.Equals(BiometricType.RIGHT_FINGER) || biometricType.Equals(BiometricType.RIGHT_FINGER)) {
                     lbTypeResult.Content = biometricType;
                     lbResult.Content = biometricResult.ToString().ToLower();
                     lbScoreResult.Content = biometricScore.ToString();
