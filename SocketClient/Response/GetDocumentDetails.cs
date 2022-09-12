@@ -14,12 +14,14 @@ namespace ClientInspectionSystem.SocketClient.Response {
         private string challenge;
         private bool caEnabled;
         private bool taEnabled;
+        private bool paEnabled;
 
         public GetDocumentDetails(bool mrzEnabled, bool imageEnabled, 
                                   bool dataGroupEnabled, bool optionalDetailsEnabled,
                                   string canValue, string challenge,
                                   bool caEnabled,bool taEnabled,
-                                  int timeoutInterval, ISPluginClient pluginClient) {
+                                  bool paEnabled, int timeoutInterval, 
+                                  ISPluginClient pluginClient) {
             this.mrzEnabled = mrzEnabled;
             this.imageEnabled = imageEnabled;
             this.dataGroupEnabled = dataGroupEnabled;
@@ -28,6 +30,7 @@ namespace ClientInspectionSystem.SocketClient.Response {
             this.challenge = challenge;
             this.caEnabled = caEnabled;
             this.taEnabled = taEnabled;
+            this.paEnabled = paEnabled;
             this.timeoutInterval = timeoutInterval;
             this.pluginClient = pluginClient;
         }
@@ -37,7 +40,7 @@ namespace ClientInspectionSystem.SocketClient.Response {
                                                    dataGroupEnabled, optionalDetailsEnabled,
                                                    canValue, challenge,
                                                    caEnabled, taEnabled,
-                                                   timeoutInterval);
+                                                   paEnabled, timeoutInterval);
         }
     }
 }

@@ -142,13 +142,14 @@ namespace ClientInspectionSystem.SocketClient {
                                                       bool dataGroupEnabled, bool optionalDetailsEnabled,
                                                       string canValue, string challenge,
                                                       bool caEnabled, bool taEnabled,
-                                                      int timeoutInterval) {
+                                                      bool paEnabled, int timeoutInterval) {
             try {
                 GetDocumentDetails getDocumentDetails = new GetDocumentDetails(mrzEnabled, imageEnabled,
                                                                                dataGroupEnabled, optionalDetailsEnabled,
                                                                                canValue, challenge,
                                                                                caEnabled, taEnabled,
-                                                                               timeoutInterval, wsClient);
+                                                                               paEnabled, timeoutInterval, 
+                                                                               wsClient);
                 DocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
             }

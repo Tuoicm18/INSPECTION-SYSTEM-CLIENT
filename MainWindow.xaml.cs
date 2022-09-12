@@ -120,7 +120,8 @@ namespace ClientInspectionSystem {
             btnConnectToDevice.IsEnabled = false;
 
             //Test Biometric Auth With cardNo
-            btnRFID.IsEnabled = true;
+            btnIDocument.IsEnabled = false;
+            btnRFID.IsEnabled = false;
             btnLeftFinger.IsEnabled = false;
             btnRightFinger.IsEnabled = false;
             btnRefresh.IsEnabled = false;
@@ -231,8 +232,19 @@ namespace ClientInspectionSystem {
                     if (documentDetailsResp.data.bacEnabled) { updateBackgroundBtnDG(btnBAC, 2); }
                     if (documentDetailsResp.data.paceEnabled) { updateBackgroundBtnDG(btnSAC, 2); }
                     if (documentDetailsResp.data.activeAuthenticationEnabled) { updateBackgroundBtnDG(btnAA, 2); }
-                    if (documentDetailsResp.data.chipAuthenticationEnabled) { updateBackgroundBtnDG(btnCA, 2); }
-                    if (documentDetailsResp.data.terminalAuthenticationEnabled) { updateBackgroundBtnDG(btnTA, 2); }
+                    if (documentDetailsResp.data.chipAuthenticationEnabled) {
+                        updateBackgroundBtnDG(btnCA, 2);
+                    }
+                    if (documentDetailsResp.data.terminalAuthenticationEnabled) {
+                        updateBackgroundBtnDG(btnTA, 2);
+                    }
+                    else {
+                        this.Dispatcher.Invoke(() => {
+                            btnLeftFinger.IsEnabled = false;
+                            btnRightFinger.IsEnabled = false;
+                        });
+                        logger.Warn("NOT TA => NOT VERIFY FINGER");
+                    }
                     if (documentDetailsResp.data.passiveAuthenticationEnabled) { updateBackgroundBtnDG(btnSOD, 2); }
                     if (!documentDetailsResp.data.efCom.Equals(string.Empty)) { updateBackgroundBtnDG(btnEF, 2); }
                     if (!documentDetailsResp.data.efCardAccess.Equals(string.Empty)) { updateBackgroundBtnDG(btnCSC, 2); }
@@ -341,15 +353,17 @@ namespace ClientInspectionSystem {
                                 FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
                                 string txtCanValue = string.Empty;
                                 //Update 2022.05.20 TA, CA ENABLED
-                                bool caEnableEd = false;
-                                bool taEnabled = false;
+                                bool caEnableEd = true;
+                                bool taEnabled = true;
+                                bool paEnabled = true;
                                 if (formChoiceReadDocument.ShowDialog() == true) {
-                                    if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
-                                        isReadByCanValue = true;
-                                        txtCanValue = formChoiceReadDocument.getCanValue();
-                                    }
+                                    //if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
+                                    //    isReadByCanValue = true;
+                                    //    txtCanValue = formChoiceReadDocument.getCanValue();
+                                    //}
                                     caEnableEd = formChoiceReadDocument.getValueCheckBoxCA();
                                     taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
+                                    paEnabled = formChoiceReadDocument.getValueCheckBoxPA();
                                     this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
                                 }
                                 try {
@@ -381,7 +395,7 @@ namespace ClientInspectionSystem {
                                                                                             dataGroupEnabled, optionalDetailsEnabled,
                                                                                             txtCanValue, "C# CLIENT",
                                                                                             caEnableEd, taEnabled,
-                                                                                            timeoutInterval);
+                                                                                            paEnabled, timeoutInterval);
                                             if (getDocSuccess) {
                                                 controllerReadChip.CloseAsync();
                                             }
@@ -399,8 +413,8 @@ namespace ClientInspectionSystem {
                                         }
                                     });
                                     btnRFID.IsEnabled = true;
-                                    btnLeftFinger.IsEnabled = true;
-                                    btnRightFinger.IsEnabled = true;
+                                    //btnLeftFinger.IsEnabled = true;
+                                    //btnRightFinger.IsEnabled = true;
                                 }
                                 catch (Exception eReadChip) {
                                     //Check if auto reviced data.
@@ -786,15 +800,17 @@ namespace ClientInspectionSystem {
                 FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
                 string txtCanValue = string.Empty;
                 //Update 2022.05.20 TA, CA ENABLED
-                bool caEnableEd = false;
-                bool taEnabled = false;
+                bool caEnabled = true;
+                bool taEnabled = true;
+                bool paEnabled = true;
                 if (formChoiceReadDocument.ShowDialog() == true) {
-                    if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
-                        isReadByCanValue = true;
-                        txtCanValue = formChoiceReadDocument.getCanValue();
-                    }
-                    caEnableEd = formChoiceReadDocument.getValueCheckBoxCA();
+                    //if (!formChoiceReadDocument.txtCanValue.Text.Equals("CAN VALUE") && !formChoiceReadDocument.txtCanValue.Text.Equals(string.Empty)) {
+                    //    isReadByCanValue = true;
+                    //    txtCanValue = formChoiceReadDocument.getCanValue();
+                    //}
+                    caEnabled = formChoiceReadDocument.getValueCheckBoxCA();
                     taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
+                    paEnabled = formChoiceReadDocument.getValueCheckBoxPA();
                     this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
                 }
                 try {
@@ -825,8 +841,8 @@ namespace ClientInspectionSystem {
                             bool getDocSuccess = getDocumentDetailsToLayout(mrzEnabled, imageEnabled,
                                                                             dataGroupEnabled, optionalDetailsEnabled,
                                                                             txtCanValue, "C# CLIENT",
-                                                                            caEnableEd, taEnabled,
-                                                                            this.timeoutInterval);
+                                                                            caEnabled, taEnabled,
+                                                                            paEnabled, this.timeoutInterval);
                             if (getDocSuccess) {
                                 controllerReadChip.CloseAsync();
                             }
@@ -844,8 +860,8 @@ namespace ClientInspectionSystem {
                         }
                     });
                     btnRFID.IsEnabled = true;
-                    btnLeftFinger.IsEnabled = true;
-                    btnRightFinger.IsEnabled = true;
+                    //btnLeftFinger.IsEnabled = true;
+                    //btnRightFinger.IsEnabled = true;
                 }
                 catch (Exception eReadChip) {
                     //Check if auto reviced data.
@@ -901,15 +917,16 @@ namespace ClientInspectionSystem {
                                                 bool dataGroupEnabled, bool optionalDetailsEnabled,
                                                 string canValue, string challenge,
                                                 bool caEnabled, bool taEnabled,
-                                                int timeoutInterval) {
+                                                bool paEnabled, int timeoutInterval) {
             try {
 
                 DocumentDetailsResp documentDetailsResp = connectionSocket.getDocumentDetails(mrzEnabled, imageEnabled,
                                                                                               dataGroupEnabled, optionalDetailsEnabled,
                                                                                               canValue, challenge,
                                                                                               caEnabled, taEnabled,
-                                                                                              timeoutInterval);
-                logger.Info(JsonConvert.SerializeObject(documentDetailsResp));
+                                                                                              paEnabled, timeoutInterval);
+                //logger.Info(JsonConvert.SerializeObject(documentDetailsResp));
+
                 if (null != documentDetailsResp) {
                     //2022.05.11 Update get jwt PA from server
                     logger.Debug("(MANUAL READ) [JWT PA FROM SERVER] " + documentDetailsResp.data.jwt);
@@ -943,7 +960,20 @@ namespace ClientInspectionSystem {
                     if (documentDetailsResp.data.paceEnabled) { updateBackgroundBtnDG(btnSAC, 2); }
                     if (documentDetailsResp.data.activeAuthenticationEnabled) { updateBackgroundBtnDG(btnAA, 2); }
                     if (documentDetailsResp.data.chipAuthenticationEnabled) { updateBackgroundBtnDG(btnCA, 2); }
-                    if (documentDetailsResp.data.terminalAuthenticationEnabled) { updateBackgroundBtnDG(btnTA, 2); }
+                    if (documentDetailsResp.data.terminalAuthenticationEnabled) {
+                        updateBackgroundBtnDG(btnTA, 2);
+                        this.Dispatcher.Invoke(() => {
+                            btnLeftFinger.IsEnabled = true;
+                            btnRightFinger.IsEnabled = true;
+                        });
+                    }
+                    else {
+                        this.Dispatcher.Invoke(() => {
+                            btnLeftFinger.IsEnabled = false;
+                            btnRightFinger.IsEnabled = false;
+                        });
+                        logger.Warn("NOT TA => NOT VERIFY FINGER");
+                    }
                     if (documentDetailsResp.data.passiveAuthenticationEnabled) { updateBackgroundBtnDG(btnSOD, 2); }
                     if (!documentDetailsResp.data.efCom.Equals(string.Empty)) { updateBackgroundBtnDG(btnEF, 2); }
                     if (!documentDetailsResp.data.efCardAccess.Equals(string.Empty)) { updateBackgroundBtnDG(btnCSC, 2); }
@@ -1093,7 +1123,7 @@ namespace ClientInspectionSystem {
                                                                     "...", "...", "...");
             }
             else {
-                if(!isCardRemove) {
+                if (!isCardRemove) {
                     if (null != dataGridDetails.ItemsSource) {
                         LoadDataForDataGrid.loadDataDetailsDeviceNotConnect(dataGridDetails, string.Empty,
                                                                             string.Empty, string.Empty, string.Empty);
@@ -1178,7 +1208,6 @@ namespace ClientInspectionSystem {
 
         #region BUTTON_CLICK FACE AUTH
         private void btnRFID_Click(object sender, RoutedEventArgs e) {
-            ProgressDialogController controllerFaceAuth = null;
             this.Dispatcher.Invoke(async () => {
                 try {
                     btnRFID.IsEnabled = false;
@@ -1195,18 +1224,17 @@ namespace ClientInspectionSystem {
                                 resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.FACE_ID, string.Empty); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
-                                ProgressDialogController controllerFaceAuthErr = null;
                                 if (ex is ISPluginException) {
                                     this.Dispatcher.InvokeAsync(async () => {
                                         ISPluginException pluginException = (ISPluginException)ex;
-                                        controllerFaceAuthErr = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                                        ProgressDialogController controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
                                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                                         await controllerFaceAuth.CloseAsync();
                                     });
                                 }
                                 else {
                                     this.Dispatcher.InvokeAsync(async () => {
-                                        controllerFaceAuthErr = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                                        ProgressDialogController controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
                                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                                         await controllerFaceAuth.CloseAsync();
                                     });
@@ -1272,7 +1300,7 @@ namespace ClientInspectionSystem {
                             }
                             else {
                                 await this.Dispatcher.InvokeAsync(async () => {
-                                    controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, resultFaceAuth.errorMessage.ToUpper());
+                                    ProgressDialogController controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, resultFaceAuth.errorMessage.ToUpper());
                                     await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                                     await controllerFaceAuth.CloseAsync();
                                     logger.Warn("RESPONSE FACE AUTH\n" + JsonConvert.SerializeObject(resultFaceAuth));
@@ -1289,12 +1317,12 @@ namespace ClientInspectionSystem {
                     logger.Error(ex);
                     if (ex is ISPluginException) {
                         ISPluginException pluginException = (ISPluginException)ex;
-                        controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
+                        ProgressDialogController controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, pluginException.errMsg.ToUpper());
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
                     }
                     else {
-                        controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
+                        ProgressDialogController controllerFaceAuth = await this.ShowProgressAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, InspectionSystemContanst.CONTENT_FALIL);
                         await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_2k);
                         await controllerFaceAuth.CloseAsync();
                     }

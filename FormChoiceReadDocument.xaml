@@ -17,8 +17,8 @@
         BorderBrush="#0767b3"
         BorderThickness="2"
         ShowTitleBar="False"
-        Height="200" 
-        Width="300">
+        Height="150" 
+        Width="320">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -33,6 +33,7 @@
             DropDownClosed="cmbChoices_DropDownClosed"
             SelectionChanged="cmbChoices_SelectionChanged"
             SelectedIndex="0"
+            Visibility="Collapsed"
             Margin="5,5,5,5">
             <ComboBoxItem Content="MRZ"/>
             <ComboBoxItem Content="CAN"/>
@@ -40,7 +41,7 @@
         <!--Label CAN-->
         <Label
             x:Name="lbCanValue"
-            Visibility="Visible"
+            Visibility="Collapsed"
             Grid.Row="0"
             VerticalAlignment="Top"
             HorizontalAlignment="Left"
@@ -63,9 +64,10 @@
             Margin="5,40,5,5"/>
         <!--Check box CA & CA-->
         <Grid
-            Grid.Row="1"
+            Grid.Row="0"
             Margin="5,5,5,5">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -84,17 +86,24 @@
                 IsChecked="True"
                 HorizontalAlignment="Center"
                 Content="TA"/>
+            <!--PA-->
+            <CheckBox
+                x:Name="cbPa"
+                Grid.Column="2"
+                IsChecked="True"
+                HorizontalAlignment="Center"
+                Content="PA"/>
             <!--LIVENESS-->
             <CheckBox
                 x:Name="cbLiveness"
                 IsChecked="True"
-                Grid.Column="2"
+                Grid.Column="3"
                 HorizontalAlignment="Center"
                 Content="LIVENESS"/>
         </Grid>
         <!--#region BUTTON-->
         <Grid
-            Grid.Row="2"
+            Grid.Row="1"
             Margin="5,5,5,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

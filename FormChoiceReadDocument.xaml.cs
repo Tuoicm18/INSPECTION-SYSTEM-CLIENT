@@ -132,6 +132,10 @@ namespace ClientInspectionSystem {
             return (bool)cbTa.IsChecked;
         }
 
+        public bool getValueCheckBoxPA() {
+            return (bool)cbPa.IsChecked;
+        }
+
         public bool getValueCheckBoxLiveness() {
             return (bool)cbLiveness.IsChecked;
         }
