@@ -23,9 +23,9 @@ namespace ClientInspectionSystem.LoadData {
                 listTest.Add(new DataInputFromDevice { NO = "11", ITEM = InspectionSystemContanst.ISSUANCE_DATE, DESCRIPTION = optionalDetails.issuanceDate.ToUpper() });
                 listTest.Add(new DataInputFromDevice { NO = "12", ITEM = InspectionSystemContanst.EXPIRY_DATE, DESCRIPTION = optionalDetails.expiryDate.ToUpper() });
                 listTest.Add(new DataInputFromDevice { NO = "13", ITEM = InspectionSystemContanst.EX_IDENTIFICATION_DOCUMENT, DESCRIPTION = optionalDetails.idDocument.ToUpper() }); // DG13 [15] Chillkat
-                listTest.Add(new DataInputFromDevice { NO = "14", ITEM = InspectionSystemContanst.FULL_NAME_OF_FATHER, DESCRIPTION = optionalDetails.fullNameOfFather.ToUpper() }); // DG13 [13]
-                listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_MOTHER, DESCRIPTION = optionalDetails.fullNameOfMother.ToUpper() }); // DG13 [12]
-                listTest.Add(new DataInputFromDevice { NO = "16", ITEM = InspectionSystemContanst.FULL_NAME_OF_SPOUSE, DESCRIPTION = optionalDetails.fullNameOfSpouse.ToUpper() }); // DG13 [14]
+                listTest.Add(new DataInputFromDevice { NO = "14", ITEM = InspectionSystemContanst.FULL_NAME_OF_PARENTS, DESCRIPTION = optionalDetails.fullNameOfParents.ToUpper() }); // DG13 [13]
+                //listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_MOTHER, DESCRIPTION = optionalDetails.fullNameOfMother.ToUpper() }); // DG13 [12]
+                listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_SPOUSE, DESCRIPTION = optionalDetails.fullNameOfSpouse.ToUpper() }); // DG13 [14]
                 dataGridInputDevice.ItemsSource = listTest;
             }
             else {
@@ -42,9 +42,9 @@ namespace ClientInspectionSystem.LoadData {
                 listTest.Add(new DataInputFromDevice { NO = "11", ITEM = InspectionSystemContanst.ISSUANCE_DATE, DESCRIPTION = string.Empty });
                 listTest.Add(new DataInputFromDevice { NO = "12", ITEM = InspectionSystemContanst.EXPIRY_DATE, DESCRIPTION = string.Empty });
                 listTest.Add(new DataInputFromDevice { NO = "13", ITEM = InspectionSystemContanst.EX_IDENTIFICATION_DOCUMENT, DESCRIPTION = string.Empty });
-                listTest.Add(new DataInputFromDevice { NO = "14", ITEM = InspectionSystemContanst.FULL_NAME_OF_FATHER, DESCRIPTION = string.Empty });
-                listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_MOTHER, DESCRIPTION = string.Empty });
-                listTest.Add(new DataInputFromDevice { NO = "16", ITEM = InspectionSystemContanst.FULL_NAME_OF_SPOUSE, DESCRIPTION = string.Empty });
+                listTest.Add(new DataInputFromDevice { NO = "14", ITEM = InspectionSystemContanst.FULL_NAME_OF_PARENTS, DESCRIPTION = string.Empty });
+                //listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_MOTHER, DESCRIPTION = string.Empty });
+                listTest.Add(new DataInputFromDevice { NO = "15", ITEM = InspectionSystemContanst.FULL_NAME_OF_SPOUSE, DESCRIPTION = string.Empty });
                 dataGridInputDevice.ItemsSource = listTest;
             }
         }

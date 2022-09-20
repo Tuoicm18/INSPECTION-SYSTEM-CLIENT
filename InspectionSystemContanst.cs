@@ -17,8 +17,10 @@ namespace ClientInspectionSystem {
         public static string ISSUANCE_DATE = "ISSUANCE DATE";
         public static string EXPIRY_DATE = "EXPIRY DATE";
         public static string EX_IDENTIFICATION_DOCUMENT = "ID DOCUMENT";
-        public static string FULL_NAME_OF_FATHER = "FULL NAME OF FATHER";
-        public static string FULL_NAME_OF_MOTHER = "FULL NAME OF MOTHER";
+        //Update 2022.09.20 Replace fullNameOfFather & fullNameOfMother with fullNameOfParents
+        public static string FULL_NAME_OF_PARENTS = "FULL NAME OF PARENTS";
+        //public static string FULL_NAME_OF_FATHER = "FULL NAME OF FATHER";
+        //public static string FULL_NAME_OF_MOTHER = "FULL NAME OF MOTHER";
         public static string FULL_NAME_OF_SPOUSE = "FULL NAME OF SPOUSE";
 
         //Device details
