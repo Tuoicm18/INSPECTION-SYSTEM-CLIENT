@@ -9,6 +9,7 @@ using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
     public class RenderResultMultipleChoices {
+
         #region VARIABLE
         private GroupBox groupBoxMultiple;
         public ListView listViewMultiple;

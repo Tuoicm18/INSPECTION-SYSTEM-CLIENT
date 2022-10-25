@@ -28,6 +28,8 @@ namespace ClientInspectionSystem {
         private RenderResultSingleChoices renderResultSingleChoices = new RenderResultSingleChoices();
         //NVP
         private RenderResultNameValuePairs renderResultNVP = new RenderResultNameValuePairs();
+        //Document Digest
+        private RenderResultDocumentDigest renderResultDocumentDigest = new RenderResultDocumentDigest();
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
@@ -225,6 +227,16 @@ namespace ClientInspectionSystem {
                 ClientExtentions.removeHoverListView(renderResultNVP.listViewNVP, this);
             }
             catch(Exception ex) {
+                logger.Error(ex);
+            }
+        }
+
+        //Document Digest
+        public void renderToLayoutDocDigest(AuthorizationElement elementDocDigest) {
+            try {
+                renderResultDocumentDigest.renderResultDocumentDigest(elementDocDigest, lvAll, scvAll);
+                ClientExtentions.removeHoverListView(renderResultDocumentDigest.listViewDocDigest, this);
+            } catch (Exception ex) {
                 logger.Error(ex);
             }
         }

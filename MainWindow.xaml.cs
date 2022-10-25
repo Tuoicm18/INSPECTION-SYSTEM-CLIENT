@@ -1654,7 +1654,7 @@ namespace ClientInspectionSystem {
 
         #region INIT FORM RESULT BIOMETRIC AUTH
         public void initFormResultBiometricAuth(BiometricAuthResp baseBiometricAuthResp, string biometricType) {
-            logger.Debug("INI FORM RESULT BIOMETRIC AUTH...");
+            logger.Debug("INI FORM RESULT BIOMETRIC AUTH...\n" + JsonConvert.SerializeObject(baseBiometricAuthResp, Formatting.Indented));
             if (null != baseBiometricAuthResp) {
                 if (null != baseBiometricAuthResp.data.challenge) {
                     ChallengeBiometricAuth challengeBiometricAuth = baseBiometricAuthResp.data.challenge;
@@ -1696,6 +1696,14 @@ namespace ClientInspectionSystem {
                                 }
                             }
 
+                            //Document Digest
+                            if (null != transactionDataResp.documentDigestList) {
+                                foreach (var v in transactionDataResp.documentDigestList) {
+                                    v.type = AuthElementType.DocDigest;
+                                    dicRenderResult.Add(v.ordinary, v);
+                                }
+                            }
+
                             int maxLoop = 1000;
                             int count = 0;
                             for (int i = 0; i < maxLoop; i++) {
@@ -1717,6 +1725,9 @@ namespace ClientInspectionSystem {
                                             break;
                                         case AuthElementType.NVP:
                                             formResultAuthorization.renderToLayoutNVP(element);
+                                            break;
+                                        case AuthElementType.DocDigest:
+                                            formResultAuthorization.renderToLayoutDocDigest(element);
                                             break;
                                     }
                                     if (++count >= dicRenderResult.Count) {

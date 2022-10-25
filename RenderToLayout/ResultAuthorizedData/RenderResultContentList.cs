@@ -9,6 +9,7 @@ using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
     public class RenderResultContentList {
+
         #region VARIABLE
         private GroupBox groupBoxContentList;
         public ListView listViewContentList;
