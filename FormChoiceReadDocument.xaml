@@ -9,16 +9,15 @@
         mc:Ignorable="d"
         WindowStartupLocation ="CenterScreen"
         ResizeMode="NoResize"
-        SizeToContent="Height"
         ShowCloseButton="False"
         ShowMinButton="False"
         ShowMaxRestoreButton="False"
         ShowInTaskbar="False"
         BorderBrush="#0767b3"
         BorderThickness="2"
-        ShowTitleBar="False"
-        Height="150" 
-        Width="320">
+        ShowTitleBar="True"
+        Title="OPTIONS READ DOCUMENT"
+        SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -71,6 +70,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <!--CA-->
             <CheckBox
@@ -78,28 +78,40 @@
                 Grid.Column="0"
                 IsChecked="True"
                 HorizontalAlignment="Center"
-                Content="CA"/>
+                Content="CA"
+                 Margin="5,5,5,5"/>
             <!--TA-->
             <CheckBox
                 x:Name="cbTa"
                 Grid.Column="1"
                 IsChecked="True"
                 HorizontalAlignment="Center"
-                Content="TA"/>
+                Content="TA"
+                 Margin="5,5,5,5"/>
             <!--PA-->
             <CheckBox
                 x:Name="cbPa"
                 Grid.Column="2"
                 IsChecked="True"
                 HorizontalAlignment="Center"
-                Content="PA"/>
+                Content="PA"
+                Margin="5,5,5,5"/>
             <!--LIVENESS-->
             <CheckBox
                 x:Name="cbLiveness"
                 IsChecked="True"
                 Grid.Column="3"
                 HorizontalAlignment="Center"
-                Content="LIVENESS"/>
+                Content="LIVENESS"
+                Margin="5,5,5,5"/>
+            <!--BIOMETRIC EVIDENCE-->
+            <CheckBox
+                x:Name="cbBiometricEvidence"
+                IsChecked="True"
+                Grid.Column="4"
+                HorizontalAlignment="Center"
+                Content="BIOMECTRIC EVIDENCE"
+                Margin="5,5,5,5"/>
         </Grid>
         <!--#region BUTTON-->
         <Grid

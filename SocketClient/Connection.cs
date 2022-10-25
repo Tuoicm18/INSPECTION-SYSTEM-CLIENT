@@ -164,12 +164,13 @@ namespace ClientInspectionSystem.SocketClient {
         #region GET RESULT BIOMETRIC AUTH FUNC
         public BiometricAuthResp getResultBiometricAuth(BiometricType biometricType, object challenge,
                                                        ChallengeType challengeType, bool livenessEnabled,
-                                                       string cardNo, int timeoutInterval) {
+                                                       string cardNo, int timeoutInterval,
+                                                       bool biometricEvidence) {
             try {
                 GetBiometricAuthentication getBiometricAuthentication = new GetBiometricAuthentication(biometricType, challenge,
                                                                                                        challengeType, livenessEnabled,
                                                                                                        cardNo, timeoutInterval,
-                                                                                                       wsClient);
+                                                                                                       biometricEvidence, wsClient);
                 BiometricAuthResp biometricAuthenticationResp = getBiometricAuthentication.getResultBiometricAuth();
                 return biometricAuthenticationResp;
             }

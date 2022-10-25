@@ -139,5 +139,9 @@ namespace ClientInspectionSystem {
         public bool getValueCheckBoxLiveness() {
             return (bool)cbLiveness.IsChecked;
         }
+
+        public bool getValueCheckBoxBiomectricEvidence() {
+            return (bool)cbBiometricEvidence.IsChecked;
+        }
     }
 }

@@ -63,6 +63,8 @@ namespace ClientInspectionSystem {
         private bool isReadByCanValue = false;
         //Update 2022.05.20 set liveness
         private bool liveness;
+        //Update 2022.10.25 Biomectric Evidence
+        private bool biometricEvidenceEnabled;
         public bool isConnectDenied;
         public bool isConnectSocket { get; set; }
         public bool isDisConnectSocket = false;
@@ -365,6 +367,7 @@ namespace ClientInspectionSystem {
                                     taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
                                     paEnabled = formChoiceReadDocument.getValueCheckBoxPA();
                                     this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
+                                    this.biometricEvidenceEnabled = formChoiceReadDocument.getValueCheckBoxBiomectricEvidence();
                                 }
                                 try {
                                     if (formChoiceReadDocument.isClose) {
@@ -812,6 +815,7 @@ namespace ClientInspectionSystem {
                     taEnabled = formChoiceReadDocument.getValueCheckBoxTA();
                     paEnabled = formChoiceReadDocument.getValueCheckBoxPA();
                     this.liveness = formChoiceReadDocument.getValueCheckBoxLiveness();
+                    this.biometricEvidenceEnabled = formChoiceReadDocument.getValueCheckBoxBiomectricEvidence();
                 }
                 try {
                     if (formChoiceReadDocument.isClose) {
@@ -1260,7 +1264,7 @@ namespace ClientInspectionSystem {
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.FACE_ID));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, 2);
                                         //Button Pass All
@@ -1281,7 +1285,7 @@ namespace ClientInspectionSystem {
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultFaceAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.FACE_ID));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH FACE" + JsonConvert.SerializeObject(resultFaceAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnFA, -1);
                                         //Button Pass All
@@ -1348,7 +1352,8 @@ namespace ClientInspectionSystem {
                         challengeString = formAuthorizationData.getImportJson();
                         resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challengeString,
                                                                                   ChallengeType.TYPE_STRING, this.liveness,
-                                                                                  cardNo, this.timeoutInterval);
+                                                                                  cardNo, this.timeoutInterval,
+                                                                                  this.biometricEvidenceEnabled);
                     }
                     else {
                         if (formAuthorizationData.CheckImportJson) {
@@ -1370,7 +1375,8 @@ namespace ClientInspectionSystem {
 
                 resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
                                                                           ChallengeType.TYPE_OBJECT, this.liveness,
-                                                                          cardNo, this.timeoutInterval);
+                                                                          cardNo, this.timeoutInterval,
+                                                                          this.biometricEvidenceEnabled);
 
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
@@ -1446,7 +1452,7 @@ namespace ClientInspectionSystem {
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.LEFT_FINGER));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER\n" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER\n" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 2);
                                         //Button Pass All
@@ -1467,7 +1473,7 @@ namespace ClientInspectionSystem {
                                     await this.Dispatcher.InvokeAsync(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultLeftFingerAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.LEFT_FINGER));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH LEFT FINGER" + JsonConvert.SerializeObject(resultLeftFingerAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, -1);
                                         //Button Pass All
@@ -1574,8 +1580,7 @@ namespace ClientInspectionSystem {
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.RIGHT_FINGER));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " +
-                                                                     JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER " + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 2);
                                         //Button Pass All
@@ -1596,7 +1601,7 @@ namespace ClientInspectionSystem {
                                     this.Dispatcher.Invoke(() => {
                                         //Init Form Result Biometric Auth
                                         initFormResultBiometricAuth(resultFingerRightAuth, PluginICAOClientSDK.Utils.ToDescription(BiometricType.RIGHT_FINGER));
-                                        logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
+                                        //logger.Debug("GET RESPONSE BIOMETRIC AUTH RIGHT FINGER\n" + JsonConvert.SerializeObject(resultFingerRightAuth, Formatting.Indented));
 
                                         updateBackgroundBtnDG(btnSF, 1);
                                         //Button Pass All
@@ -1801,7 +1806,10 @@ namespace ClientInspectionSystem {
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
                 //connectionSocket = new Connection("127.0.0.1", 9505, true);
-                logger.Debug("DG1 CLICKED!!!");
+                FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
+                if (formChoiceReadDocument.ShowDialog() == true) {
+                    logger.Debug(formChoiceReadDocument.getValueCheckBoxBiomectricEvidence());
+                }
             }
             catch (Exception ex) {
                 logger.Error(ex);
