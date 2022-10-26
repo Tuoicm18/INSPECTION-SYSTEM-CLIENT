@@ -239,6 +239,7 @@
     <Compile Include="RenderToLayout\ResultAuthorizedData\ModelBindDataNVP.cs" />
     <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultContentList.cs" />
     <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultDocumentDigest.cs" />
+    <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultDocumentDigestTable.cs" />
     <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultMultipleChoices.cs" />
     <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultNameValuePairs.cs" />
     <Compile Include="RenderToLayout\ResultAuthorizedData\RenderResultSingleChoices.cs" />

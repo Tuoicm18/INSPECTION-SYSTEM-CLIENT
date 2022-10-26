@@ -4,71 +4,73 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK.Request;
 
 namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
-    public class RenderResultNameValuePairs {
+    public class RenderResultDocumentDigestTable {
 
         #region VARIABLE
         private BrushConverter bc = new BrushConverter();
-        private GroupBox groupBoxNVP;
-        public ListView listViewNVP;
-        private TextBlock textBlockDescriptionNVP;
-        private DataGrid dataGridNVP;
+        private GroupBox groupBox;
+        public ListView listViewDocDigest;
+        private TextBlock textBlockDescription;
+        private DataGrid dataGridDocDigest;
         private DataGridTextColumn dataGridBoundColumnKey;
         private DataGridTextColumn dataGridBoundColumnValue;
         #endregion
 
         #region RENDER
-        public void renderResultNVP(AuthorizationElement elementNVP, ListView lvALl, ScrollViewer scvAll) {
-            if(null != elementNVP) {
+
+        public void renderResulDocDigest(AuthorizationElement elementDocDigest, ListView lvALl, ScrollViewer scvAll) {
+            if (null != elementDocDigest) {
                 //Get Header Group
-                string headerGr = elementNVP.title;
+                string headerGr = elementDocDigest.title;
                 //Get Description
-                string description = elementNVP.label;
+                string description = elementDocDigest.label;
                 //Create Group Box
-                groupBoxNVP = new GroupBox();
-                groupBoxNVP.Margin = new Thickness(5, 5, 5, 10);
-                groupBoxNVP.Header = headerGr;
+                groupBox = new GroupBox();
+                groupBox.Margin = new Thickness(5, 5, 5, 10);
+                groupBox.Header = headerGr;
                 //Create List View
-                listViewNVP = new ListView();
+                listViewDocDigest = new ListView();
                 //Create Text Block Description
-                textBlockDescriptionNVP = new TextBlock();
-                textBlockDescriptionNVP.Text = description;
-                textBlockDescriptionNVP.MaxWidth = ClientContants.MAX_WIDTH_TEXT_BLOCK;
-                textBlockDescriptionNVP.TextWrapping = TextWrapping.Wrap;
+                textBlockDescription = new TextBlock();
+                textBlockDescription.Text = description;
+                textBlockDescription.MaxWidth = ClientContants.MAX_WIDTH_TEXT_BLOCK;
+                textBlockDescription.TextWrapping = TextWrapping.Wrap;
                 //Create Data Grid
-                dataGridNVP = new DataGrid();
-                dataGridNVP.Background = Brushes.Black;
-                dataGridNVP.RowBackground = (Brush)bc.ConvertFrom(ClientContants.CODE_COLOR_ROW_DATA_GRID);
-                dataGridNVP.AlternatingRowBackground = (Brush)bc.ConvertFrom(ClientContants.CODE_COLOR_ALTERNATING_ROW_DATA_GRID);
+                dataGridDocDigest = new DataGrid();
+                dataGridDocDigest.Background = Brushes.Black;
+                dataGridDocDigest.RowBackground = (Brush)bc.ConvertFrom(ClientContants.CODE_COLOR_ROW_DATA_GRID);
+                dataGridDocDigest.AlternatingRowBackground = (Brush)bc.ConvertFrom(ClientContants.CODE_COLOR_ALTERNATING_ROW_DATA_GRID);
                 //Bind data to Data Grid
-                Dictionary<string, string> nvpRequest;
-                if (null != elementNVP.nameValuePair && elementNVP.nameValuePair.Count > 0) {
-                    nvpRequest = elementNVP.nameValuePair;
-                    foreach (var kv in nvpRequest) {
-                        dataGridNVP.Items.Add(new ModelBindDataNVP { key = kv.Key, value = kv.Value });
-                    }
+                DocumentDigest documentDigest = elementDocDigest.documentDigest;
+                if(null != documentDigest) {
+                    dataGridDocDigest.Items.Add(new ModelBindDataNVP { key = documentDigest.digestAlgo, value = documentDigest.digestValue });
                 }
+
                 //Key Cloumn
                 dataGridBoundColumnKey = new DataGridTextColumn();
                 styleDataGridTextColumn(dataGridBoundColumnKey, true);
                 //Binding Data KEY
                 dataGridBoundColumnKey.Binding = new Binding("key");
-                dataGridNVP.Columns.Add(dataGridBoundColumnKey);
+                dataGridDocDigest.Columns.Add(dataGridBoundColumnKey);
 
                 //Value Cloumn
                 dataGridBoundColumnValue = new DataGridTextColumn();
                 styleDataGridTextColumn(dataGridBoundColumnValue, false);
                 //Binding Data VALUE
                 dataGridBoundColumnValue.Binding = new Binding("value");
-                dataGridNVP.Columns.Add(dataGridBoundColumnValue);
+                dataGridDocDigest.Columns.Add(dataGridBoundColumnValue);
 
                 //Render
-                listViewNVP.Items.Add(textBlockDescriptionNVP);
-                listViewNVP.Items.Add(dataGridNVP);
-                groupBoxNVP.Content = listViewNVP;
-                lvALl.Items.Add(groupBoxNVP);
+                if(!string.IsNullOrEmpty(description)) {
+                    listViewDocDigest.Items.Add(textBlockDescription);
+                }
+                listViewDocDigest.Items.Add(dataGridDocDigest);
+                groupBox.Content = listViewDocDigest;
+                lvALl.Items.Add(groupBox);
                 scvAll.Content = lvALl;
             }
         }
@@ -77,7 +79,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
         private void styleDataGridTextColumn(DataGridTextColumn dataGridTextColumn, bool isKey) {
             if (isKey) {
                 //KEY COLUMN
-                dataGridTextColumn.Header = ClientContants.HEADER_KEY_COLUMN;
+                dataGridTextColumn.Header = ClientContants.HEADER_KEY_COLUMN_DOC_DIGEST;
                 dataGridTextColumn.CanUserResize = false;
                 dataGridTextColumn.Width = ClientContants.WIDTH_KEY_COLUMN;
                 //Style Header
@@ -96,7 +98,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
             }
             else {
                 //VALUE COLUMN
-                dataGridTextColumn.Header = ClientContants.HEADER_VALUE_COLUMN;
+                dataGridTextColumn.Header = ClientContants.HEADER_VALUE_COLUMN_DOC_DIGEST;
                 dataGridTextColumn.CanUserResize = false;
                 dataGridTextColumn.FontWeight = FontWeights.Bold;
 
@@ -114,7 +116,7 @@ namespace ClientInspectionSystem.RenderToLayout.ResultAuthorizedData {
                 elementStyleValue.Setters.Add(new Setter(TextBlock.MarginProperty, new Thickness(15, 0, 0, 0)));
                 dataGridTextColumn.ElementStyle = elementStyleValue;
             }
+            #endregion
         }
-        #endregion
     }
 }

@@ -1370,13 +1370,12 @@ namespace ClientInspectionSystem {
                             transactionDataInput.nameValuePairList = formAuthorizationData.getDataNVP();
                             challenge.transactionData = transactionDataInput;
                         }
+                        resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
+                                                          ChallengeType.TYPE_OBJECT, this.liveness,
+                                                          cardNo, this.timeoutInterval,
+                                                          this.biometricEvidenceEnabled);
                     }
                 });
-
-                resultBiometric = connectionSocket.getResultBiometricAuth(biometricType, challenge,
-                                                                          ChallengeType.TYPE_OBJECT, this.liveness,
-                                                                          cardNo, this.timeoutInterval,
-                                                                          this.biometricEvidenceEnabled);
 
                 if (null != resultBiometric) {
                     //resultAuthFace = resultBiometric.result;
@@ -1727,7 +1726,8 @@ namespace ClientInspectionSystem {
                                             formResultAuthorization.renderToLayoutNVP(element);
                                             break;
                                         case AuthElementType.DocDigest:
-                                            formResultAuthorization.renderToLayoutDocDigest(element);
+                                            //formResultAuthorization.renderToLayoutDocDigest(element);
+                                            formResultAuthorization.renderToLayoutDocDigestTable(element);
                                             break;
                                     }
                                     if (++count >= dicRenderResult.Count) {

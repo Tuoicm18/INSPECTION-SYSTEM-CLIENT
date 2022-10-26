@@ -22,6 +22,8 @@ namespace ClientInspectionSystem {
         public static int WIDTH_VALUE_COLUMN = 608;
         public static string HEADER_KEY_COLUMN = "KEY";
         public static string HEADER_VALUE_COLUMN = "     VALUE";
+        public static string HEADER_KEY_COLUMN_DOC_DIGEST = "HASH ALGORITHM ";
+        public static string HEADER_VALUE_COLUMN_DOC_DIGEST = "     HASH VALUE";
         public static string CODE_COLOR_ROW_DATA_GRID = "#111111";
         public static string CODE_COLOR_ALTERNATING_ROW_DATA_GRID = "#282828";
         public static string CONTENT_BTN_IMPORT_JSON = "IMPORT JSON";

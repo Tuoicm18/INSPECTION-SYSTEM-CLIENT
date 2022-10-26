@@ -30,6 +30,7 @@ namespace ClientInspectionSystem {
         private RenderResultNameValuePairs renderResultNVP = new RenderResultNameValuePairs();
         //Document Digest
         private RenderResultDocumentDigest renderResultDocumentDigest = new RenderResultDocumentDigest();
+        private RenderResultDocumentDigestTable renderResultDocumentDigestTable = new RenderResultDocumentDigestTable();
         private readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
@@ -236,6 +237,16 @@ namespace ClientInspectionSystem {
             try {
                 renderResultDocumentDigest.renderResultDocumentDigest(elementDocDigest, lvAll, scvAll);
                 ClientExtentions.removeHoverListView(renderResultDocumentDigest.listViewDocDigest, this);
+            } catch (Exception ex) {
+                logger.Error(ex);
+            }
+        }
+
+        //Document Digest Table
+        public void renderToLayoutDocDigestTable(AuthorizationElement elementDocDigest) {
+            try {
+                renderResultDocumentDigestTable.renderResulDocDigest(elementDocDigest, lvAll, scvAll);
+                ClientExtentions.removeHoverListView(renderResultDocumentDigestTable.listViewDocDigest, this);
             } catch (Exception ex) {
                 logger.Error(ex);
             }
