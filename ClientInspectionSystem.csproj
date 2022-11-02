@@ -248,6 +248,7 @@
     <Compile Include="SocketClient\Request\ClientAuthorizationElement.cs" />
     <Compile Include="SocketClient\Response\ClientListener.cs" />
     <Compile Include="SocketClient\Response\GetBiometricAuthentication.cs" />
+    <Compile Include="SocketClient\Response\GetBiometricEvidence.cs" />
     <Compile Include="SocketClient\Response\GetConnectToDevice.cs" />
     <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />
     <Compile Include="SocketClient\Response\GetDocumentDetails.cs" />

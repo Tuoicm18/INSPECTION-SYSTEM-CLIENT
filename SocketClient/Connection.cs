@@ -148,7 +148,7 @@ namespace ClientInspectionSystem.SocketClient {
                                                                                dataGroupEnabled, optionalDetailsEnabled,
                                                                                canValue, challenge,
                                                                                caEnabled, taEnabled,
-                                                                               paEnabled, timeoutInterval, 
+                                                                               paEnabled, timeoutInterval,
                                                                                wsClient);
                 DocumentDetailsResp documentDetailsResp = getDocumentDetails.getDocumentDetails();
                 return documentDetailsResp;
@@ -224,6 +224,21 @@ namespace ClientInspectionSystem.SocketClient {
                 GetScanDocument scanDocument = new GetScanDocument(scanType, saveEnabled, timeoutInterval, wsClient);
                 scanDocResp = scanDocument.scanDocumentResp();
                 return scanDocResp;
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+        #endregion
+
+        #region BIOMETRIC EVIDENCE 2022.11.02
+        public PluginICAOClientSDK.Response.BiometricEvidence.BiometricEvidenceResp biometricEvidence(BiometricType biometricType, int timeoutInterval) {
+            PluginICAOClientSDK.Response.BiometricEvidence.BiometricEvidenceResp biometricEvidenceResp = null;
+            try {
+                GetBiometricEvidence bioEvidence = new GetBiometricEvidence(wsClient, biometricType, timeoutInterval);
+                biometricEvidenceResp = bioEvidence.getBiometricEvidence();
+                return biometricEvidenceResp;
             }
             catch (Exception ex) {
                 logger.Error(ex);

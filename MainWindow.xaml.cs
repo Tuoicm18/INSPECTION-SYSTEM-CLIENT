@@ -30,6 +30,7 @@ using System.Timers;
 using log4net;
 using PluginICAOClientSDK.Models;
 using PluginICAOClientSDK;
+using PluginICAOClientSDK.Response.BiometricEvidence;
 
 /// <summary>
 /// Main Window Class.cs
@@ -1817,10 +1818,12 @@ namespace ClientInspectionSystem {
         private void btnDG1_Click(object sender, RoutedEventArgs e) {
             try {
                 //connectionSocket = new Connection("127.0.0.1", 9505, true);
-                FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
-                if (formChoiceReadDocument.ShowDialog() == true) {
-                    logger.Debug(formChoiceReadDocument.getValueCheckBoxBiomectricEvidence());
-                }
+                //FormChoiceReadDocument formChoiceReadDocument = new FormChoiceReadDocument();
+                //if (formChoiceReadDocument.ShowDialog() == true) {
+                //    logger.Debug(formChoiceReadDocument.getValueCheckBoxBiomectricEvidence());
+                //}
+                BiometricEvidenceResp biometricEvidenceResp = connectionSocket.biometricEvidence(BiometricType.LEFT_FINGER, this.timeoutInterval);
+                logger.Debug(JsonConvert.SerializeObject(biometricEvidenceResp));
             }
             catch (Exception ex) {
                 logger.Error(ex);
