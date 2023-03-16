@@ -44,7 +44,7 @@ using PluginICAOClientSDK.Response.BiometricEvidence;
 namespace ClientInspectionSystem {
     public partial class MainWindow : MetroWindow {
 
-        #region VARIABLE
+        #region VARIABLES
 
         #region DELEGATE
         public ISPluginClientDelegate pluginClientDelegate = new ISPluginClientDelegate();
@@ -75,6 +75,9 @@ namespace ClientInspectionSystem {
         //Update 2022.07.28
         private Task<ProgressDialogController> dialogControllerReConnect = null;
         private bool isDenied = false;
+
+        //Update 2023.03.16 for fingerprint enrollment
+        private string cardNo = string.Empty;
         #endregion
 
         #region CONSTRUCTOR
@@ -122,7 +125,7 @@ namespace ClientInspectionSystem {
             btnDisconnect.IsEnabled = false;
             btnConnectToDevice.IsEnabled = false;
 
-            //Test Biometric Auth With cardNo
+            //Test Biometric Auth With cardNoInput
             btnIDocument.IsEnabled = false;
             btnRFID.IsEnabled = false;
             btnLeftFinger.IsEnabled = false;
@@ -600,6 +603,7 @@ namespace ClientInspectionSystem {
                             btnScanDocument.IsEnabled = true;
                             btnConnect.IsEnabled = false;
                             btnIDocument.IsEnabled = true;
+                            btnEnrollFingerprint.IsEnabled = true;
 
                             this.IsEnabled = true;
 
@@ -1226,7 +1230,7 @@ namespace ClientInspectionSystem {
                         BiometricAuthResp resultFaceAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
-                                resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.FACE_ID, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultFaceAuth = resultBiometricAuth(formAuthorizationData, BiometricType.FACE_ID, this.cardNo); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 if (ex is ISPluginException) {
@@ -1410,7 +1414,7 @@ namespace ClientInspectionSystem {
 
                         await Task.Factory.StartNew(async () => {
                             try {
-                                resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.LEFT_FINGER, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultLeftFingerAuth = resultBiometricAuth(formAuthorizationData, BiometricType.LEFT_FINGER, this.cardNo); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 logger.Warn("CHECK " + ex);
@@ -1539,7 +1543,7 @@ namespace ClientInspectionSystem {
                         BiometricAuthResp resultFingerRightAuth = null;
                         await Task.Factory.StartNew(() => {
                             try {
-                                resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.RIGHT_FINGER, string.Empty); // 2022.05.12 Update challenge 079094012066
+                                resultFingerRightAuth = resultBiometricAuth(formAuthorizationData, BiometricType.RIGHT_FINGER, this.cardNo); // 2022.05.12 Update challenge 079094012066
                             }
                             catch (Exception ex) {
                                 ProgressDialogController controllerRightFingerAuthErr = null;
@@ -2018,6 +2022,73 @@ namespace ClientInspectionSystem {
                     logger.Error(ex);
                 }
             });
+        }
+        #endregion
+
+        #region BUTTON CLICK ENROLL FINGERPRINT 2023.03.15
+        private async void btnEnrollFingerprint_Click(object sender, RoutedEventArgs e) {
+            try {
+                var cardNoInput = await this.ShowInputAsync("FINGERPRINT ENROLLMENT", "ENTER CARD NUMBER");
+
+                if (string.IsNullOrEmpty(cardNoInput)) {
+                    await this.ShowMessageAsync(InspectionSystemContanst.TITLE_MESSAGE_BOX, "CARD NUMBER CAN NOT BE EMPTY");
+                }
+                else {
+                    this.cardNo = cardNoInput;
+                    ClientExtentions.showProgressDialogController(this, InspectionSystemContanst.TITLE_MESSAGE_BOX,
+                                                              "FINGERPRINT ENROLLMENT", false,
+                                                              InspectionSystemContanst.DIALOG_TIME_OUT_2k, true,
+                                                              false);
+
+                    await this.Dispatcher.Invoke(async () => {
+                        await Task.Factory.StartNew(async () => {
+                            try {
+                                PluginICAOClientSDK.Response.EnrollFingerprint.EnrollFingerprintResp enrollFingerprintResp = connectionSocket.enrollFingerprint(this.cardNo, this.timeoutInterval);
+                                if (null == enrollFingerprintResp) {
+                                    logger.Error("RESPONSE ENROLL FINGERPRINT IS NULL");
+                                    ClientExtentions.progressDialogController.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await ClientExtentions.progressDialogController.CloseAsync();
+                                    return;
+                                }
+                                if (enrollFingerprintResp.errorCode == 0) {
+                                    //OK
+                                    ClientExtentions.progressDialogController.SetMessage(enrollFingerprintResp.errorMessage.ToUpper());
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await ClientExtentions.progressDialogController.CloseAsync();
+                                    this.btnLeftFinger.IsEnabled = true;
+                                    this.btnRightFinger.IsEnabled = true;
+                                }
+                                else {
+                                    logger.Error("ENROLL FINGERPRINT RESP\n" + JsonConvert.SerializeObject(enrollFingerprintResp, Formatting.Indented));
+                                    ClientExtentions.progressDialogController.SetMessage(enrollFingerprintResp.errorMessage.ToUpper());
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await ClientExtentions.progressDialogController.CloseAsync();
+                                    return;
+                                }
+                            }
+                            catch (Exception ex) {
+                                logger.Error(ex);
+                                if (ex is ISPluginException) {
+                                    ISPluginException pluginException = (ISPluginException)ex;
+                                    ClientExtentions.progressDialogController.SetMessage(pluginException.errMsg.ToUpper());
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await ClientExtentions.progressDialogController.CloseAsync();
+                                }
+                                else {
+                                    ClientExtentions.progressDialogController.SetMessage(InspectionSystemContanst.CONTENT_FALIL);
+                                    await Task.Delay(InspectionSystemContanst.DIALOG_TIME_OUT_3k);
+                                    await ClientExtentions.progressDialogController.CloseAsync();
+                                    return;
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+            }
         }
         #endregion
     }

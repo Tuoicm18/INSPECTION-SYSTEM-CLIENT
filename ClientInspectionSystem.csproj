@@ -252,6 +252,7 @@
     <Compile Include="SocketClient\Response\GetConnectToDevice.cs" />
     <Compile Include="SocketClient\Response\GetDeviceDetails.cs" />
     <Compile Include="SocketClient\Response\GetDocumentDetails.cs" />
+    <Compile Include="SocketClient\Response\GetEnrollFingerprint.cs" />
     <Compile Include="SocketClient\Response\Refresh.cs" />
     <Compile Include="SocketClient\Response\GetScanDocument.cs" />
     <Compile Include="TestListenner.cs" />

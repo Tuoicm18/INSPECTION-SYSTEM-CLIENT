@@ -247,6 +247,21 @@ namespace ClientInspectionSystem.SocketClient {
         }
         #endregion
 
+        #region ENROLL FINGERPRINT 2022.03.15
+        public PluginICAOClientSDK.Response.EnrollFingerprint.EnrollFingerprintResp enrollFingerprint (string cardNo, int timeoutInterval) {
+            PluginICAOClientSDK.Response.EnrollFingerprint.EnrollFingerprintResp enrollFingerprintResp = null;
+            try {
+                GetEnrollFingerprint getEnrollFingerprint = new GetEnrollFingerprint(wsClient, cardNo, timeoutInterval);
+                enrollFingerprintResp = getEnrollFingerprint.enrollFingerprintResp();
+                return enrollFingerprintResp;
+            }
+            catch (Exception ex) {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+        #endregion
+
         #region RE-CONNECT SOCKET
         public void reConnect() {
             try {

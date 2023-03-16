@@ -161,6 +161,10 @@
             <Button x:Name="btnScanDocument"
                     Click="btnScanDocument_Click"
                     Content="SCAN DOCUMENT"/>
+            <Button x:Name="btnEnrollFingerprint"
+                    IsEnabled="False"
+                    Click="btnEnrollFingerprint_Click"
+                    Content="ENROLL FINGERPRINT"/>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 

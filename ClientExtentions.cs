@@ -1,4 +1,6 @@
-﻿using MahApps.Metro.Controls;
+﻿using log4net;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -16,6 +18,8 @@ using System.Windows.Media.Imaging;
 
 namespace ClientInspectionSystem {
     public static class ClientExtentions {
+
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region INNER CLASS
         public class ListWithDuplicates : List<KeyValuePair<object, object>> {
@@ -114,6 +118,72 @@ namespace ClientInspectionSystem {
                 }
             }
             throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+        #endregion
+
+        #region 2022.05.24 SHOW PROGRESS DIALOG CONTROLLER
+        public static ProgressDialogController progressDialogController { get; set; } = null;
+        public static void showProgressDialogController(MetroWindow metroWindow, string title,
+                                                        string message, bool isSystemTray,
+                                                        int timeout, bool setIndeterminate,
+                                                        bool isClose = true) {
+            try {
+                //logger.Debug("<DIALOG> " + message + " <SYSTEM TRAY> " + isSystemTray);
+                if (!isSystemTray) {
+                    metroWindow.Dispatcher.Invoke(async () => {
+                        progressDialogController = await metroWindow.ShowProgressAsync(title, message);
+                        if (setIndeterminate) {
+                            progressDialogController.SetIndeterminate();
+                        }
+                        if (isClose) {
+                            await Task.Delay(timeout);
+                            await progressDialogController.CloseAsync();
+                        }
+                    });
+                }
+            }
+            catch (Exception e) {
+                logger.Error("SHOW PROGRESS DIALOG", e);
+            }
+        }
+
+        //Show dialog and change current message
+        public static void showProgressDialogControllerAndChangeMsg(MetroWindow metroWindow, string title,
+                                                                    string message, string messageChange,
+                                                                    int timeout, int timeoutForMsgChange,
+                                                                    bool setIndeterminate, bool isSystemTray) {
+            try {
+                //logger.Debug("<DIALOG> " + message + " <SYSTEM TRAY> " + isSystemTray);
+                if (!isSystemTray) {
+                    metroWindow.Dispatcher.Invoke(async () => {
+                        progressDialogController = await metroWindow.ShowProgressAsync(title, message);
+                        if (setIndeterminate) {
+                            progressDialogController.SetIndeterminate();
+                        }
+                        await Task.Delay(timeout);
+                        progressDialogController.SetMessage(messageChange);
+                        await Task.Delay(timeoutForMsgChange);
+                        await progressDialogController.CloseAsync();
+                    });
+                }
+            }
+            catch (Exception e) {
+                logger.Error("SHOW PROGRESS DIALOG", e);
+                return;
+            }
+        }
+
+        //Update 2023.02.20 For close process dialog controller when in syste, tray
+        public static void dlgIsInSystemtray(bool isInSystray) {
+            if (isInSystray) {
+                if (null != progressDialogController) {
+                    if (progressDialogController.IsOpen) {
+                        logger.Warn("[CLOSED] DIALOG CONTROLLER CAUSE IS IN SYSTEM TRAY");
+                        progressDialogController.CloseAsync();
+
+                    }
+                }
+            }
         }
         #endregion
     }
