@@ -84,7 +84,7 @@
             <CheckBox
                 x:Name="cbTa"
                 Grid.Column="1"
-                IsChecked="True"
+                IsChecked="False"
                 HorizontalAlignment="Center"
                 Content="TA"
                  Margin="5,5,5,5"/>
@@ -99,7 +99,7 @@
             <!--LIVENESS-->
             <CheckBox
                 x:Name="cbLiveness"
-                IsChecked="True"
+                IsChecked="False"
                 Grid.Column="3"
                 HorizontalAlignment="Center"
                 Content="LIVENESS"
