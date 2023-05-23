@@ -21,7 +21,7 @@
         x:Name="mainWindow"
         Closed="mainWindow_Closed"
         TitleAlignment="Center"
-        Title="CHECKID CLIENT DEMO">
+        Title="">
 
     <!--Syte For WindowCommands Mahapps Metro-->
     <Window.Resources>

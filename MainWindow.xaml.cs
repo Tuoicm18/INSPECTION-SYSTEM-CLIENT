@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEMO
+
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Data;
@@ -132,6 +134,9 @@ namespace ClientInspectionSystem {
             btnRightFinger.IsEnabled = false;
             btnRefresh.IsEnabled = false;
             btnScanDocument.IsEnabled = false;
+#if DEMO
+            btnEnrollFingerprint.Visibility = Visibility.Collapsed;
+#endif
         }
         #endregion
 
@@ -603,7 +608,12 @@ namespace ClientInspectionSystem {
                             btnScanDocument.IsEnabled = true;
                             btnConnect.IsEnabled = false;
                             btnIDocument.IsEnabled = true;
+#if DEMO
+                            btnEnrollFingerprint.Visibility = Visibility.Collapsed;
+#else
+                            btnEnrollFingerprint.Visibility = Visibility.Visible;
                             btnEnrollFingerprint.IsEnabled = true;
+#endif
 
                             this.IsEnabled = true;
 

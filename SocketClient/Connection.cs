@@ -251,7 +251,7 @@ namespace ClientInspectionSystem.SocketClient {
         public PluginICAOClientSDK.Response.EnrollFingerprint.EnrollFingerprintResp enrollFingerprint (string cardNo, int timeoutInterval) {
             PluginICAOClientSDK.Response.EnrollFingerprint.EnrollFingerprintResp enrollFingerprintResp = null;
             try {
-                GetEnrollFingerprint getEnrollFingerprint = new GetEnrollFingerprint(wsClient, cardNo, timeoutInterval);
+                GetEnrollFingerprint getEnrollFingerprint = new GetEnrollFingerprint(wsClient, cardNo, timeoutInterval * 10);
                 enrollFingerprintResp = getEnrollFingerprint.enrollFingerprintResp();
                 return enrollFingerprintResp;
             }
